@@ -14,17 +14,17 @@ namespace NuClear.Broadway.Host.Controllers
             _clusterClient = clusterClient;
         }
         
-        [HttpGet]
+        [HttpGet("{id}")]
         public JsonResult Get(long id)
         {
-            var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(1);
+            var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
             return Json(campaignGrain.GetState());
         }
         
         [HttpPatch("{id}")]
         public void SetName(long id, [FromBody] string name)
         {
-            var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(1);
+            var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
             campaignGrain.ChangeName(name, 1);
         }
     }

@@ -9,6 +9,8 @@ using NuClear.Broadway.Interfaces;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Runtime;
+using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace NuClear.Broadway.Host
 {
@@ -47,15 +49,21 @@ namespace NuClear.Broadway.Host
                     options.ServiceId = "Broadway";
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddConsole())
+                .ConfigureLogging(logging => logging.AddSerilog())
                 .Build();
 
-            StartClientWithRetries(client).Wait();
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger<Startup>(); 
+
+            StartClientWithRetries(logger, client).Wait();
             
             return client;
         }
 
-        private static async Task StartClientWithRetries(IClusterClient client, int initializeAttemptsBeforeFailing = 5)
+        private static async Task StartClientWithRetries(
+            ILogger logger, 
+            IClusterClient client,
+            int initializeAttemptsBeforeFailing = 5)
         {
             var attempt = 0;
             while (true)
@@ -63,18 +71,23 @@ namespace NuClear.Broadway.Host
                 try
                 {
                     await client.Connect();
-                    Console.WriteLine("Client successfully connect to silo host");
+                    logger.LogInformation("Client successfully connect to silo host");
                     break;
                 }
-                catch (SiloUnavailableException)
+                catch (SiloUnavailableException ex)
                 {
                     attempt++;
-                    Console.WriteLine($"Attempt {attempt} of {initializeAttemptsBeforeFailing} failed to initialize the Orleans client.");
+                    logger.LogWarning(
+                        ex,
+                        "Attempt {attempt} of {initializeAttemptsBeforeFailing} failed to initialize the Orleans client.",
+                        attempt,
+                        initializeAttemptsBeforeFailing);
+                    
                     if (attempt > initializeAttemptsBeforeFailing)
                     {
                         throw;
                     }
-                    
+
                     await Task.Delay(TimeSpan.FromSeconds(4));
                 }
             }

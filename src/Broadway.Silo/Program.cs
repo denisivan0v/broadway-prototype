@@ -28,6 +28,9 @@ namespace NuClear.Broadway.Silo
                 .UseLocalhostClustering(clusterId: "dev")
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
+                .AddMemoryGrainStorageAsDefault()
+                .AddLogStorageBasedLogConsistencyProviderAsDefault()
+                .AddStateStorageBasedLogConsistencyProviderAsDefault()
                 .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning).AddConsole())
                 .Build();
 

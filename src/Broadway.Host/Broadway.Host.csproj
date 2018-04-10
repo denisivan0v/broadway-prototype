@@ -2,6 +2,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeFrameworkVersion>$(RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>NuClear.Broadway.Host</RootNamespace>
     <RuntimeIdentifiers>win10-x64;osx.10.12-x64</RuntimeIdentifiers>
   </PropertyGroup>
@@ -9,5 +11,8 @@
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
     <PackageReference Include="Microsoft.Orleans.Client" Version="$(OrleansPackageVersion)" />
     <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator.Build" Version="$(OrleansPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Broadway.Interfaces\Broadway.Interfaces.csproj" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,46 @@
+variables:
+  REGISTRY: "docker-hub.2gis.ru"
+
+stages:
+  - build
+  - end
+
+before_script:
+  - export APPLICATION=`make -s print-APPLICATION`
+  - source ${CI_PROJECT_DIR}/ci-starter-kit/utils.sh
+  - export CI_TAG=`[[ -z ${CI_COMMIT_TAG} ]] && echo "branch-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA:0:8}" || echo "${CI_COMMIT_TAG}"`
+
+# ================= Test & Build =================
+
+build:app:
+  image: $REGISTRY/microsoft/aspnetcore-build:2.0.6-2.1.101
+  stage: build
+  when: always
+  script:
+    - dotnet restore --runtime debian-x64
+    - dotnet publish src/Broadway.Host --configuration Release --runtime debian-x64 --output ../../publish/broadway-host
+  tags: [ 2gis, docker ]
+  artifacts:
+    name: "${CI_COMMIT_REF_NAME}_app"
+    expire_in: '1 week'
+    paths:
+      - publish/broadway-host/
+      
+# ================= End =================
+
+cleanup:registry:
+  stage: end
+  when: always
+  script:
+    - make docker-registry-images-cleanup TAG="branch-" TIME_LIFE_IMAGE=604800 # 7 days
+  dependencies: []
+  tags: [ docker-engine, io ]
+
+cleanup:runner:
+  stage: end
+  when: always
+  script:
+    - make docker-containers-cleanup
+    - make docker-images-cleanup TAG="branch-" TIME_LIFE_IMAGE=86400 # 4 days
+  dependencies: []
+  tags: [ docker-engine, io ]

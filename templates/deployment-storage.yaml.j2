@@ -42,9 +42,6 @@ spec:
           name: postgres-tmp
         - mountPath: /var/lib/postgresql/data
           name: postgres-data
-        - mountPath: /var/lib/postgresql/postgres-passwd   {# Не подхватывается в docker-entrypoint.sh. Наверно, права нужны postgres #}
-          name: postgres-secret
-          subPath: pgpass {# Опция которая позволяет делать mount конкретно в файл, а не каталог целиком #}
         env:
         - name: POSTGRES_DB
           value: '{{ postgres_db }}'

@@ -29,7 +29,6 @@ deploy-storage:
   postgres_password: "postgres"
 
   kubectl:
-  - template: secret-postgres.yaml.j2
   - template: deployment-storage.yaml.j2
   - template: service-postgres.yaml.j2
 

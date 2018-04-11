@@ -67,7 +67,7 @@ deploy:prototype:
   dependencies: []
   tags: [ 2gis, docker ]
   environment:
-    name: vstore-standalone
+    name: broadway-prototype
     url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
       
 # ================= End =================

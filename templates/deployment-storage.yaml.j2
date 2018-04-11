@@ -19,10 +19,6 @@ spec:
 {#          medium: Memory#}
       - name: postgres-data
         emptyDir: {}
-      - name: postgres-secret
-        secret:
-          secretName: {{ vendor }}-postgres-secret
-          defaultMode: 0600
       containers:
       - name: postgres
         image: {{ postgres_path }}:{{ postgres_version }}

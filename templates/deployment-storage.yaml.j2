@@ -1,0 +1,60 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ vendor }}-{{ id }}-storage
+spec:
+  replicas: {{ replicas_count_storage }}
+  revisionHistoryLimit: {{ revision_history_limit | default('3') }}  {# https://kubernetes.io/docs/user-guide/deployments/#revision-history-limit  #}
+  template:
+    metadata:
+      labels:
+        app: {{ vendor }}-{{ id }}-storage
+    spec:
+      nodeSelector:
+        role: {{ node_selector }}
+{#        ssd: 'True'#}
+      volumes:
+      - name: postgres-tmp
+        emptyDir: {}
+{#          medium: Memory#}
+      - name: postgres-data
+        emptyDir: {}
+      - name: postgres-secret
+        secret:
+          secretName: {{ vendor }}-postgres-secret
+          defaultMode: 0600
+      containers:
+      - name: postgres
+        image: {{ postgres_path }}:{{ postgres_version }}
+        args: ["postgres", "--max_wal_size=3GB"]
+        ports:
+        - containerPort: {{ postgres_port }}
+        readinessProbe:
+          exec:
+            command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} && ls /tmp/restore_is_done"]
+          initialDelaySeconds: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: {{ postgres_limits_cpu }}
+            memory: {{ postgres_limits_memory }}
+          requests:
+            cpu: 50m
+            memory: {{ postgres_requests_memory }}
+        volumeMounts:
+        - mountPath: /tmp
+          name: postgres-tmp
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-data
+        - mountPath: /var/lib/postgresql/postgres-passwd   {# Не подхватывается в docker-entrypoint.sh. Наверно, права нужны postgres #}
+          name: postgres-secret
+          subPath: pgpass {# Опция которая позволяет делать mount конкретно в файл, а не каталог целиком #}
+        env:
+        - name: POSTGRES_DB
+          value: '{{ postgres_db }}'
+        - name: POSTGRES_USER
+          value: '{{ postgres_user }}'
+        - name: POSTGRES_PASSWORD
+          value: '{{ postgres_password }}'
+        - name: PGPASSFILE
+          value: '/var/lib/postgresql/postgres-passwd'

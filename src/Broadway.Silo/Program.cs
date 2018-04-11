@@ -19,18 +19,31 @@ namespace NuClear.Broadway.Silo
 
         private static void Main(string[] args)
         {
+            const string invariant = "Npgsql";
+            const string connectionString = "Host=localhost;Username=postgres;Password=postgres;Database=orleans";
+
             _siloHost = new SiloHostBuilder()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "orleans-docker";
-                    options.ServiceId = "AspNetSampleApp";
+                    options.ClusterId = "broadway-prototype";
+                    options.ServiceId = "broadway";
                 })
-                .UseLocalhostClustering(clusterId: "dev")
-                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
-                .AddMemoryGrainStorageAsDefault()
+                .UseAdoNetClustering(options =>
+                {
+                    options.Invariant = invariant;
+                    options.ConnectionString = connectionString;
+                })
+                .AddAdoNetGrainStorageAsDefault(
+                    options =>
+                    {
+                        options.Invariant = invariant;
+                        options.ConnectionString = connectionString;
+                        options.UseJsonFormat = true;
+                    })
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .AddStateStorageBasedLogConsistencyProviderAsDefault()
+                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning).AddConsole())
                 .Build();
 

@@ -5,6 +5,7 @@ ProjectSection(SolutionItems) = preProject
 	Directory.Build.props = Directory.Build.props
 	.gitlab-ci.yml = .gitlab-ci.yml
 	nuget.config = nuget.config
+	config-prototype.yaml = config-prototype.yaml
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{14DE1203-7E48-438A-A115-1C78687619AE}"
@@ -17,6 +18,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Grains", "src\Broa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Silo", "src\Broadway.Silo\Broadway.Silo.csproj", "{B9BE13EF-1548-495F-883C-2F6E83F3C0E8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{92F9A126-5461-4420-97D3-B1449058247C}"
+ProjectSection(SolutionItems) = preProject
+	templates\deployment-storage.yaml.j2 = templates\deployment-storage.yaml.j2
+	templates\service-postgres.yaml.j2 = templates\service-postgres.yaml.j2
+	templates\secret-postgres.yaml.j2 = templates\secret-postgres.yaml.j2
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +35,7 @@ Global
 		{0F6B8279-50B3-4D7E-A67D-E9D3750F411D} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{10D6DCA3-3279-402F-B312-2359A8823452} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{92F9A126-5461-4420-97D3-B1449058247C} = {D790569B-661E-4C95-BE74-88E9E627D935}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EEE99319-7E8A-47CE-A419-C3CA49A85675}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

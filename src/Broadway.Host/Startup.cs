@@ -1,52 +1,145 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using NuClear.Broadway.Interfaces;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Runtime;
+using Orleans.Hosting;
 using Serilog;
+using Swashbuckle.AspNetCore.Swagger;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace NuClear.Broadway.Host
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services
+                .AddMvcCore()
+                .AddVersionedApiExplorer()
+                .AddApiExplorer()
+                .AddAuthorization()
+                .AddCors()
+                .AddJsonFormatters();
+            
+            services.AddApiVersioning(options => options.ReportApiVersions = true);
+            
+            services.AddSwaggerGen(
+                options =>
+                {
+                    var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+                    foreach (var description in provider.ApiVersionDescriptions)
+                    {
+                        options.SwaggerDoc(description.GroupName, new Info { Title = $"Broadway API {description.ApiVersion}", Version = description.ApiVersion.ToString() });
+                    }
+
+                    options.AddSecurityDefinition(
+                        "Bearer",
+                        new ApiKeyScheme
+                        {
+                            Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                            Name = "Authorization",
+                            In = "header",
+                            Type = "apiKey"
+                        });
+
+                    options.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "Bearer", new string[] { } }
+                    });
+
+                    options.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{nameof(Broadway)}.{nameof(Host)}.xml"));
+                });
+            
             services.AddSingleton(CreateClusterClient);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseExceptionHandler(
+                new ExceptionHandlerOptions
+                {
+                    ExceptionHandler =
+                        async context =>
+                        {
+                            var feature = context.Features.Get<IExceptionHandlerFeature>();
+                            var error = new JObject
+                            {
+                                { "requestId", context.TraceIdentifier },
+                                { "code", "unhandledException" },
+                                { "message", feature.Error.Message }
+                            };
+
+                            if (env.IsDevelopment())
+                            {
+                                error.Add("details", feature.Error.ToString());
+                            }
+
+                            context.Response.ContentType = "application/json";
+                            await context.Response.WriteAsync(new JObject(new JProperty("error", error)).ToString());
+                        }
+                });
+            
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("Location"));
 
             app.UseMvc();
+            
+            if (!env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(
+                    options =>
+                    {
+                        var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
+                        foreach (var description in provider.ApiVersionDescriptions)
+                        {
+                            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                        }
+
+                        options.DocExpansion(DocExpansion.None);
+                        options.EnableValidator();
+                        options.ShowExtensions();
+                        options.DisplayRequestDuration();
+                    });
+            }
         }
         
         private static IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
         {
+            const string invariant = "Npgsql";
+            const string connectionString = "Host=localhost;Username=postgres;Password=postgres;Database=orleans";
+
             var client = new ClientBuilder()
-                .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "Broadway";
+                    options.ClusterId = "broadway-prototype";
+                    options.ServiceId = "broadway";
+                })
+                .UseAdoNetClustering(options =>
+                {
+                    options.Invariant = invariant;
+                    options.ConnectionString = connectionString;
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog())

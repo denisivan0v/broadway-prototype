@@ -1,0 +1,74 @@
+common:
+  blank: blank
+
+deploy-storage:
+
+  k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
+  k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
+  k8s_namespace: "erm-roads"
+  k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
+  
+  max_surge: 1
+  max_unavailable: 0  
+  replicas_count_apps: 1
+  replicas_count_storage: 1
+  revision_history_limit: 3
+  termination_grace_period_seconds: 60
+  id: "{{ env='DOMAIN_POSTFIX' }}"
+  vendor: "roads"
+  node_selector: "worker"
+  postgres_db: "clustering"
+  postgres_limits_cpu: "700m"
+  postgres_limits_memory: "400Mi"
+  postgres_password: "postgres"
+  postgres_path: "docker-hub.2gis.ru/ams/postgres-dumper"
+  postgres_port: 5432
+  postgres_requests_cpu: "50m"
+  postgres_requests_memory: "100Mi"
+  postgres_ro_password: "{{ env='DB_OKAPI_PROD_RO_PASSWORD' }}"
+  postgres_user: "postgres"
+  postgres_version: "9.6.3"
+
+  kubectl:
+  - template: secret-postgres.yaml.j2
+  - template: deployment-storage.yaml.j2
+  - template: service-postgres.yaml.j2
+
+deploy-apps:
+
+  k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
+  k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
+  k8s_namespace: "erm-roads"
+  k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
+  
+  id: "{{ env='DOMAIN_POSTFIX' }}"
+  max_surge: 1
+  max_unavailable: 0
+  node_selector: "worker"
+  postgres_password: "postgres"
+  postgres_user: "postgres"
+  replicas_count_apps: 1
+  replicas_count_renderer: 1
+  replicas_count_workers: 1
+  revision_history_limit: 3
+  termination_grace_period_seconds: 60
+  vendor: "roads"
+  vstore_aspnetcore_env: "stage"
+  vstore_domain: "vstore-{{ env='DOMAIN_POSTFIX' }}"
+  vstore_healthcheck: "/healthcheck"
+  vstore_healthcheck_delay: 1
+  vstore_healthcheck_timeout: 60
+  vstore_path: "docker-hub.2gis.ru/ams/vstore"
+  vstore_limits_cpu: "500m"
+  vstore_limits_memory: "300Mi"
+  vstore_requests_cpu: "50m"
+  vstore_requests_memory: "225Mi"
+  vstore_port: 5010
+
+  vstore_temp_dir: "/tmp/files"
+  vstore_version: "{{ env='VSTORE_VERSION' }}"  
+
+  kubectl:
+  - template: deployment-vstore.yaml.j2
+  - template: service-vstore.yaml.j2  
+

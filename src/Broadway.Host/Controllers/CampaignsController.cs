@@ -4,7 +4,8 @@ using Orleans;
 
 namespace NuClear.Broadway.Host.Controllers
 {
-    [Route("api/campaigns")]
+    [ApiVersion("1.0")]
+    [Route("api/{api-version:apiVersion}/campaigns")]
     public class CampaignsController : Controller
     {
         private readonly IClusterClient _clusterClient;

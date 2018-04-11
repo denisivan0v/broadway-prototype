@@ -3,6 +3,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RuntimeFrameworkVersion>$(RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>NuClear.Broadway.Silo</RootNamespace>
@@ -12,7 +14,9 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.1" />
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="$(OrleansPackageVersion)" />
     <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="$(OrleansPackageVersion)" />
-    <PackageReference Include="Microsoft.Orleans.Transactions" Version="$(OrleansPackageVersion)" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="$(OrleansPackageVersion)" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.AdoNet" Version="2.0.0" />
+    <PackageReference Include="Npgsql" Version="3.2.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Broadway.Grains\Broadway.Grains.csproj" />

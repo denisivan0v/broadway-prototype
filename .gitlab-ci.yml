@@ -3,6 +3,7 @@ variables:
 
 stages:
   - build
+  - dockerize
   - end
 
 before_script:
@@ -12,19 +13,43 @@ before_script:
 
 # ================= Test & Build =================
 
-build:app:
+build:apps:
   image: $REGISTRY/microsoft/aspnetcore-build:2.0.6-2.1.101
   stage: build
   when: always
   script:
     - dotnet restore --runtime debian-x64
     - dotnet publish src/Broadway.Host --configuration Release --runtime debian-x64 --output ../../publish/broadway-host
+    - dotnet publish src/Broadway.Silo --configuration Release --runtime debian-x64 --output ../../publish/broadway-silo
   tags: [ 2gis, docker ]
   artifacts:
     name: "${CI_COMMIT_REF_NAME}_app"
     expire_in: '1 week'
     paths:
       - publish/broadway-host/
+      - publish/broadway-silo/
+      
+build:broadway-host-image:
+  stage: dockerize
+  when: manual
+  allow_failure: false
+  script:
+    - TAG=$CI_TAG DOCKER_FILE=publish/broadway-host/Dockerfile DOCKER_BUILD_CONTEXT=publish/broadway-host make docker-build
+    - TAG=$CI_TAG make docker-push
+  tags: [ docker-engine, io ]
+  dependencies:
+    - build:apps
+
+build:broadway-silo-image:
+  stage: dockerize
+  when: manual
+  allow_failure: false
+  script:
+    - TAG=$CI_TAG DOCKER_FILE=publish/broadway-silo/Dockerfile DOCKER_BUILD_CONTEXT=publish/broadway-silo make docker-build
+    - TAG=$CI_TAG make docker-push
+  tags: [ docker-engine, io ]
+  dependencies:
+    - build:apps
       
 # ================= End =================
 

@@ -51,6 +51,7 @@ namespace NuClear.Broadway.Silo
                         options.Invariant = invariant;
                         options.ConnectionString = connectionString;
                         options.UseJsonFormat = true;
+                        options.IndentJson = true;
                     })
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)

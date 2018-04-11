@@ -4,6 +4,7 @@ variables:
 stages:
   - build
   - dockerize
+  - deploy
   - end
 
 before_script:
@@ -50,6 +51,24 @@ build:broadway-silo-image:
   tags: [ docker-engine, io ]
   dependencies:
     - build:apps
+    
+# ================ Deploy =================
+
+deploy:prototype:
+  stage: deploy
+  when: manual
+  image: $REGISTRY/2gis-io/k8s-handle:latest
+  script:
+    - export ROADS_ENVIRONMENT=Stage
+    - export DOMAIN_POSTFIX=${CI_COMMIT_REF_SLUG} TEMP_DIR=${CI_PROJECT_DIR}/k8s_deploy
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
+  only:
+    - tags
+  dependencies: []
+  tags: [ 2gis, docker ]
+  environment:
+    name: vstore-standalone
+    url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
       
 # ================= End =================
 

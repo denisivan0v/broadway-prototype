@@ -17,17 +17,16 @@ deploy-storage:
   id: "{{ env='DOMAIN_POSTFIX' }}"
   vendor: "roads"
   node_selector: "worker"
-  postgres_db: "clustering"
+  postgres_version: "9.6.3"
+  postgres_db: "orleans"
   postgres_limits_cpu: "700m"
   postgres_limits_memory: "400Mi"
-  postgres_password: "postgres"
   postgres_path: "docker-hub.2gis.ru/ams/postgres-dumper"
   postgres_port: 5432
   postgres_requests_cpu: "50m"
   postgres_requests_memory: "100Mi"
-  postgres_ro_password: "{{ env='DB_OKAPI_PROD_RO_PASSWORD' }}"
   postgres_user: "postgres"
-  postgres_version: "9.6.3"
+  postgres_password: "postgres"
 
   kubectl:
   - template: secret-postgres.yaml.j2

@@ -62,8 +62,8 @@ deploy:prototype:
     - export ROADS_ENVIRONMENT=Stage
     - export DOMAIN_POSTFIX=${CI_COMMIT_REF_SLUG} TEMP_DIR=${CI_PROJECT_DIR}/k8s_deploy
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
-  only:
-    - tags
+#  only:
+#    - tags
   dependencies: []
   tags: [ 2gis, docker ]
   environment:

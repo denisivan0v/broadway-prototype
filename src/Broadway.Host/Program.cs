@@ -14,7 +14,7 @@ namespace NuClear.Broadway.Host
         private static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
+                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), true)
                 .Build();
     }
 }

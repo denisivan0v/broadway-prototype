@@ -1,13 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using NuClear.Broadway.Grains;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Serilog;
 
 namespace NuClear.Broadway.Silo
 {
@@ -19,6 +22,15 @@ namespace NuClear.Broadway.Silo
 
         private static void Main(string[] args)
         {
+            var env = Environment.GetEnvironmentVariable("ROADS_ENVIRONMENT") ?? "Production";
+            var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(basePath)
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env?.ToLower()}.json")
+                .AddEnvironmentVariables("ROADS_")
+                .Build();
+            
             const string invariant = "Npgsql";
             const string connectionString = "Host=localhost;Username=postgres;Password=postgres;Database=orleans";
 
@@ -41,10 +53,9 @@ namespace NuClear.Broadway.Silo
                         options.UseJsonFormat = true;
                     })
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
-                .AddStateStorageBasedLogConsistencyProviderAsDefault()
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning).AddConsole())
+                .ConfigureLogging(logging => logging.AddSerilog(CreateLogger(configuration), true))
                 .Build();
 
             Task.Run(StartSilo);
@@ -57,7 +68,15 @@ namespace NuClear.Broadway.Silo
 
             SiloStopped.WaitOne();
         }
-        
+
+        private static ILogger CreateLogger(IConfiguration configuration)
+        {
+            var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
+            Log.Logger = loggerConfiguration.CreateLogger();
+
+            return Log.Logger;
+        }
+
         private static async Task StartSilo()
         {
             await _siloHost.StartAsync();

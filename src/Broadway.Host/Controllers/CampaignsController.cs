@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using NuClear.Broadway.Host.Commands;
 using NuClear.Broadway.Interfaces;
 using Orleans;
 
@@ -16,17 +18,24 @@ namespace NuClear.Broadway.Host.Controllers
         }
         
         [HttpGet("{id}")]
-        public JsonResult Get(long id)
+        public async Task<JsonResult> Get(long id)
         {
             var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
-            return Json(campaignGrain.GetState());
+            return Json(await campaignGrain.GetStateAsync());
         }
         
-        [HttpPatch("{id}")]
-        public void SetName(long id, [FromBody] string name)
+        [HttpGet("{id}/events")]
+        public async Task<JsonResult> GetEvents(long id)
         {
             var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
-            campaignGrain.ChangeName(name, 1);
+            return Json(await campaignGrain.GetConfirmedEvents());
+        }
+
+        [HttpPut("{id}/commands")]
+        public async Task SetName(long id, [FromBody]ChangeCompaignNameCommand command)
+        {
+            var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
+            await campaignGrain.ChangeNameAsync(command.Name, command.IssuedBy);
         }
     }
 }

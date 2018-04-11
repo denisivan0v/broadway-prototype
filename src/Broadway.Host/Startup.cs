@@ -142,7 +142,7 @@ namespace NuClear.Broadway.Host
                     options.ConnectionString = connectionString;
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddSerilog())
+                .ConfigureLogging(logging => logging.AddSerilog(Log.Logger))
                 .Build();
 
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();

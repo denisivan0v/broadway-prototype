@@ -64,4 +64,4 @@ spec:
         - name: ASPNETCORE_TEMP
           value: '{{ host_temp_dir }}'
         - name: ROADS_ConnectionStrings__Orleans
-          value: '{{ Host={{ vendor }}-{{ id }}-postgres;Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }} }}'
+          value: 'Host={{ vendor }}-{{ id }}-postgres;Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'

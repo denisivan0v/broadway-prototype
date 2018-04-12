@@ -20,6 +20,21 @@ spec:
         image: {{ postgres_path }}:{{ postgres_version }}
         ports:
         - containerPort: {{ postgres_port }}
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+                - "/bin/sh"
+                - "-c"
+                - >
+                  pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }};
+                  apt-get update -y && apt-get install -y wget;
+                  wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Main.sql;
+                  wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Clustering.sql;
+                  wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Persistence.sql;
+                  psql -U postgres -d orleans -f PostgreSQL-Main.sql;
+                  psql -U postgres -d orleans -f PostgreSQL-Clustering.sql;
+                  psql -U postgres -d orleans -f PostgreSQL-Persistence.sql;
         readinessProbe:
           exec:
             command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }}"]

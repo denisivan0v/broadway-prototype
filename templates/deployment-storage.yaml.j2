@@ -32,9 +32,9 @@ spec:
                   wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Main.sql;
                   wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Clustering.sql;
                   wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Persistence.sql;
-                  psql -U postgres -d orleans -f PostgreSQL-Main.sql;
-                  psql -U postgres -d orleans -f PostgreSQL-Clustering.sql;
-                  psql -U postgres -d orleans -f PostgreSQL-Persistence.sql;
+                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f PostgreSQL-Main.sql;
+                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f PostgreSQL-Clustering.sql;
+                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f PostgreSQL-Persistence.sql;
         readinessProbe:
           exec:
             command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }}"]

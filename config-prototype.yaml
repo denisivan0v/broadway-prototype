@@ -8,23 +8,23 @@ deploy-storage:
   k8s_namespace: "erm-roads"
   k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
   
-  max_surge: 1
-  max_unavailable: 0  
-  replicas_count_apps: 1
-  replicas_count_storage: 1
-  revision_history_limit: 3
-  termination_grace_period_seconds: 60
-  id: "{{ env='DOMAIN_POSTFIX' }}"
   vendor: "roads"
+  id: "{{ env='DOMAIN_POSTFIX' }}"
+
+  max_surge: 1
+  max_unavailable: 0 
   node_selector: "worker"
+  termination_grace_period_seconds: 60
+  revision_history_limit: 3
+
   postgres_path: "postgres"
   postgres_version: "9.6.3"
   postgres_port: 5432
-  postgres_db: "orleans"
   postgres_limits_cpu: "700m"
   postgres_limits_memory: "400Mi"
   postgres_requests_cpu: "50m"
   postgres_requests_memory: "100Mi"
+  postgres_db: "orleans"
   postgres_user: "postgres"
   postgres_password: "postgres"
 
@@ -39,34 +39,40 @@ deploy-apps:
   k8s_namespace: "erm-roads"
   k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
   
+  vendor: "roads"
   id: "{{ env='DOMAIN_POSTFIX' }}"
+  
   max_surge: 1
   max_unavailable: 0
   node_selector: "worker"
-  postgres_password: "postgres"
-  postgres_user: "postgres"
-  replicas_count_apps: 1
-  replicas_count_renderer: 1
-  replicas_count_workers: 1
-  revision_history_limit: 3
   termination_grace_period_seconds: 60
-  vendor: "roads"
-  vstore_aspnetcore_env: "stage"
-  vstore_domain: "vstore-{{ env='DOMAIN_POSTFIX' }}"
-  vstore_healthcheck: "/healthcheck"
-  vstore_healthcheck_delay: 1
-  vstore_healthcheck_timeout: 60
-  vstore_path: "docker-hub.2gis.ru/ams/vstore"
-  vstore_limits_cpu: "500m"
-  vstore_limits_memory: "300Mi"
-  vstore_requests_cpu: "50m"
-  vstore_requests_memory: "225Mi"
-  vstore_port: 5010
+  revision_history_limit: 3
 
-  vstore_temp_dir: "/tmp/files"
-  vstore_version: "{{ env='VSTORE_VERSION' }}"  
+  replicas_count_apps: 1
+  
+  host_aspnetcore_env: "{{ env='ROADS_ENVIRONMENT' }}"
+  host_domain: "broadway-{{ env='DOMAIN_POSTFIX' }}"
+  host_healthcheck: "/swagger"
+  host_healthcheck_delay: 1
+  host_healthcheck_timeout: 60
+  host_path: "docker-hub.2gis.ru/roads/broadway"
+  host_limits_cpu: "500m"
+  host_limits_memory: "300Mi"
+  host_requests_cpu: "50m"
+  host_requests_memory: "225Mi"
+  host_port: 5000
+  host_temp_dir: "/tmp/files"
+
+  prometheus_blackbox_probe: "false"
+  prometheus_scrape_metrics: "false"
+
+  postgres_db: "orleans"
+  postgres_user: "postgres"
+  postgres_password: "postgres"
+
+  broadway_version: "{{ env='BROADWAY_VERSION' }}" 
 
   kubectl:
-  - template: deployment-vstore.yaml.j2
-  - template: service-vstore.yaml.j2  
+  - template: deployment-host.yaml.j2
+  - template: service-host.yaml.j2  
 

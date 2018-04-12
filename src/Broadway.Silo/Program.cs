@@ -32,7 +32,7 @@ namespace NuClear.Broadway.Silo
                 .Build();
             
             const string invariant = "Npgsql";
-            const string connectionString = "Host=localhost;Username=postgres;Password=postgres;Database=orleans";
+            var connectionString = configuration.GetConnectionString("Orleans");
 
             _siloHost = new SiloHostBuilder()
                 .Configure<ClusterOptions>(options =>
@@ -40,6 +40,7 @@ namespace NuClear.Broadway.Silo
                     options.ClusterId = "broadway-prototype";
                     options.ServiceId = "broadway";
                 })
+                .ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
                 .UseAdoNetClustering(options =>
                 {
                     options.Invariant = invariant;
@@ -54,7 +55,6 @@ namespace NuClear.Broadway.Silo
                         options.IndentJson = true;
                     })
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
-                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog(CreateLogger(configuration), true))
                 .Build();

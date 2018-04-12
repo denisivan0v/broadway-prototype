@@ -125,10 +125,9 @@ namespace NuClear.Broadway.Host
             }
         }
         
-        private static IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
+        private IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
         {
             const string invariant = "Npgsql";
-            const string connectionString = "Host=localhost;Username=postgres;Password=postgres;Database=orleans";
 
             var client = new ClientBuilder()
                 .Configure<ClusterOptions>(options =>
@@ -139,7 +138,7 @@ namespace NuClear.Broadway.Host
                 .UseAdoNetClustering(options =>
                 {
                     options.Invariant = invariant;
-                    options.ConnectionString = connectionString;
+                    options.ConnectionString = _configuration.GetConnectionString("Orleans");
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog(Log.Logger))

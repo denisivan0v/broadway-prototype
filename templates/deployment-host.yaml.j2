@@ -1,0 +1,67 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ vendor }}-{{ id }}-host
+spec:
+  replicas: {{ replicas_count_apps }}
+  revisionHistoryLimit: {{ revision_history_limit | default('3') }}  {# https://kubernetes.io/docs/user-guide/deployments/#revision-history-limit  #}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: {{ max_unavailable }}
+      maxSurge: {{ max_surge | default('1') }}
+  template:
+    metadata:
+      labels:
+        app: {{ vendor }}-{{ id }}-host
+      annotations:
+        prometheus.io/scrape: "{{ prometheus_scrape_metrics }}"
+        prometheus.io/port: "{{ host_port }}"
+    spec:
+      terminationGracePeriodSeconds: {{ termination_grace_period_seconds | default('60') }}  {# Секунды между SIGTERM и SIGKILL #}
+      nodeSelector:
+        role: {{ node_selector }}
+      volumes:
+      - name: host-temp
+        emptyDir: {}
+      containers:
+      - name: host
+        image: {{ host_path }}:{{ broadway_version }}
+        ports:
+        - containerPort: {{ host_port }}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 5"]
+        readinessProbe:
+          httpGet:
+            path: {{ host_healthcheck }}
+            port: {{ host_port }}
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        resources:
+          limits:
+            cpu: {{ host_limits_cpu }}
+            memory: {{ host_limits_memory }}
+          requests:
+            cpu: {{ host_requests_cpu }}
+            memory: {{ host_requests_memory }}
+        volumeMounts:
+        - mountPath: {{ host_temp_dir }}
+          name: host-temp
+        env:
+        - name: DOCKER_TERM_KILL_TIMEOUT
+          value: '10s'
+        - name: HEALTHCHECK_URL
+          value: '{{ host_healthcheck }}'
+        - name: HEALTHCHECK_INITIAL_DELAY
+          value: '{{ host_healthcheck_delay }}'
+        - name: HEALTHCHECK_TIMEOUT
+          value: '{{ host_healthcheck_timeout }}'
+        - name: ASPNETCORE_URLS
+          value: 'http://*:{{ host_port }}'
+        - name: ASPNETCORE_ENVIRONMENT
+          value: '{{ host_aspnetcore_env }}'
+        - name: ASPNETCORE_TEMP
+          value: '{{ host_temp_dir }}'
+        - name: ROADS_ConnectionStrings__Orleans
+          value: '{{ Host={{ vendor }}-{{ id }}-postgres;Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }} }}'

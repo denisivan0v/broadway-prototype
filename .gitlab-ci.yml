@@ -68,7 +68,21 @@ broadway-silo-image:
     
 # ================ Deploy =================
 
-
+broadway-prototype:
+  stage: deploy
+#  when: manual
+  image: $REGISTRY/2gis-io/k8s-handle:latest
+  script:
+    - export ROADS_ENVIRONMENT=stage
+    - export BROADWAY_VERSION=${CI_TAG}
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
+  only:
+    - master
+  dependencies: []
+  tags: [ 2gis, docker ]
+  environment:
+    name: broadway-prototype
+    url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
       
 # ================= End =================
 

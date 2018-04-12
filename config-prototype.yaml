@@ -50,16 +50,24 @@ deploy-apps:
 
   replicas_count_apps: 1
   
-  host_aspnetcore_env: "{{ env='ROADS_ENVIRONMENT' }}"
-  host_domain: "broadway-{{ env='DOMAIN_POSTFIX' }}"
+  roads_env: "{{ env='ROADS_ENVIRONMENT' }}"
+  
+  silo_path: "docker-hub.2gis.ru/roads/broadway-silo"
+  silo_limits_cpu: "500m"
+  silo_limits_memory: "300Mi"
+  silo_requests_cpu: "50m"
+  silo_requests_memory: "225Mi"
+  silo_metrics_port: 3000
+  
+  host_domain: "{{ env='DOMAIN_POSTFIX' }}"
   host_healthcheck: "/swagger"
   host_healthcheck_delay: 1
   host_healthcheck_timeout: 60
-  host_path: "docker-hub.2gis.ru/roads/broadway"
-  host_limits_cpu: "500m"
-  host_limits_memory: "300Mi"
+  host_path: "docker-hub.2gis.ru/roads/broadway-host"
+  host_limits_cpu: "200m"
+  host_limits_memory: "200Mi"
   host_requests_cpu: "50m"
-  host_requests_memory: "225Mi"
+  host_requests_memory: "150Mi"
   host_port: 5000
   host_temp_dir: "/tmp/files"
 
@@ -73,6 +81,8 @@ deploy-apps:
   broadway_version: "{{ env='BROADWAY_VERSION' }}" 
 
   kubectl:
+  - template: deployment-silo.yaml.j2
   - template: deployment-host.yaml.j2
+  - template: service-silo.yaml.j2
   - template: service-host.yaml.j2  
 

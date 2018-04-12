@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ vendor }}-{{ id }}-silo
+spec:
+  replicas: {{ replicas_count_apps }}
+  revisionHistoryLimit: {{ revision_history_limit | default('3') }}  {# https://kubernetes.io/docs/user-guide/deployments/#revision-history-limit  #}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: {{ max_unavailable }}
+      maxSurge: {{ max_surge | default('1') }}
+  template:
+    metadata:
+      labels:
+        app: {{ vendor }}-{{ id }}-silo
+      annotations:
+        prometheus.io/scrape: "{{ prometheus_scrape_metrics }}"
+        prometheus.io/port: "{{ silo_metrics_port }}"
+    spec:
+      terminationGracePeriodSeconds: {{ termination_grace_period_seconds | default('60') }}  {# Секунды между SIGTERM и SIGKILL #}
+      nodeSelector:
+        role: {{ node_selector }}
+      containers:
+      - name: silo
+        image: {{ silo_path }}:{{ broadway_version }}
+        ports:
+        - containerPort: {{ silo_metrics_port }}
+        command: ["/app/Broadway.Silo"]
+        resources:
+          limits:
+            cpu: {{ silo_limits_cpu }}
+            memory: {{ silo_limits_memory }}
+          requests:
+            cpu: {{ silo_requests_cpu }}
+            memory: {{ silo_requests_memory }}
+        env:
+        - name: DOCKER_TERM_KILL_TIMEOUT
+          value: '10s'
+        - name: ROADS_ENVIRONMENT
+          value: '{{ roads_env }}'
+        - name: ROADS_ConnectionStrings__Orleans
+          value: 'Host={{ vendor }}-{{ id }}-postgres;Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'

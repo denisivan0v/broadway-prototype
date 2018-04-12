@@ -12,22 +12,17 @@ spec:
     spec:
       nodeSelector:
         role: {{ node_selector }}
-{#        ssd: 'True'#}
       volumes:
-      - name: postgres-tmp
-        emptyDir: {}
-{#          medium: Memory#}
       - name: postgres-data
         emptyDir: {}
       containers:
       - name: postgres
         image: {{ postgres_path }}:{{ postgres_version }}
-        args: ["postgres", "--max_wal_size=3GB"]
         ports:
         - containerPort: {{ postgres_port }}
         readinessProbe:
           exec:
-            command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} && ls /tmp/restore_is_done"]
+            command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }}"]
           initialDelaySeconds: 1
           timeoutSeconds: 1
         resources:
@@ -35,11 +30,9 @@ spec:
             cpu: {{ postgres_limits_cpu }}
             memory: {{ postgres_limits_memory }}
           requests:
-            cpu: 50m
+            cpu: {{ postgres_requests_cpu }}
             memory: {{ postgres_requests_memory }}
         volumeMounts:
-        - mountPath: /tmp
-          name: postgres-tmp
         - mountPath: /var/lib/postgresql/data
           name: postgres-data
         env:
@@ -49,5 +42,3 @@ spec:
           value: '{{ postgres_user }}'
         - name: POSTGRES_PASSWORD
           value: '{{ postgres_password }}'
-        - name: PGPASSFILE
-          value: '/var/lib/postgresql/postgres-passwd'

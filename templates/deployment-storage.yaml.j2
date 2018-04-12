@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ vendor }}-{{ id }}-storage
 spec:
-  replicas: {{ replicas_count_storage }}
+  replicas: 1
   revisionHistoryLimit: {{ revision_history_limit | default('3') }}  {# https://kubernetes.io/docs/user-guide/deployments/#revision-history-limit  #}
   template:
     metadata:

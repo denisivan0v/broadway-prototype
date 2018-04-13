@@ -10,22 +10,5 @@ namespace NuClear.Broadway.Interfaces
         public long? StartedBy { get; set; }
         public DateTimeOffset? PausedAt { get; set; }
         public long? PausedBy { get; set; }
-        
-        public void Apply(CampaignNameChangedEvent nameChangedEvent)
-        {
-            Name = nameChangedEvent.Name;
-        }
-
-        public void Apply(CampaignStartedEvent startedEvent)
-        {
-            StartedAt = startedEvent.StartedAt;
-            StartedBy = startedEvent.UserId;
-        }
-        
-        public void Apply(CampaignPausedEvent pausedEvent)
-        {
-            PausedAt = pausedEvent.PausedAt;
-            PausedBy = pausedEvent.UserId;
-        }
     }
 }

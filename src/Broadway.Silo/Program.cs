@@ -6,6 +6,7 @@ using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using NuClear.Broadway.Grains;
 using Orleans;
 using Orleans.Configuration;
@@ -52,7 +53,6 @@ namespace NuClear.Broadway.Silo
                         options.Invariant = invariant;
                         options.ConnectionString = connectionString;
                         options.UseJsonFormat = true;
-                        options.IndentJson = true;
                     })
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())

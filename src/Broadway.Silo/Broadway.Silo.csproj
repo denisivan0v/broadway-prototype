@@ -42,18 +42,4 @@
     <ProjectReference Include="..\Broadway.Grains\Broadway.Grains.csproj" />
     <ProjectReference Include="..\Broadway.Interfaces\Broadway.Interfaces.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="appsettings.development.json">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="appsettings.json">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="appsettings.production.json">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="appsettings.stage.json">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
 </Project>

@@ -47,6 +47,8 @@ ProjectSection(SolutionItems) = preProject
 	ci-starter-kit\utils.sh = ci-starter-kit\utils.sh
 EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Worker", "src\Broadway.Worker\Broadway.Worker.csproj", "{CB1839BF-4999-4F63-82FB-C05C2C80E58E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,7 @@ Global
 		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{92F9A126-5461-4420-97D3-B1449058247C} = {D790569B-661E-4C95-BE74-88E9E627D935}
 		{A291DB63-282B-4453-95BF-E50FD0C11D49} = {D790569B-661E-4C95-BE74-88E9E627D935}
+		{CB1839BF-4999-4F63-82FB-C05C2C80E58E} = {14DE1203-7E48-438A-A115-1C78687619AE}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EEE99319-7E8A-47CE-A419-C3CA49A85675}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -77,5 +80,9 @@ Global
 		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB1839BF-4999-4F63-82FB-C05C2C80E58E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB1839BF-4999-4F63-82FB-C05C2C80E58E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB1839BF-4999-4F63-82FB-C05C2C80E58E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB1839BF-4999-4F63-82FB-C05C2C80E58E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

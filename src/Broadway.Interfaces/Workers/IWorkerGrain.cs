@@ -3,7 +3,7 @@ using Orleans;
 
 namespace NuClear.Broadway.Interfaces.Workers
 {
-    public interface IWorkerGrain : IGrainWithIntegerKey
+    public interface IWorkerGrain : IGrainWithStringKey
     {
         Task Execute(GrainCancellationToken cancellation);
     }

@@ -5,7 +5,9 @@ using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using NuClear.Broadway.Grains;
+using NuClear.Broadway.Kafka;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -55,6 +57,11 @@ namespace NuClear.Broadway.Silo
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog(CreateLogger(configuration), true))
+                .ConfigureServices((context, services) =>
+                {
+                    var kafkaOptions = configuration.GetSection("Kafka").Get<KafkaOptions>();
+                    services.AddSingleton(kafkaOptions);
+                })
                 .Build();
 
             Task.Run(StartSilo);

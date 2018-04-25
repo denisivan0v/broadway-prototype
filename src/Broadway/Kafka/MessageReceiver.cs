@@ -12,7 +12,7 @@ namespace NuClear.Broadway.Kafka
     {
         private readonly IEnumerable<string> _topics;
         
-        private bool _streamingStarted;
+        private bool _subscribed;
 
         public MessageReceiver(ILogger logger, KafkaOptions kafkaOptions, string groupId, IEnumerable<string> topics)
             : base(logger, kafkaOptions, groupId)
@@ -20,15 +20,12 @@ namespace NuClear.Broadway.Kafka
             _topics = topics;
         }
         
-        public IObservable<KafkaMessage> Subscribe(CancellationToken cancellationToken)
+        public (IObservable<KafkaMessage>, Action) Subscribe(CancellationToken cancellationToken)
         {
-            if (_streamingStarted)
+            if (_subscribed)
             {
                 throw new InvalidOperationException("Streaming already started. Please dispose the previous obvservable before getting the new one.");
             }
-
-            var pollCancellationTokenSource = new CancellationTokenSource();
-            var registration = cancellationToken.Register(() => pollCancellationTokenSource.Cancel());
 
             var onMessage = Observable.FromEventPattern<Message<string, string>>(
                                           x =>
@@ -38,32 +35,18 @@ namespace NuClear.Broadway.Kafka
                                               },
                                           x =>
                                               {
-                                                  pollCancellationTokenSource.Cancel();
-                                                  registration.Dispose();
                                                   Consumer.Unsubscribe();
                                                   Consumer.OnMessage -= x;
-                                                  _streamingStarted = false;
+                                                  _subscribed = false;
                                               })
                                       .Select(x => new KafkaMessage(
                                                       x.EventArgs.Key, 
                                                       x.EventArgs.Value, 
                                                       x.EventArgs.TopicPartitionOffset, 
                                                       x.EventArgs.Timestamp));
-            Task.Factory.StartNew(
-                    () =>
-                        {
-                            while (!pollCancellationTokenSource.IsCancellationRequested)
-                            {
-                                Consumer.Poll(TimeSpan.FromMilliseconds(100));
-                            }
-                        },
-                    pollCancellationTokenSource.Token,
-                    TaskCreationOptions.LongRunning,
-                    TaskScheduler.Current);
+            _subscribed = true;
 
-            _streamingStarted = true;
-
-            return onMessage;
+            return (onMessage, () => Consumer.Poll(TimeSpan.FromMilliseconds(100)));
         }
 
         public async Task CommitAsync<TSourceEvent>(KafkaMessage message)

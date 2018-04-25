@@ -13,12 +13,6 @@ namespace NuClear.Broadway.Grains
         {
             _logger = logger;
         }
-        
-        public override Task OnActivateAsync()
-        {
-            _logger.LogInformation("Activating...");
-            return base.OnActivateAsync();
-        }
 
         public async Task UpdateStateAsync(Category category)
         {
@@ -27,6 +21,8 @@ namespace NuClear.Broadway.Grains
             State.Localizations = category.Localizations;
             
             await WriteStateAsync();
+            
+            _logger.LogInformation("State updated.");
         }
     }
 }

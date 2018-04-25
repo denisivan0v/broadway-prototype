@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -17,8 +20,10 @@ namespace NuClear.Broadway.Grains.Workers
         private const string ConsumerGroupId = "roads-flow-kaleidoscope-consumer";
         
         private readonly ILogger<FlowKaleidoscopeConsumerGrain> _logger;
-        private readonly MessageReceiver _messageReceiver;
-
+        private readonly KafkaOptions _kafkaOptions;
+        
+        private  MessageReceiver _messageReceiver;
+        private TaskPoolScheduler _rxScheduler;
         private CancellationTokenRegistration _cancellationTokenRegistration;
         
         public FlowKaleidoscopeConsumerGrain(
@@ -26,35 +31,41 @@ namespace NuClear.Broadway.Grains.Workers
             KafkaOptions kafkaOptions)
         {
             _logger = logger;
-            _messageReceiver = new MessageReceiver(
-                logger,
-                kafkaOptions,
-                $"{ConsumerGroupId}-{kafkaOptions.ConsumerGroupToken}",
-                new[] {"casino_staging_flowKaleidoscope_compacted"});
+            _kafkaOptions = kafkaOptions;
         }
         
-        public Task Execute(GrainCancellationToken cancellation)
+        public async Task Execute(GrainCancellationToken cancellation)
         {
             var (observable, poll) = _messageReceiver.Subscribe(cancellation.CancellationToken);
 
+//            var subscription = observable
+//                .ObserveOn(_rxScheduler)
+//                .SelectMany(async message =>
+//                {
+//                    var xml = XElement.Parse(message.Source);
+//                    return await UpdateCategoryAsync(xml);
+//                })
+//                .Subscribe();
+
+            var orleansScheduler = TaskScheduler.Current;
             var subscription = observable
-                .Subscribe(async message =>
-                {
-                    _logger.LogInformation("Message received.");
-                    
-                    var xml = XElement.Parse(message.Source);
-                    await UpdateCategoryAsync(xml);
-                });
+                .SelectMany(message =>
+                    Task.Factory.StartNew(async () =>
+                            {
+                                var xml = XElement.Parse(message.Source);
+                                return await UpdateCategoryAsync(xml);
+                            },
+                            cancellation.CancellationToken,
+                            TaskCreationOptions.None,
+                            orleansScheduler)
+                        .Unwrap()
+                        .ToObservable())
+                .Publish()
+                .Connect();
 
             _cancellationTokenRegistration = cancellation.CancellationToken.Register(() => subscription.Dispose());
-
-            while (!cancellation.CancellationToken.IsCancellationRequested)
-            {
-                _logger.LogInformation("Poll for the next message.");
-                poll();
-            }
             
-            return Task.CompletedTask;
+            await RunPollLoop(cancellation.CancellationToken, poll);
         }
         
         public void Dispose()
@@ -63,11 +74,40 @@ namespace NuClear.Broadway.Grains.Workers
             _messageReceiver.Dispose();
         }
 
-        public async Task UpdateCategoryAsync(XElement xml)
+        public override async Task OnActivateAsync()
+        {
+            await base.OnActivateAsync();
+            
+            _messageReceiver = new MessageReceiver(
+                _logger,
+                _kafkaOptions,
+                $"{ConsumerGroupId}-{_kafkaOptions.ConsumerGroupToken}",
+                new[] {"casino_staging_flowKaleidoscope_compacted"});
+
+            var factory = new TaskFactory(TaskScheduler.Current);
+            _rxScheduler = new TaskPoolScheduler(factory);
+        }
+
+        private Task RunPollLoop(CancellationToken cancellationToken, Action poll)
+        {
+            return Task.Factory.StartNew(() =>
+                {
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        //_logger.LogInformation("Poll for the next message.");
+                        poll();
+                    }
+                },
+                cancellationToken,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+        }
+
+        private async Task<Category> UpdateCategoryAsync(XElement xml)
         {
             if (xml.Attribute(nameof(Category.Code)) == null || xml.Attribute(nameof(Category.IsDeleted)) == null)
             {
-                return;
+                return null;
             }
             
             var category = new Category
@@ -78,8 +118,10 @@ namespace NuClear.Broadway.Grains.Workers
             
             var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(category.Code);
             
-            _logger.LogInformation("Going to update state...");
+            //_logger.LogInformation("Going to update state...");
             await categoryGrain.UpdateStateAsync(category);
+
+            return category;
         }
     }
 }

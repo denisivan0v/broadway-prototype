@@ -6,12 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Grains;
 using NuClear.Broadway.Kafka;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace NuClear.Broadway.Silo
 {
@@ -56,7 +58,7 @@ namespace NuClear.Broadway.Silo
                     })
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddSerilog(CreateLogger(configuration), true))
+                .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Information).AddSerilog(CreateLogger(configuration), true))
                 .ConfigureServices((context, services) =>
                 {
                     var kafkaOptions = configuration.GetSection("Kafka").Get<KafkaOptions>();

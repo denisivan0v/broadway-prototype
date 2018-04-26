@@ -22,7 +22,7 @@ namespace NuClear.Broadway.Grains
             
             await WriteStateAsync();
             
-            _logger.LogInformation("State updated.");
+            _logger.LogDebug("State updated.");
         }
     }
 }

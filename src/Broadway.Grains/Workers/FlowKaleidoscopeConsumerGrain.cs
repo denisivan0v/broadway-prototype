@@ -93,13 +93,13 @@ namespace NuClear.Broadway.Grains.Workers
             var xml = XElement.Parse(message.Value);
             switch (xml.Name.ToString())
             {
-                case "Category":
+                case nameof(Category):
                     await UpdateCategoryAsync(xml);
                     break;
-                case "SecondRubric":
+                case nameof(SecondRubric):
                     await UpdateSecondRubricAsync(xml);
                     break;
-                case "Rubric":
+                case nameof(Rubric):
                     await UpdateRubricAsync(xml);
                     break;
                 default:

@@ -18,11 +18,13 @@ namespace NuClear.Broadway.Grains
         {
             State.Code = category.Code;
             State.IsDeleted = category.IsDeleted;
-            State.Localizations = category.Localizations;
+            
+            if (!category.IsDeleted)
+            {
+                State.Localizations = category.Localizations;
+            }
             
             await WriteStateAsync();
-            
-            _logger.LogDebug("State updated.");
         }
     }
 }

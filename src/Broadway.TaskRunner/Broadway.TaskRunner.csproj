@@ -7,9 +7,10 @@
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <RootNamespace>NuClear.Broadway.Worker</RootNamespace>
+    <RootNamespace>NuClear.Broadway.TaskRunner</RootNamespace>
     <RuntimeIdentifiers>win10-x64;osx.10.12-x64</RuntimeIdentifiers>
     <LangVersion>latest</LangVersion>
+    <AssemblyName>Broadway.TaskRunner</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <None Update="appsettings.development.json">

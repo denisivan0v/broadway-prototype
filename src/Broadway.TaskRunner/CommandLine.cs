@@ -1,4 +1,4 @@
-﻿namespace NuClear.Broadway.Worker
+﻿namespace NuClear.Broadway.TaskRunner
 {
     public struct CommandLine
     {

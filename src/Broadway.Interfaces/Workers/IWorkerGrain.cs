@@ -5,6 +5,6 @@ namespace NuClear.Broadway.Interfaces.Workers
 {
     public interface IWorkerGrain : IGrainWithStringKey
     {
-        Task Execute(GrainCancellationToken cancellation);
+        Task StartExecutingAsync(GrainCancellationToken cancellation);
     }
 }

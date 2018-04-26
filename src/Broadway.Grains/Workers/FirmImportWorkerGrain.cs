@@ -8,7 +8,7 @@ namespace NuClear.Broadway.Grains.Workers
     [StatelessWorker]
     public class FirmImportWorkerGrain : Grain, IFirmImportWorkerGrain
     {
-        public async Task Execute(GrainCancellationToken cancellation)
+        public async Task StartExecutingAsync(GrainCancellationToken cancellation)
         {
             return;
         }

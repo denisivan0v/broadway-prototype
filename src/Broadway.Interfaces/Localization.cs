@@ -4,15 +4,21 @@ namespace NuClear.Broadway.Interfaces
 {
     public struct Localization : IEquatable<Localization>
     {
-        public Language Lang { get; set; }
-        public string Name { get; set; }
-        public string ShortName { get; set; }
+        public Localization(string lang, string name, string shortName = null)
+        {
+            Lang = lang;
+            Name = name;
+            ShortName = shortName;
+        }
+        
+        public string Lang { get; }
+        public string Name { get; }
+        public string ShortName { get; }
 
         public bool Equals(Localization other)
         {
-            return Lang == other.Lang &&
-                   Name.Equals(other.Name, StringComparison.InvariantCultureIgnoreCase) &&
-                   ShortName.Equals(other.ShortName, StringComparison.InvariantCultureIgnoreCase);
+            return (Lang?.Equals(other.Lang, StringComparison.InvariantCultureIgnoreCase) ?? other.Lang == null) &&
+                   (Name?.Equals(other.Name, StringComparison.InvariantCultureIgnoreCase) ?? other.Name == null);
         }
         
         public static bool operator ==(Localization left, Localization right)
@@ -31,9 +37,8 @@ namespace NuClear.Broadway.Interfaces
         {
             unchecked
             {
-                var hashCode = (Lang != null ? Lang.GetHashCode() : 0);
+                var hashCode = Lang != null ? Lang.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (ShortName != null ? ShortName.GetHashCode() : 0);
                 return hashCode;
             }
         }

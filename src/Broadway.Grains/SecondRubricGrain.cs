@@ -9,10 +9,14 @@ namespace NuClear.Broadway.Grains
         public async Task UpdateStateAsync(SecondRubric secondRubric)
         {
             State.Code = secondRubric.Code;
-            State.CategoryCode = secondRubric.CategoryCode;
             State.IsDeleted = secondRubric.IsDeleted;
-            State.Localizations = secondRubric.Localizations;
-            
+
+            if (!secondRubric.IsDeleted)
+            {
+                State.CategoryCode = secondRubric.CategoryCode;
+                State.Localizations = secondRubric.Localizations;
+            }
+           
             await WriteStateAsync();
         }
     }

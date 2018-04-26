@@ -4,8 +4,8 @@ namespace NuClear.Broadway.Interfaces
 {
     public sealed class Rubric
     {
-        public int Code { get; set; }
-        public int SecondRubricCode { get; set; }
+        public long Code { get; set; }
+        public long SecondRubricCode { get; set; }
         public bool IsCommercial { get; set; }
         public bool IsDeleted { get; set; }
         public ISet<Localization> Localizations { get; set; }

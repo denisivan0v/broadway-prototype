@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Interfaces.Workers;
 using Orleans;
 
-namespace NuClear.Broadway.Worker
+namespace NuClear.Broadway.TaskRunner
 {
     public class WorkerGrainRegistry
     {
@@ -46,7 +46,7 @@ namespace NuClear.Broadway.Worker
             }
             
             _logger.LogCritical("Worker for task {taskId} of type {taskType} has not beed registered.", taskId, taskType);
-            throw new WorkerNotFoundExeption(taskId, taskType);
+            throw new WorkerGrainNotFoundExeption(taskId, taskType);
         }
 
         private TWorkerGrain GetGrain<TWorkerGrain>(string key) where TWorkerGrain : IWorkerGrain

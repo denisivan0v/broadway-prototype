@@ -49,7 +49,7 @@ namespace NuClear.Broadway.Kafka
                     { "fetch.message.max.bytes", kafkaOptions.Consumer.FetchMessageMaxBytes },
                     { "queued.min.messages", kafkaOptions.Consumer.QueuedMinMessages },
 #if DEBUG
-                    { "debug", "msg" },
+                    //{ "debug", "msg" },
                     { "socket.blocking.max.ms", 1 }, // https://github.com/edenhill/librdkafka/wiki/How-to-decrease-message-latency
 #else
                     { "log.connection.close", false },

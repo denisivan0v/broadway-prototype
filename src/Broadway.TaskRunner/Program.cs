@@ -13,7 +13,7 @@ using Orleans.Hosting;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace NuClear.Broadway.Worker
+namespace NuClear.Broadway.TaskRunner
 {
     internal class Program
     {
@@ -99,7 +99,7 @@ namespace NuClear.Broadway.Worker
                 ex.Command.ShowHelp();
                 exitCode = 1;
             }
-            catch (WorkerNotFoundExeption)
+            catch (WorkerGrainNotFoundExeption)
             {
                 exitCode = 2;
             }
@@ -189,8 +189,8 @@ namespace NuClear.Broadway.Worker
                 "Starting worker of type {workerType} with identity {workerIndentity}...",
                 workerGrain.GetType().Name,
                 workerGrain.GetGrainIdentity());
-            
-            workerGrain.Execute(cts.Token).GetAwaiter().GetResult();
+
+            workerGrain.InvokeOneWay(x => x.StartExecutingAsync(cts.Token));
             
             logger.LogInformation(
                 "Worker of type {workerType} with identity {workerIndentity} completed successfully.", 

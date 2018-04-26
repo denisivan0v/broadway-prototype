@@ -47,7 +47,7 @@ ProjectSection(SolutionItems) = preProject
 	ci-starter-kit\utils.sh = ci-starter-kit\utils.sh
 EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Worker", "src\Broadway.Worker\Broadway.Worker.csproj", "{CB1839BF-4999-4F63-82FB-C05C2C80E58E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Worker", "src\Broadway.TaskRunner\Broadway.TaskRunner.csproj", "{CB1839BF-4999-4F63-82FB-C05C2C80E58E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway", "src\Broadway\Broadway.csproj", "{EBA860E2-DC36-4D1D-9138-0A496CCA14FA}"
 EndProject

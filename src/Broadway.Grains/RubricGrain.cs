@@ -6,6 +6,7 @@ namespace NuClear.Broadway.Grains
 {
     public class RubricGrain : Grain<Rubric>, IRubricGrain
     {
+        [StateModification]
         public async Task UpdateStateAsync(Rubric rubric)
         {
             State.Code = rubric.Code;

@@ -96,6 +96,7 @@ namespace NuClear.Broadway.Silo
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog(logger, true))
+                .AddIncomingGrainCallFilter<StateModificationFilter>()
                 .Build();
         }
 

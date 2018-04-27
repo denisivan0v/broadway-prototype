@@ -7,6 +7,7 @@ namespace NuClear.Broadway.Grains
 {
     public class SecondRubricGrain : Grain<SecondRubric>, ISecondRubricGrain
     {
+        [StateModification]
         public async Task AddRubric(long rubricCode)
         {
             if (State.Rubrics != null)
@@ -25,6 +26,7 @@ namespace NuClear.Broadway.Grains
             await WriteStateAsync();
         }
 
+        [StateModification]
         public async Task RemoveRubric(long rubricCode)
         {
             if (State.Rubrics != null)
@@ -37,6 +39,7 @@ namespace NuClear.Broadway.Grains
             }
         }
 
+        [StateModification]
         public async Task UpdateStateAsync(SecondRubric secondRubric)
         {
             State.Code = secondRubric.Code;

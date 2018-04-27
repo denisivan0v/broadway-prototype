@@ -15,6 +15,7 @@ namespace NuClear.Broadway.Grains
             _logger = logger;
         }
 
+        [StateModification]
         public async Task AddSecondRubric(long secondRubricCode)
         {
             if (State.SecondRubrics != null)
@@ -33,6 +34,7 @@ namespace NuClear.Broadway.Grains
             await WriteStateAsync();
         }
 
+        [StateModification]
         public async Task RemoveSecondRubric(long secondRubricCode)
         {
             if (State.SecondRubrics != null)
@@ -45,6 +47,7 @@ namespace NuClear.Broadway.Grains
             }
         }
 
+        [StateModification]
         public async Task UpdateStateAsync(Category category)
         {
             State.Code = category.Code;

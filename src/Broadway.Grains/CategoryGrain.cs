@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Interfaces;
 using Orleans;
@@ -12,6 +13,36 @@ namespace NuClear.Broadway.Grains
         public CategoryGrain(ILogger<CategoryGrain> logger)
         {
             _logger = logger;
+        }
+
+        public async Task AddSecondRubric(long secondRubricCode)
+        {
+            if (State.SecondRubrics != null)
+            {
+                if (State.SecondRubrics.Contains(secondRubricCode))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                State.SecondRubrics = new HashSet<long>();
+            }
+
+            State.SecondRubrics.Add(secondRubricCode);
+            await WriteStateAsync();
+        }
+
+        public async Task RemoveSecondRubric(long secondRubricCode)
+        {
+            if (State.SecondRubrics != null)
+            {
+                if (State.SecondRubrics.Contains(secondRubricCode))
+                {
+                    State.SecondRubrics.Remove(secondRubricCode);
+                    await WriteStateAsync();
+                }
+            }
         }
 
         public async Task UpdateStateAsync(Category category)

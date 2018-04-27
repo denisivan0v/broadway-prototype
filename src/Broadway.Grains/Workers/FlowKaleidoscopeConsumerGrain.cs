@@ -13,7 +13,7 @@ using Orleans.Concurrency;
 
 namespace NuClear.Broadway.Grains.Workers
 {
-    [StatelessWorker(1)]
+    [StatelessWorker(8)]
     public class FlowKaleidoscopeConsumerGrain : Grain, IFlowKaleidoscopeConsumerGrain
     {
         private const int BufferSize = 100;
@@ -140,9 +140,11 @@ namespace NuClear.Broadway.Grains.Workers
                 IsDeleted = (bool) xml.Attribute(nameof(SecondRubric.IsDeleted)),
             };
 
+            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(secondRubric.CategoryCode);
             if (!secondRubric.IsDeleted)
             {
                 secondRubric.CategoryCode = (long) xml.Attribute(nameof(SecondRubric.CategoryCode));
+                await categoryGrain.AddSecondRubric(secondRubric.Code);
                 
                 var localizations = xml.Element(nameof(SecondRubric.Localizations));
                 secondRubric.Localizations = localizations?.Elements()
@@ -150,6 +152,10 @@ namespace NuClear.Broadway.Grains.Workers
                         (string) x.Attribute(nameof(Localization.Lang)),
                         (string) x.Attribute(nameof(Localization.Name))))
                     .ToHashSet();
+            }
+            else
+            {
+                await categoryGrain.RemoveSecondRubric(secondRubric.Code);
             }
             
             var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(secondRubric.Code);
@@ -164,9 +170,12 @@ namespace NuClear.Broadway.Grains.Workers
                 IsDeleted = (bool) xml.Attribute(nameof(Rubric.IsDeleted)),
             };
 
+            var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(rubric.SecondRubricCode);
             if (!rubric.IsDeleted)
             {
                 rubric.SecondRubricCode = (long) xml.Attribute(nameof(Rubric.SecondRubricCode));
+                await secondRubricGrain.AddRubric(rubric.Code);
+                
                 rubric.IsCommercial = (bool) xml.Attribute(nameof(Rubric.IsCommercial));
                 
                 var localizations = xml.Element(nameof(Rubric.Localizations));
@@ -176,10 +185,20 @@ namespace NuClear.Broadway.Grains.Workers
                         (string) x.Attribute(nameof(Localization.Name)),
                         (string) x.Attribute(nameof(Localization.ShortName))))
                     .ToHashSet();
+                rubric.Branches = xml.Elements("Groups")
+                    .Elements()
+                    .Elements(nameof(Rubric.Branches))
+                    .Elements()
+                    .Select(x => (int) x.Attribute(nameof(Rubric.Code)))
+                    .ToHashSet();
+            }
+            else
+            {
+                await secondRubricGrain.RemoveRubric(rubric.Code);
             }
 
-            var secondRubricGrain = GrainFactory.GetGrain<IRubricGrain>(rubric.Code);
-            await secondRubricGrain.UpdateStateAsync(rubric);
+            var rubricGrain = GrainFactory.GetGrain<IRubricGrain>(rubric.Code);
+            await rubricGrain.UpdateStateAsync(rubric);
         }
     }
 }

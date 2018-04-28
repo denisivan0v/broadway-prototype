@@ -1,94 +1,30 @@
 ﻿using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Interfaces;
 using NuClear.Broadway.Interfaces.Workers;
-using NuClear.Broadway.Kafka;
-using Orleans;
 using Orleans.Concurrency;
 
 namespace NuClear.Broadway.Grains.Workers
 {
-    [StatelessWorker(8)]
-    public class FlowKaleidoscopeConsumerGrain : Grain, IFlowKaleidoscopeConsumerGrain
+    [StatelessWorker]
+    public sealed class FlowKaleidoscopeConsumerGrain : FlowConsumerGrain, IFlowKaleidoscopeConsumerGrain
     {
-        private const int BufferSize = 100;
-        private const string ConsumerGroupId = "roads-flow-kaleidoscope-consumer";
+        private const string ConsumerGroupToken = "roads-flow-kaleidoscope-consumer";
+        private const string Topic = "casino_staging_flowKaleidoscope_compacted";
         
         private readonly ILogger<FlowKaleidoscopeConsumerGrain> _logger;
-        private readonly KafkaOptions _kafkaOptions;
-        private readonly BufferBlock<Message<string, string>> _messageProcessingQueue = new BufferBlock<Message<string, string>>();
         
-        private SimpleMessageReceiver _messageReceiver;
-        
-        public FlowKaleidoscopeConsumerGrain(
-            ILogger<FlowKaleidoscopeConsumerGrain> logger,
-            KafkaOptions kafkaOptions)
+        public FlowKaleidoscopeConsumerGrain(ILogger<FlowKaleidoscopeConsumerGrain> logger, ReferenceObjectsClusterKafkaOptions kafkaOptions)
+            : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
         {
             _logger = logger;
-            _kafkaOptions = kafkaOptions;
         }
         
-        public override async Task OnActivateAsync()
-        {
-            await base.OnActivateAsync();
-            
-            _messageReceiver = new SimpleMessageReceiver(
-                _logger,
-                _kafkaOptions,
-                $"{ConsumerGroupId}-{_kafkaOptions.ConsumerGroupToken}",
-                new[] {"casino_staging_flowKaleidoscope_compacted"});
-
-            _messageReceiver.OnMessage += OnMessage;
-        }
-
-        public override Task OnDeactivateAsync()
-        {
-            _messageReceiver.OnMessage -= OnMessage;
-            _messageReceiver.Dispose();
-            
-            return base.OnDeactivateAsync();
-        }
-        
-        public async Task StartExecutingAsync(GrainCancellationToken cancellation)
-        {
-            var waitHandler = new ManualResetEventSlim(false);
-
-            var consumingTask = Task.Run(() =>
-            {
-                while (!cancellation.CancellationToken.IsCancellationRequested)
-                {
-                    if (_messageProcessingQueue.Count >= BufferSize)
-                    {
-                        _logger.LogDebug("Enabling consumer backpressure...");
-                        waitHandler.Reset();
-                        waitHandler.Wait();
-                    }
-
-                    _messageReceiver.Poll();
-                }
-            });
-
-            while (await _messageProcessingQueue.OutputAvailableAsync(cancellation.CancellationToken))
-            {
-                var message = await _messageProcessingQueue.ReceiveAsync();
-                if (_messageProcessingQueue.Count < BufferSize && !waitHandler.IsSet)
-                {
-                    waitHandler.Set();
-                    _logger.LogDebug("Consumer backpressure disabled.");
-                }
-
-                await ProcessMessage(message);
-            }
-        }
-
-        private void OnMessage(object sender, Message<string, string> message) => _messageProcessingQueue.Post(message);
-
-        private async Task ProcessMessage(Message<string, string> message)
+        protected override async Task ProcessMessage(Message<string, string> message)
         {
             var xml = XElement.Parse(message.Value);
             switch (xml.Name.ToString())
@@ -106,8 +42,6 @@ namespace NuClear.Broadway.Grains.Workers
                     _logger.LogInformation("Unknown object type.");
                     break;
             }
-
-            //await _messageReceiver.CommitAsync(message);
         }
 
         private async Task UpdateCategoryAsync(XElement xml)

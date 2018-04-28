@@ -12,7 +12,7 @@ namespace NuClear.Broadway.TaskRunner
         private static readonly Dictionary<string, Type> Registry =
             new Dictionary<string, Type>
             {
-                {"import-firms", typeof(IFirmImportWorkerGrain)},
+                {"import-flow-cardsforerm", typeof(IFlowCardForErmConsumerGrain)},
                 {"import-flow-kaleidoscope", typeof(IFlowKaleidoscopeConsumerGrain)}
             };
 

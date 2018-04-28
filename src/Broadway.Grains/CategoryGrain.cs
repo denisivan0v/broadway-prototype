@@ -39,11 +39,8 @@ namespace NuClear.Broadway.Grains
         {
             if (State.SecondRubrics != null)
             {
-                if (State.SecondRubrics.Contains(secondRubricCode))
-                {
-                    State.SecondRubrics.Remove(secondRubricCode);
-                    await WriteStateAsync();
-                }
+                State.SecondRubrics.Remove(secondRubricCode);
+                await WriteStateAsync();
             }
         }
 

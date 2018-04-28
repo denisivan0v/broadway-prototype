@@ -1,11 +1,36 @@
 ﻿namespace NuClear.Broadway.Kafka
 {
-    public sealed class KafkaOptions
+    public class KafkaOptions
     {
         public string BrokerEndpoints { get; set; }
         public string ConsumerGroupToken { get; set; }
         public ConsumerOptions Consumer { get; set; }
         public ProducerOptions Producer { get; set; }
+
+        public TOptions MergeWith<TOptions>(TOptions options) where TOptions : KafkaOptions
+        {
+            if (!string.IsNullOrEmpty(BrokerEndpoints))
+            {
+                options.BrokerEndpoints = BrokerEndpoints;
+            }
+            
+            if (!string.IsNullOrEmpty(ConsumerGroupToken))
+            {
+                options.ConsumerGroupToken = ConsumerGroupToken;
+            }
+            
+            if (Consumer != null)
+            {
+                options.Consumer = Consumer;
+            }
+            
+            if (Producer != null)
+            {
+                options.Producer = Producer;
+            }
+
+            return options;
+        }
 
         public sealed class ConsumerOptions
         {

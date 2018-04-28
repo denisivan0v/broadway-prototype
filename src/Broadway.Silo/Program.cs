@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Grains;
+using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Kafka;
 using Orleans;
 using Orleans.Configuration;
@@ -74,7 +75,8 @@ namespace NuClear.Broadway.Silo
                     connectionString = context.Configuration.GetConnectionString("Orleans");
                     
                     var kafkaOptions = context.Configuration.GetSection("Kafka").Get<KafkaOptions>();
-                    services.AddSingleton(kafkaOptions);
+                    var referenceObjectsClusterKafkaOptions = context.Configuration.GetSection("ReferenceObjectsKafkaCluster").Get<ReferenceObjectsClusterKafkaOptions>();
+                    services.AddSingleton(kafkaOptions.MergeWith(referenceObjectsClusterKafkaOptions));
                 })
                 .Configure<ClusterOptions>(options =>
                 {
@@ -96,7 +98,7 @@ namespace NuClear.Broadway.Silo
                 .AddLogStorageBasedLogConsistencyProviderAsDefault()
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog(logger, true))
-                .AddIncomingGrainCallFilter<StateModificationFilter>()
+                .AddIncomingGrainCallFilter<StateModificationCallFilter>()
                 .Build();
         }
 

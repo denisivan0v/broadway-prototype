@@ -13,7 +13,7 @@
         
         public struct CommandTypes
         {
-            public const string Firms = "firms";
+            public const string FlowCardsForERM = "flow-cardsforerm";
             public const string FlowKaleidoscope = "flow-kaleidoscope";
         }
 

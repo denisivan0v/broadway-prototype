@@ -66,10 +66,10 @@ namespace NuClear.Broadway.TaskRunner
                     config.Description = "Run import worker. See available arguments for details.";
                     config.HelpOption(CommandLine.HelpOptionTemplate);
                     config.Command(
-                        CommandLine.CommandTypes.Firms,
+                        CommandLine.CommandTypes.FlowCardsForERM,
                         commandConfig =>
                         {
-                            commandConfig.Description = "Import firms.";
+                            commandConfig.Description = "Import objects from FlowCardsForERM flow.";
                             commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
                             commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
                         });
@@ -77,7 +77,7 @@ namespace NuClear.Broadway.TaskRunner
                         CommandLine.CommandTypes.FlowKaleidoscope,
                         commandConfig =>
                         {
-                            commandConfig.Description = "Import objects from Kaleidoscope flow.";
+                            commandConfig.Description = "Import objects from FlowKaleidoscope flow.";
                             commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
                             commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
                         });

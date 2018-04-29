@@ -9,8 +9,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>NuClear.Broadway.TaskRunner</RootNamespace>
     <RuntimeIdentifiers>win10-x64;osx.10.12-x64</RuntimeIdentifiers>
+    <CodeAnalysisRuleSet>..\..\NuClear.CodeStyle.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
-    <AssemblyName>Broadway.TaskRunner</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <None Update="appsettings.development.json">
@@ -25,6 +25,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.1" />
@@ -42,5 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Broadway.Interfaces\Broadway.Interfaces.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\stylecop.json" />
   </ItemGroup>
 </Project>

@@ -31,15 +31,19 @@ namespace NuClear.Broadway.Grains.Workers
             {
                 case nameof(Category):
                     await UpdateCategoryAsync(xml);
+
                     break;
                 case nameof(SecondRubric):
                     await UpdateSecondRubricAsync(xml);
+
                     break;
                 case nameof(Rubric):
                     await UpdateRubricAsync(xml);
+
                     break;
                 default:
                     _logger.LogInformation("Unknown object type.");
+
                     break;
             }
         }
@@ -47,19 +51,21 @@ namespace NuClear.Broadway.Grains.Workers
         private async Task UpdateCategoryAsync(XElement xml)
         {
             var category = new Category
-            {
-                Code = (long) xml.Attribute(nameof(Category.Code)),
-                IsDeleted = (bool) xml.Attribute(nameof(Category.IsDeleted)),
-            };
+                {
+                    Code = (long)xml.Attribute(nameof(Category.Code)),
+                    IsDeleted = (bool)xml.Attribute(nameof(Category.IsDeleted)),
+                };
 
             if (!category.IsDeleted)
             {
                 var localizations = xml.Element(nameof(Category.Localizations));
-                category.Localizations = localizations?.Elements()
-                    .Select(x => new Localization(
-                        (string) x.Attribute(nameof(Localization.Lang)),
-                        (string) x.Attribute(nameof(Localization.Name))))
-                    .ToHashSet();
+                category.Localizations =
+                    localizations?.Elements()
+                                 .Select(
+                                     x => new Localization(
+                                         (string)x.Attribute(nameof(Localization.Lang)),
+                                         (string)x.Attribute(nameof(Localization.Name))))
+                                 .ToHashSet();
             }
 
             var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(category.Code);
@@ -69,23 +75,25 @@ namespace NuClear.Broadway.Grains.Workers
         private async Task UpdateSecondRubricAsync(XElement xml)
         {
             var secondRubric = new SecondRubric
-            {
-                Code = (long) xml.Attribute(nameof(SecondRubric.Code)),
-                IsDeleted = (bool) xml.Attribute(nameof(SecondRubric.IsDeleted)),
-            };
+                {
+                    Code = (long)xml.Attribute(nameof(SecondRubric.Code)),
+                    IsDeleted = (bool)xml.Attribute(nameof(SecondRubric.IsDeleted))
+                };
 
             var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(secondRubric.CategoryCode);
             if (!secondRubric.IsDeleted)
             {
-                secondRubric.CategoryCode = (long) xml.Attribute(nameof(SecondRubric.CategoryCode));
+                secondRubric.CategoryCode = (long)xml.Attribute(nameof(SecondRubric.CategoryCode));
                 await categoryGrain.AddSecondRubric(secondRubric.Code);
 
                 var localizations = xml.Element(nameof(SecondRubric.Localizations));
-                secondRubric.Localizations = localizations?.Elements()
-                    .Select(x => new Localization(
-                        (string) x.Attribute(nameof(Localization.Lang)),
-                        (string) x.Attribute(nameof(Localization.Name))))
-                    .ToHashSet();
+                secondRubric.Localizations =
+                    localizations?.Elements()
+                                 .Select(
+                                     x => new Localization(
+                                         (string)x.Attribute(nameof(Localization.Lang)),
+                                         (string)x.Attribute(nameof(Localization.Name))))
+                                 .ToHashSet();
             }
             else
             {
@@ -99,32 +107,35 @@ namespace NuClear.Broadway.Grains.Workers
         private async Task UpdateRubricAsync(XElement xml)
         {
             var rubric = new Rubric
-            {
-                Code = (long) xml.Attribute(nameof(Rubric.Code)),
-                IsDeleted = (bool) xml.Attribute(nameof(Rubric.IsDeleted)),
-            };
+                {
+                    Code = (long)xml.Attribute(nameof(Rubric.Code)),
+                    IsDeleted = (bool)xml.Attribute(nameof(Rubric.IsDeleted)),
+                };
 
             var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(rubric.SecondRubricCode);
             if (!rubric.IsDeleted)
             {
-                rubric.SecondRubricCode = (long) xml.Attribute(nameof(Rubric.SecondRubricCode));
+                rubric.SecondRubricCode = (long)xml.Attribute(nameof(Rubric.SecondRubricCode));
                 await secondRubricGrain.AddRubric(rubric.Code);
 
-                rubric.IsCommercial = (bool) xml.Attribute(nameof(Rubric.IsCommercial));
+                rubric.IsCommercial = (bool)xml.Attribute(nameof(Rubric.IsCommercial));
 
                 var localizations = xml.Element(nameof(Rubric.Localizations));
-                rubric.Localizations = localizations?.Elements()
-                    .Select(x => new Localization(
-                        (string) x.Attribute(nameof(Localization.Lang)),
-                        (string) x.Attribute(nameof(Localization.Name)),
-                        (string) x.Attribute(nameof(Localization.ShortName))))
-                    .ToHashSet();
+                rubric.Localizations =
+                    localizations?.Elements()
+                                 .Select(
+                                     x => new Localization(
+                                         (string)x.Attribute(nameof(Localization.Lang)),
+                                         (string)x.Attribute(nameof(Localization.Name)),
+                                         (string)x.Attribute(nameof(Localization.ShortName))))
+                                 .ToHashSet();
+
                 rubric.Branches = xml.Elements("Groups")
-                    .Elements()
-                    .Elements(nameof(Rubric.Branches))
-                    .Elements()
-                    .Select(x => (int) x.Attribute(nameof(Rubric.Code)))
-                    .ToHashSet();
+                                     .Elements()
+                                     .Elements(nameof(Rubric.Branches))
+                                     .Elements()
+                                     .Select(x => (int)x.Attribute(nameof(Rubric.Code)))
+                                     .ToHashSet();
             }
             else
             {

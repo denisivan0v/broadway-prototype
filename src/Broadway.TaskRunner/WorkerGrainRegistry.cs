@@ -11,10 +11,10 @@ namespace NuClear.Broadway.TaskRunner
     {
         private static readonly Dictionary<string, Type> Registry =
             new Dictionary<string, Type>
-            {
-                {"import-flow-cardsforerm", typeof(IFlowCardForErmConsumerGrain)},
-                {"import-flow-kaleidoscope", typeof(IFlowKaleidoscopeConsumerGrain)}
-            };
+                {
+                    { "import-flow-cardsforerm", typeof(IFlowCardForErmConsumerGrain) },
+                    { "import-flow-kaleidoscope", typeof(IFlowKaleidoscopeConsumerGrain) }
+                };
 
         private static readonly MethodInfo GetGrainMethodInfo =
             typeof(WorkerGrainRegistry).GetMethod(nameof(GetGrain), BindingFlags.Instance | BindingFlags.NonPublic);
@@ -36,16 +36,18 @@ namespace NuClear.Broadway.TaskRunner
                 var getGrainMethod = GetGrainMethodInfo.MakeGenericMethod(workerType);
                 try
                 {
-                    return (IWorkerGrain) getGrainMethod.Invoke(this, new object[] {key});
+                    return (IWorkerGrain)getGrainMethod.Invoke(this, new object[] { key });
                 }
                 catch (Exception ex)
                 {
                     _logger.LogCritical(ex, "Unexpected error occured while getting worker grain of type {workerType}.", workerType.Name);
+
                     throw;
                 }
             }
 
             _logger.LogCritical("Worker for task {taskId} of type {taskType} has not beed registered.", taskId, taskType);
+
             throw new WorkerGrainNotFoundExeption(taskId, taskType);
         }
 

@@ -31,7 +31,7 @@ namespace NuClear.Broadway.Grains
         public async Task ChangeNameAsync(string name, long userId)
         {
             var @event = JsonConvert.SerializeObject(
-                new CampaignNameChangedEvent {Name = name, ChangedAt = DateTime.UtcNow, ChangedBy = userId},
+                new CampaignNameChangedEvent { Name = name, ChangedAt = DateTime.UtcNow, ChangedBy = userId },
                 _serializerSettings);
 
             RaiseEvent(@event);
@@ -41,7 +41,7 @@ namespace NuClear.Broadway.Grains
         public async Task Start(long userId)
         {
             var @event = JsonConvert.SerializeObject(
-                new CampaignStartedEvent {StartedAt = DateTime.UtcNow, UserId = userId},
+                new CampaignStartedEvent { StartedAt = DateTime.UtcNow, UserId = userId },
                 _serializerSettings);
 
             RaiseEvent(@event);
@@ -51,7 +51,7 @@ namespace NuClear.Broadway.Grains
         public async Task Pause(long userId)
         {
             var @event = JsonConvert.SerializeObject(
-                new CampaignPausedEvent {PausedAt = DateTime.UtcNow, UserId = userId},
+                new CampaignPausedEvent { PausedAt = DateTime.UtcNow, UserId = userId },
                 _serializerSettings);
 
             RaiseEvent(@event);

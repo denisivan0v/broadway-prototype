@@ -39,7 +39,7 @@ namespace NuClear.Broadway.Grains.Workers
                 _logger,
                 _kafkaOptions,
                 $"{_consumerGroupToken}-{_kafkaOptions.ConsumerGroupToken}",
-                new[] {_topic});
+                new[] { _topic });
 
             _messageReceiver.OnMessage += OnMessage;
         }

@@ -29,14 +29,14 @@ namespace NuClear.Broadway.TaskRunner
                 .Build();
 
             var serilogLogger = CreateLogger(configuration);
-            
+
             var services = new ServiceCollection()
                 .AddLogging(x => x.AddSerilog(serilogLogger, true));
 
             var serviceProvider = services.BuildServiceProvider();
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Program>();
-            
+
             var cts = new GrainCancellationTokenSource();
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
@@ -46,7 +46,7 @@ namespace NuClear.Broadway.TaskRunner
 
                 eventArgs.Cancel = true;
             };
-            
+
             var app = new CommandLineApplication { Name = "Broadway.Worker" };
             app.HelpOption(CommandLine.HelpOptionTemplate);
             app.OnExecute(
@@ -56,7 +56,7 @@ namespace NuClear.Broadway.TaskRunner
                     app.ShowHelp();
                     return 0;
                 });
-            
+
             var clusterClient = CreateClusterClient(configuration, logger, serilogLogger);
 
             app.Command(
@@ -87,7 +87,7 @@ namespace NuClear.Broadway.TaskRunner
                         return 0;
                     });
                 });
-            
+
             var exitCode = 0;
             try
             {
@@ -115,7 +115,7 @@ namespace NuClear.Broadway.TaskRunner
 
             Environment.Exit(exitCode);
         }
-        
+
         private static Serilog.ILogger CreateLogger(IConfiguration configuration)
         {
             var loggerConfiguration = new LoggerConfiguration().ReadFrom.Configuration(configuration);
@@ -123,10 +123,10 @@ namespace NuClear.Broadway.TaskRunner
 
             return Log.Logger;
         }
-        
+
         private static IClusterClient CreateClusterClient(IConfiguration configuration, ILogger logger, Serilog.ILogger serilogLogger)
         {
-            const string invariant = "Npgsql";
+            const string Invariant = "Npgsql";
 
             var client = new ClientBuilder()
                 .Configure<ClusterOptions>(options =>
@@ -136,20 +136,20 @@ namespace NuClear.Broadway.TaskRunner
                 })
                 .UseAdoNetClustering(options =>
                 {
-                    options.Invariant = invariant;
+                    options.Invariant = Invariant;
                     options.ConnectionString = configuration.GetConnectionString("Orleans");
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddSerilog(serilogLogger, true))
                 .Build();
-            
+
             StartClientWithRetries(logger, client).Wait();
-            
+
             return client;
         }
-        
+
         private static async Task StartClientWithRetries(
-            ILogger logger, 
+            ILogger logger,
             IClusterClient client)
         {
             var attempt = 0;
@@ -161,11 +161,11 @@ namespace NuClear.Broadway.TaskRunner
                     {
                         attempt++;
                         logger.LogWarning("Attempt {attempt} failed to initialize the Orleans client.", attempt);
-                        
+
                         await Task.Delay(TimeSpan.FromSeconds(2));
                         return true;
                     });
-                    
+
                     logger.LogInformation("Client successfully connect to silo host.");
                     break;
                 }
@@ -191,9 +191,9 @@ namespace NuClear.Broadway.TaskRunner
                 workerGrain.GetGrainIdentity());
 
             workerGrain.InvokeOneWay(x => x.StartExecutingAsync(cts.Token));
-            
+
             logger.LogInformation(
-                "Worker of type {workerType} with identity {workerIndentity} completed successfully.", 
+                "Worker of type {workerType} with identity {workerIndentity} completed successfully.",
                 workerGrain.GetType().Name,
                 workerGrain.GetGrainIdentity());
 

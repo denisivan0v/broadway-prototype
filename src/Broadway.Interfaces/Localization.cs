@@ -10,7 +10,7 @@ namespace NuClear.Broadway.Interfaces
             Name = name;
             ShortName = shortName;
         }
-        
+
         public string Lang { get; }
         public string Name { get; }
         public string ShortName { get; }
@@ -20,7 +20,7 @@ namespace NuClear.Broadway.Interfaces
             return (Lang?.Equals(other.Lang, StringComparison.InvariantCultureIgnoreCase) ?? other.Lang == null) &&
                    (Name?.Equals(other.Name, StringComparison.InvariantCultureIgnoreCase) ?? other.Name == null);
         }
-        
+
         public static bool operator ==(Localization left, Localization right)
         {
             return left.Equals(right);

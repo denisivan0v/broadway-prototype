@@ -10,7 +10,7 @@
         {
             public const string Import = "import";
         }
-        
+
         public struct CommandTypes
         {
             public const string FlowCardsForERM = "flow-cardsforerm";

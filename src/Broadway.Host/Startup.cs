@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -42,9 +41,9 @@ namespace NuClear.Broadway.Host
                 .AddAuthorization()
                 .AddCors()
                 .AddJsonFormatters();
-            
+
             services.AddApiVersioning(options => options.ReportApiVersions = true);
-            
+
             services.AddSwaggerGen(
                 options =>
                 {
@@ -71,7 +70,7 @@ namespace NuClear.Broadway.Host
 
                     options.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{nameof(Broadway)}.{nameof(Host)}.xml"));
                 });
-            
+
             services.AddSingleton(CreateClusterClient);
         }
 
@@ -100,11 +99,11 @@ namespace NuClear.Broadway.Host
                             await context.Response.WriteAsync(new JObject(new JProperty("error", error)).ToString());
                         }
                 });
-            
+
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("Location"));
 
             app.UseMvc();
-            
+
             if (!env.IsProduction())
             {
                 app.UseSwagger();
@@ -124,10 +123,10 @@ namespace NuClear.Broadway.Host
                     });
             }
         }
-        
+
         private IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
         {
-            const string invariant = "Npgsql";
+            const string Invariant = "Npgsql";
 
             var client = new ClientBuilder()
                 .Configure<ClusterOptions>(options =>
@@ -137,7 +136,7 @@ namespace NuClear.Broadway.Host
                 })
                 .UseAdoNetClustering(options =>
                 {
-                    options.Invariant = invariant;
+                    options.Invariant = Invariant;
                     options.ConnectionString = _configuration.GetConnectionString("Orleans");
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
@@ -145,15 +144,15 @@ namespace NuClear.Broadway.Host
                 .Build();
 
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger<Startup>(); 
+            var logger = loggerFactory.CreateLogger<Startup>();
 
             StartClientWithRetries(logger, client).Wait();
-            
+
             return client;
         }
 
         private static async Task StartClientWithRetries(
-            ILogger logger, 
+            ILogger logger,
             IClusterClient client,
             int initializeAttemptsBeforeFailing = 5)
         {
@@ -174,7 +173,7 @@ namespace NuClear.Broadway.Host
                         "Attempt {attempt} of {initializeAttemptsBeforeFailing} failed to initialize the Orleans client.",
                         attempt,
                         initializeAttemptsBeforeFailing);
-                    
+
                     if (attempt > initializeAttemptsBeforeFailing)
                     {
                         throw;

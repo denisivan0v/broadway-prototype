@@ -15,14 +15,14 @@ namespace NuClear.Broadway.Interfaces
         public int SortingPosition { get; set; }
         public FirmAddress Address { get; set; }
         public ISet<Rubric> Rubrics { get; set; }
-        
+
         public sealed class FirmAddress
         {
             public string Text { get; set; }
             public long? TerritoryCode { get; set; }
             public int? BuildingPurposeCode { get; set; }
         }
-        
+
         public sealed class Rubric
         {
             public long Code { get; set; }

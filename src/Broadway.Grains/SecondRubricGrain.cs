@@ -21,7 +21,7 @@ namespace NuClear.Broadway.Grains
             {
                 State.Rubrics = new HashSet<long>();
             }
-            
+
             State.Rubrics.Add(rubricCode);
             await WriteStateAsync();
         }
@@ -47,7 +47,7 @@ namespace NuClear.Broadway.Grains
                 State.CategoryCode = secondRubric.CategoryCode;
                 State.Localizations = secondRubric.Localizations;
             }
-           
+
             await WriteStateAsync();
         }
     }

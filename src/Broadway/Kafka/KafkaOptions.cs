@@ -13,17 +13,17 @@
             {
                 options.BrokerEndpoints = BrokerEndpoints;
             }
-            
+
             if (!string.IsNullOrEmpty(ConsumerGroupToken))
             {
                 options.ConsumerGroupToken = ConsumerGroupToken;
             }
-            
+
             if (Consumer != null)
             {
                 options.Consumer = Consumer;
             }
-            
+
             if (Producer != null)
             {
                 options.Producer = Producer;

@@ -21,7 +21,7 @@ namespace NuClear.Broadway.Silo
     {
         private static readonly object SyncLock = new object();
         private static readonly ManualResetEvent SiloStopped = new ManualResetEvent(false);
-        
+
         private static bool _siloStopping;
 
         private static void Main(string[] args)
@@ -29,14 +29,14 @@ namespace NuClear.Broadway.Silo
             var siloHost = CreateSilo();
 
             var logger = siloHost.Services.GetRequiredService<ILogger<Program>>();
-            
+
             SetupApplicationShutdown(siloHost, logger);
 
             StartSilo(siloHost, logger).GetAwaiter().GetResult();
 
             SiloStopped.WaitOne();
         }
-        
+
         private static void SetupApplicationShutdown(ISiloHost siloHost, ILogger logger)
         {
             Console.CancelKeyPress += (s, a) =>
@@ -55,7 +55,7 @@ namespace NuClear.Broadway.Silo
 
         private static ISiloHost CreateSilo()
         {
-            const string invariant = "Npgsql";
+            const string Invariant = "Npgsql";
 
             var env = Environment.GetEnvironmentVariable("ROADS_ENVIRONMENT") ?? "Production";
             var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -67,13 +67,13 @@ namespace NuClear.Broadway.Silo
                 .ConfigureAppConfiguration(
                     builder => builder.SetBasePath(basePath)
                         .AddJsonFile("appsettings.json")
-                        .AddJsonFile($"appsettings.{env?.ToLower()}.json")
+                        .AddJsonFile($"appsettings.{env.ToLower()}.json")
                         .AddEnvironmentVariables("ROADS_"))
                 .ConfigureServices((context, services) =>
                 {
                     logger = CreateSerilogLogger(context.Configuration);
                     connectionString = context.Configuration.GetConnectionString("Orleans");
-                    
+
                     var kafkaOptions = context.Configuration.GetSection("Kafka").Get<KafkaOptions>();
                     var referenceObjectsClusterKafkaOptions = context.Configuration.GetSection("ReferenceObjectsKafkaCluster").Get<ReferenceObjectsClusterKafkaOptions>();
                     services.AddSingleton(kafkaOptions.MergeWith(referenceObjectsClusterKafkaOptions));
@@ -86,12 +86,12 @@ namespace NuClear.Broadway.Silo
                 .ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
                 .UseAdoNetClustering(options =>
                 {
-                    options.Invariant = invariant;
+                    options.Invariant = Invariant;
                     options.ConnectionString = connectionString;
                 })
                 .AddAdoNetGrainStorageAsDefault(options =>
                 {
-                    options.Invariant = invariant;
+                    options.Invariant = Invariant;
                     options.ConnectionString = connectionString;
                     options.UseJsonFormat = true;
                 })

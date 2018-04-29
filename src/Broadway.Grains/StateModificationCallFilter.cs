@@ -13,7 +13,7 @@ namespace NuClear.Broadway.Grains
         {
             _logger = logger;
         }
-        
+
         public async Task Invoke(IIncomingGrainCallContext context)
         {
             await context.Invoke();

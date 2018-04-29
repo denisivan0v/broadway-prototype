@@ -18,7 +18,7 @@ namespace NuClear.Broadway.Kafka
                 CreateConsumerConfig(kafkaOptions, groupId),
                 new StringDeserializer(Encoding.UTF8),
                 new StringDeserializer(Encoding.UTF8));
-            
+
             Consumer.OnLog += OnLog;
             Consumer.OnError += OnError;
             Consumer.OnStatistics += OnStatistics;

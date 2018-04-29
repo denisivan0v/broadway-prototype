@@ -23,9 +23,9 @@ namespace NuClear.Broadway.Grains
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
             };
         }
-        
+
         public Task<Campaign> GetStateAsync() => Task.FromResult(State);
-        
+
         public async Task<IReadOnlyList<object>> GetConfirmedEvents() => await RetrieveConfirmedEvents(0, Version);
 
         public async Task ChangeNameAsync(string name, long userId)
@@ -33,7 +33,7 @@ namespace NuClear.Broadway.Grains
             var @event = JsonConvert.SerializeObject(
                 new CampaignNameChangedEvent {Name = name, ChangedAt = DateTime.UtcNow, ChangedBy = userId},
                 _serializerSettings);
-            
+
             RaiseEvent(@event);
             await ConfirmEvents();
         }
@@ -43,7 +43,7 @@ namespace NuClear.Broadway.Grains
             var @event = JsonConvert.SerializeObject(
                 new CampaignStartedEvent {StartedAt = DateTime.UtcNow, UserId = userId},
                 _serializerSettings);
-            
+
             RaiseEvent(@event);
             await ConfirmEvents();
         }
@@ -53,11 +53,11 @@ namespace NuClear.Broadway.Grains
             var @event = JsonConvert.SerializeObject(
                 new CampaignPausedEvent {PausedAt = DateTime.UtcNow, UserId = userId},
                 _serializerSettings);
-            
+
             RaiseEvent(@event);
             await ConfirmEvents();
         }
-        
+
         protected override void TransitionState(Campaign state, string @event)
         {
             var deserializedEvent = JsonConvert.DeserializeObject<object>(@event, _serializerSettings);
@@ -78,7 +78,7 @@ namespace NuClear.Broadway.Grains
                     _logger.LogWarning("Got an {eventType} event, but the state wasn't updated. Current version is {version}.", @event.GetType(), Version);
                     return;
             }
-            
+
             _logger.LogInformation("State updated based on {eventType} event.", @event.GetType());
          }
     }

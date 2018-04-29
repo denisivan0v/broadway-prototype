@@ -22,7 +22,7 @@ namespace NuClear.Broadway.Grains
             State.SortingPosition = cardForErm.SortingPosition;
             State.Address = cardForErm.Address;
             State.Rubrics = cardForErm.Rubrics;
-            
+
             await WriteStateAsync();
         }
     }

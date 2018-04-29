@@ -17,10 +17,12 @@ namespace NuClear.Broadway.Grains.Workers
         private readonly KafkaOptions _kafkaOptions;
         private readonly string _consumerGroupToken;
         private readonly string _topic;
-        private readonly BufferBlock<Message<string, string>> _messageProcessingQueue = new BufferBlock<Message<string, string>>();
-        
+
+        private readonly BufferBlock<Message<string, string>> _messageProcessingQueue =
+            new BufferBlock<Message<string, string>>();
+
         private SimpleMessageReceiver _messageReceiver;
-        
+
         protected FlowConsumerGrain(ILogger logger, KafkaOptions kafkaOptions, string consumerGroupToken, string topic)
         {
             _logger = logger;
@@ -46,7 +48,7 @@ namespace NuClear.Broadway.Grains.Workers
         {
             _messageReceiver.OnMessage -= OnMessage;
             _messageReceiver.Dispose();
-            
+
             return base.OnDeactivateAsync();
         }
 
@@ -79,12 +81,13 @@ namespace NuClear.Broadway.Grains.Workers
                 }
 
                 await ProcessMessage(message);
+
                 //await _messageReceiver.CommitAsync(message);
             }
         }
 
         protected abstract Task ProcessMessage(Message<string, string> message);
-        
+
         private void OnMessage(object sender, Message<string, string> message) => _messageProcessingQueue.Post(message);
     }
 }

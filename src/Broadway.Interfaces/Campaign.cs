@@ -1,5 +1,4 @@
 ﻿using System;
-using NuClear.Broadway.Interfaces.Events;
 
 namespace NuClear.Broadway.Interfaces
 {

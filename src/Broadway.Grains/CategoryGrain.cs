@@ -49,12 +49,12 @@ namespace NuClear.Broadway.Grains
         {
             State.Code = category.Code;
             State.IsDeleted = category.IsDeleted;
-            
+
             if (!category.IsDeleted)
             {
                 State.Localizations = category.Localizations;
             }
-            
+
             await WriteStateAsync();
         }
     }

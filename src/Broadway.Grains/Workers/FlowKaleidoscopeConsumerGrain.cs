@@ -15,15 +15,15 @@ namespace NuClear.Broadway.Grains.Workers
     {
         private const string ConsumerGroupToken = "roads-flow-kaleidoscope-consumer";
         private const string Topic = "casino_staging_flowKaleidoscope_compacted";
-        
+
         private readonly ILogger<FlowKaleidoscopeConsumerGrain> _logger;
-        
+
         public FlowKaleidoscopeConsumerGrain(ILogger<FlowKaleidoscopeConsumerGrain> logger, ReferenceObjectsClusterKafkaOptions kafkaOptions)
             : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
         {
             _logger = logger;
         }
-        
+
         protected override async Task ProcessMessage(Message<string, string> message)
         {
             var xml = XElement.Parse(message.Value);
@@ -65,7 +65,7 @@ namespace NuClear.Broadway.Grains.Workers
             var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(category.Code);
             await categoryGrain.UpdateStateAsync(category);
         }
-        
+
         private async Task UpdateSecondRubricAsync(XElement xml)
         {
             var secondRubric = new SecondRubric
@@ -79,7 +79,7 @@ namespace NuClear.Broadway.Grains.Workers
             {
                 secondRubric.CategoryCode = (long) xml.Attribute(nameof(SecondRubric.CategoryCode));
                 await categoryGrain.AddSecondRubric(secondRubric.Code);
-                
+
                 var localizations = xml.Element(nameof(SecondRubric.Localizations));
                 secondRubric.Localizations = localizations?.Elements()
                     .Select(x => new Localization(
@@ -91,11 +91,11 @@ namespace NuClear.Broadway.Grains.Workers
             {
                 await categoryGrain.RemoveSecondRubric(secondRubric.Code);
             }
-            
+
             var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(secondRubric.Code);
             await secondRubricGrain.UpdateStateAsync(secondRubric);
         }
-        
+
         private async Task UpdateRubricAsync(XElement xml)
         {
             var rubric = new Rubric
@@ -109,9 +109,9 @@ namespace NuClear.Broadway.Grains.Workers
             {
                 rubric.SecondRubricCode = (long) xml.Attribute(nameof(Rubric.SecondRubricCode));
                 await secondRubricGrain.AddRubric(rubric.Code);
-                
+
                 rubric.IsCommercial = (bool) xml.Attribute(nameof(Rubric.IsCommercial));
-                
+
                 var localizations = xml.Element(nameof(Rubric.Localizations));
                 rubric.Localizations = localizations?.Elements()
                     .Select(x => new Localization(

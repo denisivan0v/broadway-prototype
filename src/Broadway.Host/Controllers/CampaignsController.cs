@@ -16,14 +16,14 @@ namespace NuClear.Broadway.Host.Controllers
         {
             _clusterClient = clusterClient;
         }
-        
+
         [HttpGet("{id}")]
         public async Task<JsonResult> Get(long id)
         {
             var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
             return Json(await campaignGrain.GetStateAsync());
         }
-        
+
         [HttpGet("{id}/events")]
         public async Task<JsonResult> GetEvents(long id)
         {

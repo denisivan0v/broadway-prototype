@@ -11,7 +11,7 @@ namespace NuClear.Broadway.Kafka
     public sealed class MessageReceiver : ConsumerWrapper
     {
         private readonly IEnumerable<string> _topics;
-        
+
         private bool _subscribed;
 
         public MessageReceiver(ILogger logger, KafkaOptions kafkaOptions, string groupId, IEnumerable<string> topics)
@@ -19,7 +19,7 @@ namespace NuClear.Broadway.Kafka
         {
             _topics = topics;
         }
-        
+
         public (IObservable<KafkaMessage>, Action) Subscribe(CancellationToken cancellationToken)
         {
             if (_subscribed)
@@ -40,9 +40,9 @@ namespace NuClear.Broadway.Kafka
                                                   _subscribed = false;
                                               })
                                       .Select(x => new KafkaMessage(
-                                                      x.EventArgs.Key, 
-                                                      x.EventArgs.Value, 
-                                                      x.EventArgs.TopicPartitionOffset, 
+                                                      x.EventArgs.Key,
+                                                      x.EventArgs.Value,
+                                                      x.EventArgs.TopicPartitionOffset,
                                                       x.EventArgs.Timestamp));
             _subscribed = true;
 

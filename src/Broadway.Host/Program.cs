@@ -17,7 +17,7 @@ namespace NuClear.Broadway.Host
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     config.Sources.Clear();
-                    
+
                     var env = hostingContext.HostingEnvironment;
                     config.SetBasePath(env.ContentRootPath)
                         .AddJsonFile("appsettings.json")

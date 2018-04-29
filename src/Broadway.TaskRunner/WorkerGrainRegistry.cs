@@ -18,7 +18,7 @@ namespace NuClear.Broadway.TaskRunner
 
         private static readonly MethodInfo GetGrainMethodInfo =
             typeof(WorkerGrainRegistry).GetMethod(nameof(GetGrain), BindingFlags.Instance | BindingFlags.NonPublic);
-        
+
         private readonly ILogger _logger;
         private readonly IClusterClient _clusterClient;
 
@@ -44,7 +44,7 @@ namespace NuClear.Broadway.TaskRunner
                     throw;
                 }
             }
-            
+
             _logger.LogCritical("Worker for task {taskId} of type {taskType} has not beed registered.", taskId, taskType);
             throw new WorkerGrainNotFoundExeption(taskId, taskType);
         }

@@ -10,9 +10,12 @@ using NuClear.Broadway.Grains;
 using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Kafka;
 using Orleans;
+using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Serilog;
+using Serilog.Extensions.Logging;
+
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace NuClear.Broadway.Silo
@@ -62,44 +65,58 @@ namespace NuClear.Broadway.Silo
 
             Serilog.ILogger logger = null;
             string connectionString = null;
-            return new SiloHostBuilder()
-                .UseEnvironment(env)
-                .ConfigureAppConfiguration(
-                    builder => builder.SetBasePath(basePath)
-                        .AddJsonFile("appsettings.json")
-                        .AddJsonFile($"appsettings.{env.ToLower()}.json")
-                        .AddEnvironmentVariables("ROADS_"))
-                .ConfigureServices((context, services) =>
-                {
-                    logger = CreateSerilogLogger(context.Configuration);
-                    connectionString = context.Configuration.GetConnectionString("Orleans");
 
-                    var kafkaOptions = context.Configuration.GetSection("Kafka").Get<KafkaOptions>();
-                    var referenceObjectsClusterKafkaOptions = context.Configuration.GetSection("ReferenceObjectsKafkaCluster").Get<ReferenceObjectsClusterKafkaOptions>();
-                    services.AddSingleton(kafkaOptions.MergeWith(referenceObjectsClusterKafkaOptions));
-                })
-                .Configure<ClusterOptions>(options =>
-                {
-                    options.ClusterId = "broadway-prototype";
-                    options.ServiceId = "broadway";
-                })
-                .ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
-                .UseAdoNetClustering(options =>
-                {
-                    options.Invariant = Invariant;
-                    options.ConnectionString = connectionString;
-                })
-                .AddAdoNetGrainStorageAsDefault(options =>
-                {
-                    options.Invariant = Invariant;
-                    options.ConnectionString = connectionString;
-                    options.UseJsonFormat = true;
-                })
-                .AddLogStorageBasedLogConsistencyProviderAsDefault()
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddSerilog(logger, true))
-                .AddIncomingGrainCallFilter<StateModificationCallFilter>()
-                .Build();
+            return new SiloHostBuilder()
+                   .UseEnvironment(env)
+                   .ConfigureAppConfiguration(
+                       builder => builder.SetBasePath(basePath)
+                                         .AddJsonFile("appsettings.json")
+                                         .AddJsonFile($"appsettings.{env.ToLower()}.json")
+                                         .AddEnvironmentVariables("ROADS_"))
+                   .ConfigureServices(
+                       (context, services) =>
+                           {
+                               logger = CreateSerilogLogger(context.Configuration);
+                               connectionString = context.Configuration.GetConnectionString("Orleans");
+
+                               var kafkaOptions = context.Configuration.GetSection("Kafka").Get<KafkaOptions>();
+                               var referenceObjectsClusterKafkaOptions =
+                                   context.Configuration.GetSection("ReferenceObjectsKafkaCluster").Get<ReferenceObjectsClusterKafkaOptions>();
+
+                               services.AddSingleton(kafkaOptions.MergeWith(referenceObjectsClusterKafkaOptions));
+                           })
+                   .Configure<ClusterOptions>(
+                       options =>
+                           {
+                               options.ClusterId = "broadway-prototype";
+                               options.ServiceId = "broadway";
+                           })
+                   .ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
+                   .UseCassandraClustering(
+                       options =>
+                           {
+                               options.ContactPoints = new[] { "localhost" };
+                               options.ReplicationFactor = 1;
+                           },
+                       new SerilogLoggerProvider(logger))
+                   // .UseAdoNetClustering(
+                   //     options =>
+                   //         {
+                   //             options.Invariant = Invariant;
+                   //             options.ConnectionString = connectionString;
+                   //         })
+                   .AddAdoNetGrainStorageAsDefault(
+                       options =>
+                           {
+                               options.Invariant = Invariant;
+                               options.ConnectionString = connectionString;
+                               options.UseJsonFormat = true;
+                           })
+                   .AddLogStorageBasedLogConsistencyProviderAsDefault()
+                   .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
+                   .ConfigureLogging(logging => logging.AddSerilog(logger, true))
+                   .AddIncomingGrainCallFilter<StateModificationCallFilter>()
+                   .Build();
         }
 
         private static Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)

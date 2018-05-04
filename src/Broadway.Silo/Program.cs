@@ -99,12 +99,6 @@ namespace NuClear.Broadway.Silo
                                options.ReplicationFactor = 1;
                            },
                        new SerilogLoggerProvider(logger))
-                   // .UseAdoNetClustering(
-                   //     options =>
-                   //         {
-                   //             options.Invariant = Invariant;
-                   //             options.ConnectionString = connectionString;
-                   //         })
                    .AddAdoNetGrainStorageAsDefault(
                        options =>
                            {

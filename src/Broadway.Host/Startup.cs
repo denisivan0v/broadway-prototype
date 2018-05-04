@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NuClear.Broadway.Interfaces;
 using Orleans;
+using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
 using Orleans.Runtime;
 using Orleans.Hosting;
@@ -46,30 +47,33 @@ namespace NuClear.Broadway.Host
 
             services.AddSwaggerGen(
                 options =>
-                {
-                    var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
-                    foreach (var description in provider.ApiVersionDescriptions)
                     {
-                        options.SwaggerDoc(description.GroupName, new Info { Title = $"Broadway API {description.ApiVersion}", Version = description.ApiVersion.ToString() });
-                    }
-
-                    options.AddSecurityDefinition(
-                        "Bearer",
-                        new ApiKeyScheme
+                        var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+                        foreach (var description in provider.ApiVersionDescriptions)
                         {
-                            Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                            Name = "Authorization",
-                            In = "header",
-                            Type = "apiKey"
-                        });
+                            options.SwaggerDoc(
+                                description.GroupName,
+                                new Info { Title = $"Broadway API {description.ApiVersion}", Version = description.ApiVersion.ToString() });
+                        }
 
-                    options.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                    {
-                        { "Bearer", new string[] { } }
+                        options.AddSecurityDefinition(
+                            "Bearer",
+                            new ApiKeyScheme
+                                {
+                                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                                    Name = "Authorization",
+                                    In = "header",
+                                    Type = "apiKey"
+                                });
+
+                        options.AddSecurityRequirement(
+                            new Dictionary<string, IEnumerable<string>>
+                                {
+                                    { "Bearer", new string[] { } }
+                                });
+
+                        //options.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{nameof(Broadway)}.{nameof(Host)}.xml"));
                     });
-
-                    options.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{nameof(Broadway)}.{nameof(Host)}.xml"));
-                });
 
             services.AddSingleton(CreateClusterClient);
         }
@@ -78,27 +82,27 @@ namespace NuClear.Broadway.Host
         {
             app.UseExceptionHandler(
                 new ExceptionHandlerOptions
-                {
-                    ExceptionHandler =
-                        async context =>
-                        {
-                            var feature = context.Features.Get<IExceptionHandlerFeature>();
-                            var error = new JObject
-                            {
-                                { "requestId", context.TraceIdentifier },
-                                { "code", "unhandledException" },
-                                { "message", feature.Error.Message }
-                            };
+                    {
+                        ExceptionHandler =
+                            async context =>
+                                {
+                                    var feature = context.Features.Get<IExceptionHandlerFeature>();
+                                    var error = new JObject
+                                        {
+                                            { "requestId", context.TraceIdentifier },
+                                            { "code", "unhandledException" },
+                                            { "message", feature.Error.Message }
+                                        };
 
-                            if (env.IsDevelopment())
-                            {
-                                error.Add("details", feature.Error.ToString());
-                            }
+                                    if (env.IsDevelopment())
+                                    {
+                                        error.Add("details", feature.Error.ToString());
+                                    }
 
-                            context.Response.ContentType = "application/json";
-                            await context.Response.WriteAsync(new JObject(new JProperty("error", error)).ToString());
-                        }
-                });
+                                    context.Response.ContentType = "application/json";
+                                    await context.Response.WriteAsync(new JObject(new JProperty("error", error)).ToString());
+                                }
+                    });
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("Location"));
 
@@ -109,18 +113,18 @@ namespace NuClear.Broadway.Host
                 app.UseSwagger();
                 app.UseSwaggerUI(
                     options =>
-                    {
-                        var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
-                        foreach (var description in provider.ApiVersionDescriptions)
                         {
-                            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
-                        }
+                            var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
+                            foreach (var description in provider.ApiVersionDescriptions)
+                            {
+                                options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                            }
 
-                        options.DocExpansion(DocExpansion.None);
-                        options.EnableValidator();
-                        options.ShowExtensions();
-                        options.DisplayRequestDuration();
-                    });
+                            options.DocExpansion(DocExpansion.None);
+                            options.EnableValidator();
+                            options.ShowExtensions();
+                            options.DisplayRequestDuration();
+                        });
             }
         }
 
@@ -129,19 +133,20 @@ namespace NuClear.Broadway.Host
             const string Invariant = "Npgsql";
 
             var client = new ClientBuilder()
-                .Configure<ClusterOptions>(options =>
-                {
-                    options.ClusterId = "broadway-prototype";
-                    options.ServiceId = "broadway";
-                })
-                .UseAdoNetClustering(options =>
-                {
-                    options.Invariant = Invariant;
-                    options.ConnectionString = _configuration.GetConnectionString("Orleans");
-                })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddSerilog(Log.Logger))
-                .Build();
+                         .Configure<ClusterOptions>(
+                             options =>
+                                 {
+                                     options.ClusterId = "broadway-prototype";
+                                     options.ServiceId = "broadway";
+                                 })
+                         .UseCassandraGatewayListProvider(
+                             options =>
+                                 {
+                                     options.ContactPoints = new[] { "localhost" };
+                                 })
+                         .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
+                         .ConfigureLogging(logging => logging.AddSerilog(Log.Logger))
+                         .Build();
 
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Startup>();
@@ -163,6 +168,7 @@ namespace NuClear.Broadway.Host
                 {
                     await client.Connect();
                     logger.LogInformation("Client successfully connect to silo host");
+
                     break;
                 }
                 catch (SiloUnavailableException ex)

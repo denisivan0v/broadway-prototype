@@ -45,6 +45,7 @@
     <ProjectReference Include="..\Broadway.Grains\Broadway.Grains.csproj" />
     <ProjectReference Include="..\Broadway.Interfaces\Broadway.Interfaces.csproj" />
     <ProjectReference Include="..\Orleans.Clustering.Cassandra\Orleans.Clustering.Cassandra.csproj" />
+    <ProjectReference Include="..\Orleans.Persistence.Cassandra\Orleans.Persistence.Cassandra.csproj" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\..\stylecop.json" />

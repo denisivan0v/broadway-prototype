@@ -13,6 +13,8 @@ using Orleans;
 using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.Persistence.Cassandra;
+
 using Serilog;
 using Serilog.Extensions.Logging;
 
@@ -99,12 +101,11 @@ namespace NuClear.Broadway.Silo
                                options.ReplicationFactor = 1;
                            },
                        new SerilogLoggerProvider(logger))
-                   .AddAdoNetGrainStorageAsDefault(
+                   .AddCassandraGrainStorageAsDefault(
                        options =>
                            {
-                               options.Invariant = Invariant;
-                               options.ConnectionString = connectionString;
-                               options.UseJsonFormat = true;
+                               options.ContactPoints = new[] { "localhost" };
+                               options.ReplicationFactor = 1;
                            })
                    .AddLogStorageBasedLogConsistencyProviderAsDefault()
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())

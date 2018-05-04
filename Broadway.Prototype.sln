@@ -59,6 +59,8 @@ EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Clustering.Cassandra", "src\Orleans.Clustering.Cassandra\Orleans.Clustering.Cassandra.csproj", "{6EF0948A-A30A-4A08-B967-627347A423AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Persistence.Cassandra", "src\Orleans.Persistence.Cassandra\Orleans.Persistence.Cassandra.csproj", "{F4F0C396-BD03-4281-B49B-B38BD4290B2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,7 @@ Global
 		{CB1839BF-4999-4F63-82FB-C05C2C80E58E} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{EBA860E2-DC36-4D1D-9138-0A496CCA14FA} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{6EF0948A-A30A-4A08-B967-627347A423AC} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{F4F0C396-BD03-4281-B49B-B38BD4290B2B} = {14DE1203-7E48-438A-A115-1C78687619AE}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EEE99319-7E8A-47CE-A419-C3CA49A85675}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -104,5 +107,9 @@ Global
 		{6EF0948A-A30A-4A08-B967-627347A423AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EF0948A-A30A-4A08-B967-627347A423AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EF0948A-A30A-4A08-B967-627347A423AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

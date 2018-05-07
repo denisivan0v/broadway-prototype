@@ -108,7 +108,7 @@ namespace NuClear.Broadway.Silo
                            {
                                options.ContactPoints = new[] { "localhost" };
                                options.ReplicationFactor = 1;
-                               options.Serialization.UseFullAssemblyNames = true;
+                               options.JsonSerialization.UseFullAssemblyNames = true;
                            },
                        new ConcurrentGrainStateTypesProvider())
                    .AddLogStorageBasedLogConsistencyProviderAsDefault()

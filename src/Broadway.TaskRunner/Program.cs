@@ -8,8 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Interfaces;
 using Orleans;
+using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
-using Orleans.Hosting;
+
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -22,11 +23,11 @@ namespace NuClear.Broadway.TaskRunner
             var env = Environment.GetEnvironmentVariable("ROADS_ENVIRONMENT") ?? "Production";
             var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(basePath)
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.ToLower()}.json")
-                .AddEnvironmentVariables("ROADS_")
-                .Build();
+                                .SetBasePath(basePath)
+                                .AddJsonFile("appsettings.json")
+                                .AddJsonFile($"appsettings.{env.ToLower()}.json")
+                                .AddEnvironmentVariables("ROADS_")
+                                .Build();
 
             var serilogLogger = CreateLogger(configuration);
 
@@ -39,54 +40,59 @@ namespace NuClear.Broadway.TaskRunner
 
             var cts = new GrainCancellationTokenSource();
             Console.CancelKeyPress += (sender, eventArgs) =>
-            {
-                logger.LogInformation("Application is shutting down...");
-                cts.Cancel();
-                serviceProvider.Dispose();
+                                          {
+                                              logger.LogInformation("Application is shutting down...");
+                                              cts.Cancel();
+                                              serviceProvider.Dispose();
 
-                eventArgs.Cancel = true;
-            };
+                                              eventArgs.Cancel = true;
+                                          };
 
             var app = new CommandLineApplication { Name = "Broadway.Worker" };
             app.HelpOption(CommandLine.HelpOptionTemplate);
             app.OnExecute(
                 () =>
-                {
-                    Console.WriteLine("Broadway worker host.");
-                    app.ShowHelp();
-                    return 0;
-                });
+                    {
+                        Console.WriteLine("Broadway worker host.");
+                        app.ShowHelp();
+
+                        return 0;
+                    });
 
             var clusterClient = CreateClusterClient(configuration, logger, serilogLogger);
 
             app.Command(
                 CommandLine.Commands.Import,
                 config =>
-                {
-                    config.Description = "Run import worker. See available arguments for details.";
-                    config.HelpOption(CommandLine.HelpOptionTemplate);
-                    config.Command(
-                        CommandLine.CommandTypes.FlowCardsForERM,
-                        commandConfig =>
-                        {
-                            commandConfig.Description = "Import objects from FlowCardsForERM flow.";
-                            commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
-                            commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
-                        });
-                    config.Command(
-                        CommandLine.CommandTypes.FlowKaleidoscope,
-                        commandConfig =>
-                        {
-                            commandConfig.Description = "Import objects from FlowKaleidoscope flow.";
-                            commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
-                            commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
-                        });
-                    config.OnExecute(() =>
                     {
-                        config.ShowHelp();
-                        return 0;
+                        config.Description = "Run import worker. See available arguments for details.";
+                        config.HelpOption(CommandLine.HelpOptionTemplate);
+                        config.Command(
+                            CommandLine.CommandTypes.FlowCardsForERM,
+                            commandConfig =>
+                                {
+                                    commandConfig.Description = "Import objects from FlowCardsForERM flow.";
+                                    commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
+                                    commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
+                                });
+
+                        config.Command(
+                            CommandLine.CommandTypes.FlowKaleidoscope,
+                            commandConfig =>
+                                {
+                                    commandConfig.Description = "Import objects from FlowKaleidoscope flow.";
+                                    commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
+                                    commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
+                                });
+
+                        config.OnExecute(
+                            () =>
+                                {
+                                    config.ShowHelp();
+
+                                    return 0;
+                                });
                     });
-                });
 
             var exitCode = 0;
             try
@@ -126,22 +132,18 @@ namespace NuClear.Broadway.TaskRunner
 
         private static IClusterClient CreateClusterClient(IConfiguration configuration, ILogger logger, Serilog.ILogger serilogLogger)
         {
-            const string Invariant = "Npgsql";
-
             var client = new ClientBuilder()
-                .Configure<ClusterOptions>(options =>
-                {
-                    options.ClusterId = "broadway-prototype";
-                    options.ServiceId = "broadway";
-                })
-                .UseAdoNetClustering(options =>
-                {
-                    options.Invariant = Invariant;
-                    options.ConnectionString = configuration.GetConnectionString("Orleans");
-                })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
-                .ConfigureLogging(logging => logging.AddSerilog(serilogLogger, true))
-                .Build();
+                         .Configure<ClusterOptions>(
+                             options =>
+                                 {
+                                     options.ClusterId = "broadway-prototype";
+                                     options.ServiceId = "broadway";
+                                 })
+                         .UseCassandraGatewayListProvider(
+                             options => { options.ContactPoints = new[] { "localhost" }; })
+                         .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
+                         .ConfigureLogging(logging => logging.AddSerilog(serilogLogger, true))
+                         .Build();
 
             StartClientWithRetries(logger, client).Wait();
 
@@ -157,21 +159,25 @@ namespace NuClear.Broadway.TaskRunner
             {
                 try
                 {
-                    await client.Connect(async ex =>
-                    {
-                        attempt++;
-                        logger.LogWarning("Attempt {attempt} failed to initialize the Orleans client.", attempt);
+                    await client.Connect(
+                        async ex =>
+                            {
+                                attempt++;
+                                logger.LogWarning("Attempt {attempt} failed to initialize the Orleans client.", attempt);
 
-                        await Task.Delay(TimeSpan.FromSeconds(2));
-                        return true;
-                    });
+                                await Task.Delay(TimeSpan.FromSeconds(2));
+
+                                return true;
+                            });
 
                     logger.LogInformation("Client successfully connect to silo host.");
+
                     break;
                 }
                 catch (Exception ex)
                 {
                     logger.LogCritical(ex, "Failed to initialize the Orleans client.");
+
                     throw;
                 }
             }

@@ -106,6 +106,7 @@ namespace NuClear.Broadway.Silo
                            {
                                options.ContactPoints = new[] { "localhost" };
                                options.ReplicationFactor = 1;
+                               options.Serialization.UseFullAssemblyNames = true;
                            })
                    .AddLogStorageBasedLogConsistencyProviderAsDefault()
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())

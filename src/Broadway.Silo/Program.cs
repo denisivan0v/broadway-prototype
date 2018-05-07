@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Grains;
 using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Kafka;
+using NuClear.Broadway.Silo.Concurrency;
+
 using Orleans;
 using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
@@ -107,7 +109,8 @@ namespace NuClear.Broadway.Silo
                                options.ContactPoints = new[] { "localhost" };
                                options.ReplicationFactor = 1;
                                options.Serialization.UseFullAssemblyNames = true;
-                           })
+                           },
+                       new ConcurrentGrainStateTypesProvider())
                    .AddLogStorageBasedLogConsistencyProviderAsDefault()
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))

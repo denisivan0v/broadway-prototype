@@ -42,6 +42,8 @@ namespace NuClear.Broadway.Grains.Workers
                 new[] { _topic });
 
             _messageReceiver.OnMessage += OnMessage;
+
+            _logger.LogTrace("{grainType} has beed activated for topic {topic}.", GetType().Name, _topic);
         }
 
         public override Task OnDeactivateAsync()
@@ -49,7 +51,11 @@ namespace NuClear.Broadway.Grains.Workers
             _messageReceiver.OnMessage -= OnMessage;
             _messageReceiver.Dispose();
 
-            return base.OnDeactivateAsync();
+            var task = base.OnDeactivateAsync();
+
+            _logger.LogTrace("{grainType} has beed deactivated.", GetType().Name);
+
+            return task;
         }
 
         public async Task StartExecutingAsync(GrainCancellationToken cancellation)
@@ -69,11 +75,15 @@ namespace NuClear.Broadway.Grains.Workers
 
                     _messageReceiver.Poll();
                 }
+
+                _logger.LogTrace("Kafka poll loop started.");
             });
 
             while (await _messageProcessingQueue.OutputAvailableAsync(cancellation.CancellationToken))
             {
                 var message = await _messageProcessingQueue.ReceiveAsync();
+                _logger.LogTrace("Got new message from Kafka.");
+
                 if (_messageProcessingQueue.Count < BufferSize && !waitHandler.IsSet)
                 {
                     waitHandler.Set();
@@ -83,6 +93,8 @@ namespace NuClear.Broadway.Grains.Workers
                 await ProcessMessage(message);
 
                 //await _messageReceiver.CommitAsync(message);
+
+                _logger.LogTrace("A message from Kafka processed successfully.");
             }
         }
 

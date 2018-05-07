@@ -68,7 +68,7 @@ namespace NuClear.Broadway.Grains.Workers
                 {
                     if (_messageProcessingQueue.Count >= BufferSize)
                     {
-                        _logger.LogDebug("Enabling consumer backpressure...");
+                        _logger.LogTrace("Enabling consumer backpressure...");
                         waitHandler.Reset();
                         waitHandler.Wait();
                     }
@@ -87,7 +87,7 @@ namespace NuClear.Broadway.Grains.Workers
                 if (_messageProcessingQueue.Count < BufferSize && !waitHandler.IsSet)
                 {
                     waitHandler.Set();
-                    _logger.LogDebug("Consumer backpressure disabled.");
+                    _logger.LogTrace("Consumer backpressure disabled.");
                 }
 
                 await ProcessMessage(message);

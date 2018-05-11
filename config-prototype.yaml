@@ -31,6 +31,35 @@ deploy-storage:
   kubectl:
   - template: deployment-storage.yaml.j2
   - template: service-postgres.yaml.j2
+  
+deploy-cassandra:
+
+  k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
+  k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
+  k8s_namespace: "erm-roads"
+  k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
+  
+  vendor: "roads"
+  id: "{{ env='DOMAIN_POSTFIX' }}"
+
+  max_surge: 1
+  max_unavailable: 0 
+  node_selector: "worker"
+  termination_grace_period_seconds: 60
+
+  cassandra_path: "cassandra"
+  cassandra_version: "3.11.2"
+  cassandra_limits_cpu: "500m"
+  cassandra_limits_memory: "1Gi"
+  cassandra_requests_cpu: "100m"
+  cassandra_requests_memory: "500Mi"
+  java_max_heap_size: "500M"
+  cassandra_sluster_name: "roads"
+  cassandra_dc: "n3"
+
+  kubectl:
+  - template: statefulset-cassandra.yaml.j2
+  - template: service-cassandra.yaml.j2
 
 deploy-apps:
 

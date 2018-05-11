@@ -27,6 +27,8 @@ ProjectSection(SolutionItems) = preProject
 	templates\service-host.yaml.j2 = templates\service-host.yaml.j2
 	templates\deployment-silo.yaml.j2 = templates\deployment-silo.yaml.j2
 	templates\service-silo.yaml.j2 = templates\service-silo.yaml.j2
+	templates\service-cassandra.yaml.j2 = templates\service-cassandra.yaml.j2
+	templates\statefulset-cassandra.yaml.j2 = templates\statefulset-cassandra.yaml.j2
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci-starter-kit", "ci-starter-kit", "{A291DB63-282B-4453-95BF-E50FD0C11D49}"

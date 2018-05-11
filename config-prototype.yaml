@@ -49,8 +49,8 @@ deploy-cassandra:
 
   cassandra_path: "cassandra"
   cassandra_version: "3.11.2"
-  cassandra_limits_cpu: "500m"
-  cassandra_limits_memory: "1Gi"
+  cassandra_limits_cpu: "300m"
+  cassandra_limits_memory: "500Mi"
   cassandra_requests_cpu: "100m"
   cassandra_requests_memory: "200Mi"
   cassandra_replicas: 2

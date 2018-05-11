@@ -6,7 +6,7 @@ metadata:
     app: {{ vendor }}-{{ id }}-cassandra
 spec:
   serviceName: {{ vendor }}-{{ id }}-cassandra
-  replicas: 3
+  replicas: {{ cassandra_replicas }}
   selector:
     matchLabels:
       app: {{ vendor }}-{{ id }}-cassandra

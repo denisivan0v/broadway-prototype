@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -10,15 +10,20 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Newtonsoft.Json.Linq;
+
 using NuClear.Broadway.Interfaces;
+
 using Orleans;
 using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
 using Orleans.Runtime;
-using Orleans.Hosting;
+
 using Serilog;
+
 using Swashbuckle.AspNetCore.Swagger;
+
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -27,10 +32,12 @@ namespace NuClear.Broadway.Host
     public class Startup
     {
         private readonly IConfiguration _configuration;
+        private readonly IHostingEnvironment _environment;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             _configuration = configuration;
+            _environment = environment;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -78,7 +85,7 @@ namespace NuClear.Broadway.Host
             services.AddSingleton(CreateClusterClient);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseExceptionHandler(
                 new ExceptionHandlerOptions
@@ -94,7 +101,7 @@ namespace NuClear.Broadway.Host
                                             { "message", feature.Error.Message }
                                         };
 
-                                    if (env.IsDevelopment())
+                                    if (_environment.IsDevelopment())
                                     {
                                         error.Add("details", feature.Error.ToString());
                                     }
@@ -108,7 +115,7 @@ namespace NuClear.Broadway.Host
 
             app.UseMvc();
 
-            if (!env.IsProduction())
+            if (!_environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(
@@ -130,20 +137,26 @@ namespace NuClear.Broadway.Host
 
         private IClusterClient CreateClusterClient(IServiceProvider serviceProvider)
         {
-            const string Invariant = "Npgsql";
-
             var client = new ClientBuilder()
+                         .UseEnvironment(_environment.EnvironmentName)
+                         .ConfigureAppConfiguration(
+                             builder =>
+                                 {
+                                     builder.Sources.Clear();
+
+                                     var env = _environment.EnvironmentName;
+                                     builder.SetBasePath(_environment.ContentRootPath)
+                                            .AddJsonFile("appsettings.json")
+                                            .AddJsonFile($"appsettings.{env?.ToLower()}.json")
+                                            .AddEnvironmentVariables("ROADS_");
+                                 })
                          .Configure<ClusterOptions>(
                              options =>
                                  {
                                      options.ClusterId = "broadway-prototype";
                                      options.ServiceId = "broadway";
                                  })
-                         .UseCassandraGatewayListProvider(
-                             options =>
-                                 {
-                                     options.ContactPoints = new[] { "localhost" };
-                                 })
+                         .UseCassandraGatewayListProvider(config => config.GetSection("Cassandra"))
                          .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
                          .ConfigureLogging(logging => logging.AddSerilog(Log.Logger))
                          .Build();

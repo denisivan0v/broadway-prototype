@@ -18,7 +18,6 @@ using Orleans.Hosting;
 using Orleans.Persistence.Cassandra;
 
 using Serilog;
-using Serilog.Extensions.Logging;
 
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -62,13 +61,10 @@ namespace NuClear.Broadway.Silo
 
         private static ISiloHost CreateSilo()
         {
-            const string Invariant = "Npgsql";
-
             var env = Environment.GetEnvironmentVariable("ROADS_ENVIRONMENT") ?? "Production";
             var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             Serilog.ILogger logger = null;
-            string connectionString = null;
 
             return new SiloHostBuilder()
                    .UseEnvironment(env)
@@ -81,7 +77,6 @@ namespace NuClear.Broadway.Silo
                        (context, services) =>
                            {
                                logger = CreateSerilogLogger(context.Configuration);
-                               connectionString = context.Configuration.GetConnectionString("Orleans");
 
                                var kafkaOptions = context.Configuration.GetSection("Kafka").Get<KafkaOptions>();
                                var referenceObjectsClusterKafkaOptions =
@@ -96,21 +91,8 @@ namespace NuClear.Broadway.Silo
                                options.ServiceId = "broadway";
                            })
                    .ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
-                   .UseCassandraClustering(
-                       options =>
-                           {
-                               options.ContactPoints = new[] { "localhost" };
-                               options.ReplicationFactor = 1;
-                           },
-                       new SerilogLoggerProvider(logger))
-                   .AddCassandraGrainStorageAsDefault(
-                       options =>
-                           {
-                               options.ContactPoints = new[] { "localhost" };
-                               options.ReplicationFactor = 1;
-                               options.JsonSerialization.UseFullAssemblyNames = true;
-                           },
-                       new ConcurrentGrainStateTypesProvider())
+                   .UseCassandraClustering(config => config.GetSection("Cassandra"))
+                   .AddCassandraGrainStorageAsDefault(config => config.GetSection("Cassandra"), ConcurrentGrainStateTypesProvider.Instance)
                    .AddLogStorageBasedLogConsistencyProviderAsDefault()
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))

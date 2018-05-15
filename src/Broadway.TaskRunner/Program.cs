@@ -31,12 +31,11 @@ namespace NuClear.Broadway.TaskRunner
 
             var serilogLogger = CreateLogger(configuration);
 
-            var services = new ServiceCollection()
-                .AddLogging(x => x.AddSerilog(serilogLogger, true));
+            var serviceProvider = new ServiceCollection()
+                .AddLogging(x => x.AddSerilog(serilogLogger, true))
+                .BuildServiceProvider();
 
-            var serviceProvider = services.BuildServiceProvider();
-            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger<Program>();
+            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
 
             var cts = new GrainCancellationTokenSource();
             Console.CancelKeyPress += (sender, eventArgs) =>
@@ -59,7 +58,7 @@ namespace NuClear.Broadway.TaskRunner
                         return 0;
                     });
 
-            var clusterClient = CreateClusterClient(configuration, logger, serilogLogger);
+            var clusterClient = CreateClusterClient(env, basePath, logger, serilogLogger);
 
             app.Command(
                 CommandLine.Commands.Import,
@@ -130,19 +129,30 @@ namespace NuClear.Broadway.TaskRunner
             return Log.Logger;
         }
 
-        private static IClusterClient CreateClusterClient(IConfiguration configuration, ILogger logger, Serilog.ILogger serilogLogger)
+        private static IClusterClient CreateClusterClient(string environmentName, string basePath, ILogger logger, Serilog.ILogger serilogLogger)
         {
             var client = new ClientBuilder()
+                         .UseEnvironment(environmentName)
+                         .ConfigureAppConfiguration(
+                             builder =>
+                                 {
+                                     builder.Sources.Clear();
+
+                                     var env = environmentName;
+                                     builder.SetBasePath(basePath)
+                                            .AddJsonFile("appsettings.json")
+                                            .AddJsonFile($"appsettings.{env?.ToLower()}.json")
+                                            .AddEnvironmentVariables("ROADS_");
+                                 })
                          .Configure<ClusterOptions>(
                              options =>
                                  {
                                      options.ClusterId = "broadway-prototype";
                                      options.ServiceId = "broadway";
                                  })
-                         .UseCassandraGatewayListProvider(
-                             options => { options.ContactPoints = new[] { "localhost" }; })
+                         .UseCassandraGatewayListProvider(config => config.GetSection("Cassandra"))
                          .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICampaignGrain).Assembly).WithReferences())
-                         .ConfigureLogging(logging => logging.AddSerilog(serilogLogger, true))
+                         .ConfigureLogging(logging => logging.AddSerilog(serilogLogger))
                          .Build();
 
             StartClientWithRetries(logger, client).Wait();

@@ -14,18 +14,19 @@ namespace NuClear.Broadway.Host
 
         private static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
-                    config.Sources.Clear();
+                   .ConfigureAppConfiguration(
+                       (context, builder) =>
+                           {
+                               builder.Sources.Clear();
 
-                    var env = hostingContext.HostingEnvironment;
-                    config.SetBasePath(env.ContentRootPath)
-                        .AddJsonFile("appsettings.json")
-                        .AddJsonFile($"appsettings.{env.EnvironmentName?.ToLower()}.json")
-                        .AddEnvironmentVariables("ROADS_");
-                })
-                .UseStartup<Startup>()
-                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), true)
-                .Build();
+                               var env = context.HostingEnvironment;
+                               builder.SetBasePath(env.ContentRootPath)
+                                      .AddJsonFile("appsettings.json")
+                                      .AddJsonFile($"appsettings.{env.EnvironmentName?.ToLower()}.json")
+                                      .AddEnvironmentVariables("ROADS_");
+                           })
+                   .UseStartup<Startup>()
+                   .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
+                   .Build();
     }
 }

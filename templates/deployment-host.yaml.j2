@@ -63,5 +63,7 @@ spec:
           value: '{{ roads_env }}'
         - name: ASPNETCORE_TEMP
           value: '{{ host_temp_dir }}'
-        - name: ROADS_ConnectionStrings__Orleans
-          value: 'Host={{ vendor }}-{{ id }}-postgres;Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'
+        - name: ROADS_Cassandra__Keyspace
+          value: '{{ vendor }}-{{ id }}'
+        - name: ROADS_Cassandra__ContactPoints__0
+          value: roads-cassandra-0.roads-cassandra.erm-roads.svc.web-staging.os-n3.hw

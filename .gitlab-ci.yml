@@ -73,6 +73,7 @@ broadway-prototype:
   image: $REGISTRY/2gis-io/k8s-handle:latest
   script:
     - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
+    - export ENVIRONMENT_KEYSPACE=${CI_COMMIT_REF_SLUG}
     - export ROADS_ENVIRONMENT=stage
     - export BROADWAY_VERSION=${CI_TAG}
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60

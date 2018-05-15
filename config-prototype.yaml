@@ -107,6 +107,8 @@ deploy-apps:
   postgres_db: "orleans"
   postgres_user: "postgres"
   postgres_password: "postgres"
+  
+  cassandra_keyspace: "{{ env='ENVIRONMENT_KEYSPACE' }}"
 
   broadway_version: "{{ env='BROADWAY_VERSION' }}" 
 

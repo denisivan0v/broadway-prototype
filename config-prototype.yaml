@@ -83,10 +83,10 @@ deploy-apps:
   roads_env: "{{ env='ROADS_ENVIRONMENT' }}"
   
   silo_path: "docker-hub.2gis.ru/roads/broadway-silo"
-  silo_limits_cpu: "500m"
-  silo_limits_memory: "300Mi"
-  silo_requests_cpu: "50m"
-  silo_requests_memory: "225Mi"
+  silo_limits_cpu: "300m"
+  silo_limits_memory: "250Mi"
+  silo_requests_cpu: "150m"
+  silo_requests_memory: "150Mi"
   silo_metrics_port: 3000
   
   host_domain: "{{ env='DOMAIN_POSTFIX' }}"
@@ -95,9 +95,9 @@ deploy-apps:
   host_healthcheck_timeout: 60
   host_path: "docker-hub.2gis.ru/roads/broadway-host"
   host_limits_cpu: "200m"
-  host_limits_memory: "200Mi"
-  host_requests_cpu: "50m"
-  host_requests_memory: "150Mi"
+  host_limits_memory: "150Mi"
+  host_requests_cpu: "100m"
+  host_requests_memory: "100Mi"
   host_port: 5000
   host_temp_dir: "/tmp/files"
 

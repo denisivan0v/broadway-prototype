@@ -64,6 +64,6 @@ spec:
         - name: ASPNETCORE_TEMP
           value: '{{ host_temp_dir }}'
         - name: ROADS_Cassandra__Keyspace
-          value: '{{ vendor }}-{{ id }}'
-        - name: ROADS_Cassandra__ContactPoints__0
+          value: '{{ cassandra_keyspace }}'
+        - name: ROADS_Cassandra__ContactPoints
           value: roads-cassandra-0.roads-cassandra.erm-roads.svc.web-staging.os-n3.hw

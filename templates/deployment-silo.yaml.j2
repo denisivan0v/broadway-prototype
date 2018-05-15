@@ -40,5 +40,7 @@ spec:
           value: '{{ roads_env }}'
         - name: ROADS_Cassandra__Keyspace
           value: '{{ vendor }}-{{ id }}'
-        - name: ROADS_Cassandra__ContactPoints__0
+        - name: ROADS_Cassandra__ContactPoints
           value: roads-cassandra-0.roads-cassandra.erm-roads.svc.web-staging.os-n3.hw
+        - name: ROADS_Cassandra__ReplicationFactor
+          value: '1'

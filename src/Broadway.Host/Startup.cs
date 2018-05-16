@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -10,9 +12,11 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json.Linq;
 
+using NuClear.Broadway.Host.Options;
 using NuClear.Broadway.Interfaces;
 
 using Orleans;
@@ -51,6 +55,25 @@ namespace NuClear.Broadway.Host
                 .AddJsonFormatters();
 
             services.AddApiVersioning(options => options.ReportApiVersions = true);
+
+            var authenticationOptions = _configuration.GetSection("Authentication").Get<JwtAuthenticationOptions>();
+            var certificate = Base64UrlEncoder.DecodeBytes(authenticationOptions.Certificate);
+            var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false, // remove when AIM-212 will be done
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidIssuer = authenticationOptions.Issuer,
+                    IssuerSigningKey = new X509SecurityKey(new X509Certificate2(certificate))
+                };
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(
+                        options =>
+                            {
+                                options.Audience = authenticationOptions.Audience;
+                                options.TokenValidationParameters = tokenValidationParameters;
+                            });
 
             services.AddSwaggerGen(
                 options =>
@@ -112,7 +135,7 @@ namespace NuClear.Broadway.Host
                     });
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("Location"));
-
+            app.UseAuthentication();
             app.UseMvc();
 
             if (!_environment.IsProduction())

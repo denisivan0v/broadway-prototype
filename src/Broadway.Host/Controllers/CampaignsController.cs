@@ -1,11 +1,16 @@
 ﻿using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using NuClear.Broadway.Host.Commands;
 using NuClear.Broadway.Interfaces;
+
 using Orleans;
 
 namespace NuClear.Broadway.Host.Controllers
 {
+    [Authorize]
     [ApiVersion("1.0")]
     [Route("api/{api-version:apiVersion}/campaigns")]
     public class CampaignsController : Controller

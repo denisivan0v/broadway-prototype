@@ -7,7 +7,7 @@ namespace NuClear.Broadway.Interfaces
     {
         Task AddCardAsync(long cardCode);
         Task RemoveCardAsync(long cardCode);
-        Task Archive();
+        Task Archive(int branchCode, int? countryCode);
         Task UpdateStateAsync(Firm firm);
     }
 }

@@ -2,66 +2,53 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+
 using NuClear.Broadway.Interfaces;
 using NuClear.Broadway.Interfaces.Events;
+
 using Orleans.EventSourcing;
+using Orleans.Providers;
 
 namespace NuClear.Broadway.Grains
 {
-    public class CampaignGrain : JournaledGrain<Campaign, string>, ICampaignGrain
+    [LogConsistencyProvider(ProviderName = "LogStorage")]
+    public class CampaignGrain : JournaledGrain<Campaign>, ICampaignGrain, IVersionedGrain
     {
         private readonly ILogger<CampaignGrain> _logger;
-        private readonly JsonSerializerSettings _serializerSettings;
 
         public CampaignGrain(ILogger<CampaignGrain> logger)
         {
             _logger = logger;
-            _serializerSettings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All,
-                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
-            };
         }
+
+        public int GetCurrentVersion() => Version;
 
         public Task<Campaign> GetStateAsync() => Task.FromResult(State);
 
         public async Task<IReadOnlyList<object>> GetConfirmedEvents() => await RetrieveConfirmedEvents(0, Version);
 
+        [StateModification]
         public async Task ChangeNameAsync(string name, long userId)
         {
-            var @event = JsonConvert.SerializeObject(
-                new CampaignNameChangedEvent { Name = name, ChangedAt = DateTime.UtcNow, ChangedBy = userId },
-                _serializerSettings);
-
-            RaiseEvent(@event);
+            RaiseEvent(new CampaignNameChangedEvent { Name = name, ChangedAt = DateTime.UtcNow, ChangedBy = userId });
             await ConfirmEvents();
         }
 
         public async Task Start(long userId)
         {
-            var @event = JsonConvert.SerializeObject(
-                new CampaignStartedEvent { StartedAt = DateTime.UtcNow, UserId = userId },
-                _serializerSettings);
-
-            RaiseEvent(@event);
+            RaiseEvent(new CampaignStartedEvent { StartedAt = DateTime.UtcNow, UserId = userId });
             await ConfirmEvents();
         }
 
         public async Task Pause(long userId)
         {
-            var @event = JsonConvert.SerializeObject(
-                new CampaignPausedEvent { PausedAt = DateTime.UtcNow, UserId = userId },
-                _serializerSettings);
-
-            RaiseEvent(@event);
+            RaiseEvent(new CampaignPausedEvent { PausedAt = DateTime.UtcNow, UserId = userId });
             await ConfirmEvents();
         }
 
-        protected override void TransitionState(Campaign state, string @event)
+        protected override void TransitionState(Campaign state, object @event)
         {
-            var deserializedEvent = JsonConvert.DeserializeObject<object>(@event, _serializerSettings);
-            switch (@deserializedEvent)
+            switch (@event)
             {
                 case CampaignNameChangedEvent nameChangedEvent:
                     state.Name = nameChangedEvent.Name;
@@ -80,6 +67,6 @@ namespace NuClear.Broadway.Grains
             }
 
             _logger.LogInformation("State updated based on {eventType} event.", @event.GetType());
-         }
+        }
     }
 }

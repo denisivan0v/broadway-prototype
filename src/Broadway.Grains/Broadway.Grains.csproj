@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />
+    <!--<PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />-->
     <PackageReference Include="Microsoft.Orleans.EventSourcing" Version="$(OrleansPackageVersion)" />
     <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator.Build" Version="$(OrleansPackageVersion)" />
     <PackageReference Include="Serilog" Version="2.6.0" />

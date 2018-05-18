@@ -1,6 +1,9 @@
 ﻿using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+
+using NuClear.Broadway.Interfaces;
+
 using Orleans;
 
 namespace NuClear.Broadway.Grains
@@ -21,11 +24,14 @@ namespace NuClear.Broadway.Grains
             var attribute = context.ImplementationMethod.GetCustomAttribute<StateModificationAttribute>();
             if (attribute != null)
             {
-                _logger.LogInformation(
-                    "State of {grainType}:{grainKey} ({identity}) modified.",
-                    context.ImplementationMethod.DeclaringType.Name,
-                    context.Grain.GetPrimaryKeyLong(),
-                    context.Grain.ToString());
+                if (context.Grain is IVersionedGrain versionedGrain)
+                {
+                    _logger.LogInformation(
+                        "State of {grainType}:{grainKey}, version = {version} modified.",
+                        context.ImplementationMethod.DeclaringType.FullName,
+                        context.Grain.GetPrimaryKeyLong(),
+                        versionedGrain.GetCurrentVersion());
+                }
             }
         }
     }

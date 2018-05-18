@@ -29,14 +29,19 @@ namespace NuClear.Broadway.Grains.Workers
         protected override async Task ProcessMessage(Message<string, string> message)
         {
             var xml = XElement.Parse(message.Value);
-            switch (xml.Name.ToString())
+            var objectType = xml.Name.ToString();
+            switch (objectType)
             {
                 case nameof(CardForERM):
                     await UpdateCardAsync(xml);
 
                     break;
+                case "EmptyArchivedFirm":
+                    await ArchiveFirm(xml);
+
+                    break;
                 default:
-                    _logger.LogInformation("Unknown object type.");
+                    _logger.LogInformation($"{objectType}: Unknown object type.");
 
                     break;
             }
@@ -112,6 +117,16 @@ namespace NuClear.Broadway.Grains.Workers
             }
 
             await cardGrain.UpdateStateAsync(card);
+        }
+
+        private async Task ArchiveFirm(XElement xml)
+        {
+            var firmCode = (long)xml.Attribute(nameof(Firm.Code));
+            var branchCode = (int)xml.Attribute(nameof(Firm.BranchCode));
+            var countryCode = (int?)xml.Attribute(nameof(Firm.CountryCode));
+
+            var firmGrain = GrainFactory.GetGrain<IFirmGrain>(firmCode);
+            await firmGrain.Archive(branchCode, countryCode);
         }
     }
 }

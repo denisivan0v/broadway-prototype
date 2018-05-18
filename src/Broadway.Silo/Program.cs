@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using NuClear.Broadway.Grains;
 using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Kafka;
-using NuClear.Broadway.Silo.Concurrency;
 
 using Orleans;
 using Orleans.Clustering.Cassandra;
@@ -92,8 +91,9 @@ namespace NuClear.Broadway.Silo
                            })
                    .ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
                    .UseCassandraClustering(config => config.GetSection("Cassandra"))
-                   .AddCassandraGrainStorageAsDefault(config => config.GetSection("Cassandra"), ConcurrentGrainStateTypesProvider.Instance)
-                   .AddLogStorageBasedLogConsistencyProviderAsDefault()
+                   .AddCassandraGrainStorageAsDefault(config => config.GetSection("Cassandra")/*, ConcurrentGrainStateTypesProvider.Instance*/)
+                   .AddLogStorageBasedLogConsistencyProvider("LogStorage")
+                   .AddStateStorageBasedLogConsistencyProviderAsDefault()
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))
                    .AddIncomingGrainCallFilter<StateModificationCallFilter>()

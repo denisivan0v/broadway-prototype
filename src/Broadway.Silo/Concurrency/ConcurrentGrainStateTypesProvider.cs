@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using NuClear.Broadway.Interfaces;
 
+using Orleans.EventSourcing.StateStorage;
 using Orleans.Persistence.Cassandra.Concurrency;
 
 namespace NuClear.Broadway.Silo.Concurrency
@@ -18,7 +19,7 @@ namespace NuClear.Broadway.Silo.Concurrency
         public IReadOnlyCollection<Type> GetGrainStateTypes()
             => new[]
                 {
-                    typeof(Campaign)
+                    typeof(GrainStateWithMetaData<Campaign>)
                 };
     }
 }

@@ -92,7 +92,7 @@ namespace NuClear.Broadway.Grains.Workers
 
                 await ProcessMessage(message);
 
-                //await _messageReceiver.CommitAsync(message);
+                await _messageReceiver.CommitAsync(message);
 
                 _logger.LogTrace("A message from Kafka processed successfully.");
             }

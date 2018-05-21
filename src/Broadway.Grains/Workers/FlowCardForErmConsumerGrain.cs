@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+
 using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Interfaces;
 using Orleans.Concurrency;

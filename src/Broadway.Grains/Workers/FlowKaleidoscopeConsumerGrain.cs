@@ -3,9 +3,11 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+
 using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Interfaces;
 using NuClear.Broadway.Interfaces.Workers;
+
 using Orleans.Concurrency;
 
 namespace NuClear.Broadway.Grains.Workers
@@ -18,7 +20,9 @@ namespace NuClear.Broadway.Grains.Workers
 
         private readonly ILogger<FlowKaleidoscopeConsumerGrain> _logger;
 
-        public FlowKaleidoscopeConsumerGrain(ILogger<FlowKaleidoscopeConsumerGrain> logger, ReferenceObjectsClusterKafkaOptions kafkaOptions)
+        public FlowKaleidoscopeConsumerGrain(
+            ILogger<FlowKaleidoscopeConsumerGrain> logger, 
+            ReferenceObjectsClusterKafkaOptions kafkaOptions)
             : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
         {
             _logger = logger;

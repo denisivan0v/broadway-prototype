@@ -1,5 +1,5 @@
 common:
-  blank: blank
+  kafka_brokers: "{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
 
 deploy-storage:
 
@@ -31,7 +31,6 @@ deploy-storage:
   kafka_path: "wurstmeister/kafka"
   kafka_version: "0.10.2.1"
   kafka_port: 9092
-  kafka_brokers: "{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
   kafka_heap_opts: "-Xmx256m"
   kafka_zookeeper_connection_timeout_ms: 60000
   kafka_limits_cpu: "250m"

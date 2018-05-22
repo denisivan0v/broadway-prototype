@@ -15,6 +15,10 @@ spec:
       volumes:
       - name: postgres-data
         emptyDir: {}
+      - name: zookeeper-data
+        emptyDir: {}
+      - name: kafka-data
+        emptyDir: {}
       containers:
       - name: postgres
         image: {{ postgres_path }}:{{ postgres_version }}
@@ -29,12 +33,8 @@ spec:
                 - >
                   pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }};
                   apt-get update -y && apt-get install -y wget;
-                  wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Main.sql;
-                  wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Clustering.sql;
-                  wget https://raw.githubusercontent.com/denisivan0v/broadway-prototype/master/src/Broadway.Silo/OrleansAdoNetContent/PostgreSQL/PostgreSQL-Persistence.sql;
-                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f PostgreSQL-Main.sql;
-                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f PostgreSQL-Clustering.sql;
-                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f PostgreSQL-Persistence.sql;
+#                  wget <URL to sql file>;
+#                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f <sql file>;
         readinessProbe:
           exec:
             command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }}"]
@@ -57,3 +57,71 @@ spec:
           value: '{{ postgres_user }}'
         - name: POSTGRES_PASSWORD
           value: '{{ postgres_password }}'
+      - name: zookeeper
+        image: {{ zookeeper_path }}:{{ zookeeper_version }}
+        ports:
+        - containerPort: {{ zookeeper_port }}
+        readinessProbe:
+          exec:
+            command: ["/bin/bash", "-c", "echo ruok | nc localhost {{ zookeeper_port }} | grep imok"]
+          initialDelaySeconds: 1
+        resources:
+          limits:
+            cpu: {{ zookeeper_limits_cpu }}
+            memory: {{ zookeeper_limits_memory }}
+          requests:
+            cpu:  {{ zookeeper_requests_cpu }}}
+            memory: {{ zookeeper_requests_memory }}
+        env:
+        - name: SERVER_JVMFLAGS
+          value: '{{ zookeeper_server_jvmflags }}'
+        - name: ZOO_DATA_DIR
+          value: '/data'
+        - name: ZOO_DATA_LOG_DIR
+          value: '/data'
+        - name: ZOO_LOG4J_PROP
+          value: 'WARN,CONSOLE'
+        volumeMounts:
+        - mountPath: /data
+          name: zookeeper-data
+      - name: kafka
+        image: {{ kafka_path }}:{{ kafka_version }}
+        ports:
+        - containerPort: {{ kafka_port }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ kafka_port }}
+          initialDelaySeconds: 3
+        resources:
+          limits:
+            cpu: {{ kafka_limits_cpu }}
+            memory: {{ kafka_limits_memory }}
+          requests:
+            cpu: {{ kafka_requests_cpu }}}
+            memory: {{ kafka_requests_memory }}
+        env:
+        - name: KAFKA_HEAP_OPTS
+          value: '{{ kafka_heap_opts }}'
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: 'PLAINTEXT://{{ kafka_brokers | join }},REPLICATION://127.0.0.1:9093'
+        - name: KAFKA_LISTENERS
+          value: 'PLAINTEXT://0.0.0.0:{{ kafka_port }},REPLICATION://0.0.0.0:9093'
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: 'PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL,REPLICATION:PLAINTEXT'
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: 'REPLICATION'
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: 'localhost:{{ zookeeper_port }}'
+        - name: KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS
+          value: '{{ kafka_zookeeper_connection_timeout_ms }}'
+        - name: KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS
+          value: '1'
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: '1'
+        - name: KAFKA_CREATE_TOPICS
+          value: '__consumer_offsets:1:1:compact'
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: '20000000'    # AMS-630
+        volumeMounts:
+        - mountPath: /kafka
+          name: kafka-data

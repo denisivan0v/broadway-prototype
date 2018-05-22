@@ -44,3 +44,11 @@ spec:
           value: roads-cassandra-0.roads-cassandra.erm-roads.svc.web-staging.os-n3.hw
         - name: ROADS_Cassandra__ReplicationFactor
           value: '1'
+        - name: ROADS_MainKafkaCluster__BrokerEndpoints
+          value: '{{ kafka_brokers }}'
+        - name: ROADS_MainKafkaCluster__ConsumerGroupPostfix
+          value: '{{ broadway_consumer_group_postfix }}'
+        - name: ROADS_ReferenceObjectsKafkaCluster__BrokerEndpoints
+          value: '{{ broadway_ref_objects_cluster_kafka_brokers }}'
+        - name: ROADS_ReferenceObjectsKafkaCluster__ConsumerGroupPostfix
+          value: '{{ broadway_consumer_group_postfix }}'

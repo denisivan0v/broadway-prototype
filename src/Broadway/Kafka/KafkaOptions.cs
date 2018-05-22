@@ -3,7 +3,7 @@
     public class KafkaOptions
     {
         public string BrokerEndpoints { get; set; }
-        public string ConsumerGroupToken { get; set; }
+        public string ConsumerGroupPostfix { get; set; }
         public ConsumerOptions Consumer { get; set; }
         public ProducerOptions Producer { get; set; }
 
@@ -14,9 +14,9 @@
                 options.BrokerEndpoints = BrokerEndpoints;
             }
 
-            if (!string.IsNullOrEmpty(ConsumerGroupToken))
+            if (!string.IsNullOrEmpty(ConsumerGroupPostfix))
             {
-                options.ConsumerGroupToken = ConsumerGroupToken;
+                options.ConsumerGroupPostfix = ConsumerGroupPostfix;
             }
 
             if (Consumer != null)

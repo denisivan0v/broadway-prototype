@@ -27,10 +27,32 @@ deploy-storage:
   postgres_db: "orleans"
   postgres_user: "postgres"
   postgres_password: "postgres"
+  
+  kafka_path: "wurstmeister/kafka"
+  kafka_version: "0.10.2.1"
+  kafka_port: 9092
+  kafka_brokers: "{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
+  kafka_heap_opts: "-Xmx256m"
+  kafka_zookeeper_connection_timeout_ms: 60000
+  kafka_limits_cpu: "250m"
+  kafka_limits_memory: "512Mi"
+  kafka_requests_cpu: "50m"
+  kafka_requests_memory: "256Mi"
+  
+  zookeeper_path: "zookeeper"
+  zookeeper_version: "3.4.10"
+  zookeeper_server_jvmflags: "-Xmx64m"
+  zookeeper_port: 2181
+  zookeeper_limits_cpu: "150m"
+  zookeeper_limits_memory: "150Mi"
+  zookeeper_requests_cpu: "50m"
+  zookeeper_requests_memory: "100Mi"
 
   kubectl:
   - template: deployment-storage.yaml.j2
   - template: service-postgres.yaml.j2
+  - template: service-zookeeper.yaml.j2
+  - template: service-kafka.yaml.j2
   
 deploy-cassandra:
 
@@ -110,7 +132,9 @@ deploy-apps:
   
   cassandra_keyspace: "{{ env='ENVIRONMENT_KEYSPACE' }}"
 
-  broadway_version: "{{ env='BROADWAY_VERSION' }}" 
+  broadway_version: "{{ env='BROADWAY_VERSION' }}"
+  broadway_consumer_group_postfix: "{{ env='DOMAIN_POSTFIX' }}"
+  broadway_ref_objects_cluster_kafka_brokers: "kafka1.test.c.os-n3.hw,kafka2.test.c.os-n3.hw,kafka3.test.c.os-n3.hw"
 
   kubectl:
   - template: deployment-silo.yaml.j2

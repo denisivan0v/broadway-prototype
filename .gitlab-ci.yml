@@ -30,16 +30,16 @@ build-apps:
       - publish/broadway-host/
       - publish/broadway-silo/
       
-#orleans-storage-up:
-#  stage: pre
-#  when: always
-#  image: $REGISTRY/2gis-io/k8s-handle:latest
-#  script:
-#    - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
-#    - k8s-handle deploy --config config-prototype.yaml --section deploy-cassandra --sync-mode true --tries 120
-#  tags: [ 2gis, docker ]
-#  only:
-#    - master
+storage-up:
+  stage: pre
+  when: always
+  image: $REGISTRY/2gis-io/k8s-handle:latest
+  script:
+    - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
+  tags: [ 2gis, docker ]
+  only:
+    - master
       
 # ================= Dockerize =================
       

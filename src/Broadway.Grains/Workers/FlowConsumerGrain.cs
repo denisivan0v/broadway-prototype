@@ -38,7 +38,7 @@ namespace NuClear.Broadway.Grains.Workers
             _messageReceiver = new SimpleMessageReceiver(
                 _logger,
                 _kafkaOptions,
-                $"{_consumerGroupToken}-{_kafkaOptions.ConsumerGroupToken}",
+                $"{_consumerGroupToken}-{_kafkaOptions.ConsumerGroupPostfix}",
                 new[] { _topic });
 
             _messageReceiver.OnMessage += OnMessage;

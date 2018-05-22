@@ -1,5 +1,5 @@
 common:
-  kafka_brokers: "{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
+  kafka_brokers: "roads-{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
 
 deploy-storage:
 

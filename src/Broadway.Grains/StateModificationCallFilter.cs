@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
@@ -14,12 +12,12 @@ namespace NuClear.Broadway.Grains
 {
     public class StateModificationCallFilter : IIncomingGrainCallFilter
     {
-        private readonly ILogger<StateModificationCallFilter> _logger;
+        private const string Topic = "roads_test_state_events";
+
         private readonly MessageSender _messageSender;
 
-        public StateModificationCallFilter(ILogger<StateModificationCallFilter> logger, MessageSender messageSender)
+        public StateModificationCallFilter(MessageSender messageSender)
         {
-            _logger = logger;
             _messageSender = messageSender;
         }
 
@@ -31,18 +29,13 @@ namespace NuClear.Broadway.Grains
                 if (context.Grain is IVersionedGrain versionedGrain)
                 {
                     var grainType = context.ImplementationMethod.DeclaringType.FullName;
-                    var grainKey = context.Grain.GetPrimaryKeyLong().ToString();
+                    var grainKey = context.Grain.GetPrimaryKeyLong();
                     var grainVersion = versionedGrain.GetCurrentVersion();
 
                     var message = JsonConvert.SerializeObject(new { grainType, grainKey, grainVersion });
 
-                    await _messageSender.SendAsync("topic", grainKey, message);
-
-                    _logger.LogInformation(
-                        "State of {grainType}:{grainKey}, version = {version} modified.",
-                        grainType,
-                        grainKey,
-                        grainVersion);
+                    var messageKey = $"{grainType}|{grainKey}";
+                    await _messageSender.SendAsync(Topic, messageKey, message);
                 }
             }
 

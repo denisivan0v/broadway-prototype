@@ -12,8 +12,6 @@ namespace NuClear.Broadway.Kafka
 {
     public sealed class MessageSender : IDisposable
     {
-        private const int DefaultPartition = 0;
-
         private readonly ILogger<MessageSender> _logger;
         private readonly Producer<string, string> _producer;
 
@@ -51,11 +49,11 @@ namespace NuClear.Broadway.Kafka
             _producer.OnStatistics += OnStatistics;
         }
 
-        public async Task SendAsync(string topic, string key, string message, int partition = DefaultPartition)
+        public async Task SendAsync(string topic, string key, string message)
         {
             try
             {
-                var result = await _producer.ProduceAsync(topic, key, message, DefaultPartition);
+                var result = await _producer.ProduceAsync(topic, key, message);
                 _logger.LogDebug(
                     "Produced to Kafka. Topic/partition/offset: '{kafkaTopic}/{kafkaPartition}/{kafkaOffset}'. Message: '{kafkaMessage}'.",
                     result.Topic,

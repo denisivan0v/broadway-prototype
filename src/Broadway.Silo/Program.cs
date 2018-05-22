@@ -76,13 +76,20 @@ namespace NuClear.Broadway.Silo
                    .ConfigureServices(
                        (context, services) =>
                            {
-                               logger = CreateSerilogLogger(context.Configuration);
+                               var configuration = context.Configuration;
 
-                               var kafkaOptions = context.Configuration.GetSection("Kafka").Get<KafkaOptions>();
+                               logger = CreateSerilogLogger(configuration);
+
+                               var kafkaOptions = configuration.GetSection("Kafka").Get<KafkaOptions>();
+
                                var referenceObjectsClusterKafkaOptions =
-                                   context.Configuration.GetSection("ReferenceObjectsKafkaCluster").Get<ReferenceObjectsClusterKafkaOptions>();
-
+                                   configuration.GetSection("ReferenceObjectsKafkaCluster").Get<ReferenceObjectsClusterKafkaOptions>();
                                services.AddSingleton(kafkaOptions.MergeWith(referenceObjectsClusterKafkaOptions));
+
+                               var mainClusterKafkaOptions = configuration.GetSection("MainKafkaCluster").Get<KafkaOptions>();
+                               services.AddSingleton(kafkaOptions.MergeWith(mainClusterKafkaOptions));
+
+                               services.AddTransient<MessageSender>();
                            })
                    .Configure<ClusterOptions>(
                        options =>

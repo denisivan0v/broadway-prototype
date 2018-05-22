@@ -1,12 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging;
+
 using NuClear.Broadway.Interfaces;
-using Orleans;
+using NuClear.Broadway.Interfaces.Events;
+
+using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class CategoryGrain : Grain<Category>, ICategoryGrain
+    public class CategoryGrain : JournaledGrain<Category>, ICategoryGrain, IVersionedGrain
     {
         private readonly ILogger<CategoryGrain> _logger;
 
@@ -15,8 +19,10 @@ namespace NuClear.Broadway.Grains
             _logger = logger;
         }
 
+        public int GetCurrentVersion() => Version;
+
         [StateModification]
-        public async Task AddSecondRubric(long secondRubricCode)
+        public async Task AddSecondRubricAsync(long secondRubricCode)
         {
             if (State.SecondRubrics != null)
             {
@@ -30,32 +36,60 @@ namespace NuClear.Broadway.Grains
                 State.SecondRubrics = new HashSet<long>();
             }
 
-            State.SecondRubrics.Add(secondRubricCode);
-            await WriteStateAsync();
+            RaiseEvent(new SecondRubricAddedToCategoryEvent(secondRubricCode));
+            await ConfirmEvents();
         }
 
         [StateModification]
-        public async Task RemoveSecondRubric(long secondRubricCode)
+        public async Task RemoveSecondRubricAsync(long secondRubricCode)
         {
             if (State.SecondRubrics != null)
             {
-                State.SecondRubrics.Remove(secondRubricCode);
-                await WriteStateAsync();
+                RaiseEvent(new SecondRubricRemovedFromCategoryEvent(secondRubricCode));
+                await ConfirmEvents();
             }
         }
 
         [StateModification]
         public async Task UpdateStateAsync(Category category)
         {
-            State.Code = category.Code;
-            State.IsDeleted = category.IsDeleted;
+            RaiseEvent(new StateChangedEvent<Category>(category));
+            await ConfirmEvents();
+        }
 
-            if (!category.IsDeleted)
+        [StateModification]
+        public async Task DeleteAsync()
+        {
+            RaiseEvent(new ObjectDeletedEvent());
+            await ConfirmEvents();
+        }
+
+        protected override void TransitionState(Category state, object @event)
+        {
+            switch (@event)
             {
-                State.Localizations = category.Localizations;
-            }
+                case SecondRubricAddedToCategoryEvent secondRubricAddedToCategoryEvent:
+                    state.SecondRubrics.Add(secondRubricAddedToCategoryEvent.SecondRubricCode);
+                    break;
+                case SecondRubricRemovedFromCategoryEvent secondRubricRemovedFromCategoryEvent:
+                    state.SecondRubrics.Remove(secondRubricRemovedFromCategoryEvent.SecondRubricCode);
+                    break;
+                case StateChangedEvent<Category> stateChangedEvent:
+                    state.Code = stateChangedEvent.State.Code;
+                    state.Localizations = stateChangedEvent.State.Localizations;
 
-            await WriteStateAsync();
+                    break;
+                case ObjectDeletedEvent _:
+                    state.IsDeleted = true;
+
+                    break;
+                default:
+                    _logger.LogWarning(
+                        "Got an {eventType} event, but the state wasn't updated. Current version is {version}.",
+                        @event.GetType(),
+                        Version);
+                    return;
+            }
         }
     }
 }

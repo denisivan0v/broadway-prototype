@@ -62,7 +62,10 @@ namespace NuClear.Broadway.Grains
                     state.PausedBy = pausedEvent.UserId;
                     break;
                 default:
-                    _logger.LogWarning("Got an {eventType} event, but the state wasn't updated. Current version is {version}.", @event.GetType(), Version);
+                    _logger.LogWarning(
+                        "Got an {eventType} event, but the state wasn't updated. Current version is {version}.",
+                        @event.GetType(),
+                        Version);
                     return;
             }
 

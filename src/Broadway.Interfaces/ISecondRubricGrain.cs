@@ -5,8 +5,9 @@ namespace NuClear.Broadway.Interfaces
 {
     public interface ISecondRubricGrain : IGrainWithIntegerKey
     {
-        Task AddRubric(long rubricCode);
-        Task RemoveRubric(long rubricCode);
+        Task AddRubricAsync(long rubricCode);
+        Task RemoveRubricAsync(long rubricCode);
         Task UpdateStateAsync(SecondRubric secondRubric);
+        Task DeleteAsync();
     }
 }

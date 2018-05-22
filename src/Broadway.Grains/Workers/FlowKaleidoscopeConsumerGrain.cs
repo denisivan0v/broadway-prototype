@@ -54,14 +54,14 @@ namespace NuClear.Broadway.Grains.Workers
 
         private async Task UpdateCategoryAsync(XElement xml)
         {
-            var category = new Category
-                {
-                    Code = (long)xml.Attribute(nameof(Category.Code)),
-                    IsDeleted = (bool)xml.Attribute(nameof(Category.IsDeleted)),
-                };
+            var code = (long)xml.Attribute(nameof(Category.Code));
+            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(code);
 
-            if (!category.IsDeleted)
+            var isDeleted = (bool)xml.Attribute(nameof(Category.IsDeleted));
+            if (!isDeleted)
             {
+                var category = new Category { Code = code };
+
                 var localizations = xml.Element(nameof(Category.Localizations));
                 category.Localizations =
                     localizations?.Elements()
@@ -70,25 +70,28 @@ namespace NuClear.Broadway.Grains.Workers
                                          (string)x.Attribute(nameof(Localization.Lang)),
                                          (string)x.Attribute(nameof(Localization.Name))))
                                  .ToHashSet();
-            }
 
-            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(category.Code);
-            await categoryGrain.UpdateStateAsync(category);
+                await categoryGrain.UpdateStateAsync(category);
+            }
+            else
+            {
+                await categoryGrain.DeleteAsync();
+            }
         }
 
         private async Task UpdateSecondRubricAsync(XElement xml)
         {
-            var secondRubric = new SecondRubric
-                {
-                    Code = (long)xml.Attribute(nameof(SecondRubric.Code)),
-                    IsDeleted = (bool)xml.Attribute(nameof(SecondRubric.IsDeleted))
-                };
+            var code = (long)xml.Attribute(nameof(SecondRubric.Code));
+            var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(code);
 
-            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(secondRubric.CategoryCode);
-            if (!secondRubric.IsDeleted)
+            var isDeleted = (bool)xml.Attribute(nameof(SecondRubric.IsDeleted));
+            if (!isDeleted)
             {
-                secondRubric.CategoryCode = (long)xml.Attribute(nameof(SecondRubric.CategoryCode));
-                await categoryGrain.AddSecondRubric(secondRubric.Code);
+                var secondRubric = new SecondRubric
+                    {
+                        Code = code,
+                        CategoryCode = (long)xml.Attribute(nameof(SecondRubric.CategoryCode))
+                    };
 
                 var localizations = xml.Element(nameof(SecondRubric.Localizations));
                 secondRubric.Localizations =
@@ -98,31 +101,28 @@ namespace NuClear.Broadway.Grains.Workers
                                          (string)x.Attribute(nameof(Localization.Lang)),
                                          (string)x.Attribute(nameof(Localization.Name))))
                                  .ToHashSet();
+                await secondRubricGrain.UpdateStateAsync(secondRubric);
             }
             else
             {
-                await categoryGrain.RemoveSecondRubric(secondRubric.Code);
+                await secondRubricGrain.DeleteAsync();
             }
-
-            var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(secondRubric.Code);
-            await secondRubricGrain.UpdateStateAsync(secondRubric);
         }
 
         private async Task UpdateRubricAsync(XElement xml)
         {
-            var rubric = new Rubric
-                {
-                    Code = (long)xml.Attribute(nameof(Rubric.Code)),
-                    IsDeleted = (bool)xml.Attribute(nameof(Rubric.IsDeleted)),
-                };
+            var code = (long)xml.Attribute(nameof(Rubric.Code));
+            var rubricGrain = GrainFactory.GetGrain<IRubricGrain>(code);
 
-            var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(rubric.SecondRubricCode);
-            if (!rubric.IsDeleted)
+            var isDeleted = (bool)xml.Attribute(nameof(Rubric.IsDeleted));
+            if (!isDeleted)
             {
-                rubric.SecondRubricCode = (long)xml.Attribute(nameof(Rubric.SecondRubricCode));
-                await secondRubricGrain.AddRubric(rubric.Code);
-
-                rubric.IsCommercial = (bool)xml.Attribute(nameof(Rubric.IsCommercial));
+                var rubric = new Rubric
+                    {
+                        Code = code,
+                        SecondRubricCode = (long)xml.Attribute(nameof(Rubric.SecondRubricCode)),
+                        IsCommercial = (bool)xml.Attribute(nameof(Rubric.IsCommercial))
+                    };
 
                 var localizations = xml.Element(nameof(Rubric.Localizations));
                 rubric.Localizations =
@@ -140,14 +140,13 @@ namespace NuClear.Broadway.Grains.Workers
                                      .Elements()
                                      .Select(x => (int)x.Attribute(nameof(Rubric.Code)))
                                      .ToHashSet();
+
+                await rubricGrain.UpdateStateAsync(rubric);
             }
             else
             {
-                await secondRubricGrain.RemoveRubric(rubric.Code);
+                await rubricGrain.DeleteAsync();
             }
-
-            var rubricGrain = GrainFactory.GetGrain<IRubricGrain>(rubric.Code);
-            await rubricGrain.UpdateStateAsync(rubric);
         }
     }
 }

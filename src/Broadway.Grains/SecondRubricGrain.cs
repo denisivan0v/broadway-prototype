@@ -1,14 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
 using NuClear.Broadway.Interfaces;
-using Orleans;
+using NuClear.Broadway.Interfaces.Events;
+
+using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class SecondRubricGrain : Grain<SecondRubric>, ISecondRubricGrain
+    public class SecondRubricGrain : JournaledGrain<SecondRubric>, ISecondRubricGrain, IVersionedGrain
     {
+        private readonly ILogger<SecondRubricGrain> _logger;
+
+        public SecondRubricGrain(ILogger<SecondRubricGrain> logger)
+        {
+            _logger = logger;
+        }
+
+        public int GetCurrentVersion() => Version;
+
         [StateModification]
-        public async Task AddRubric(long rubricCode)
+        public async Task AddRubricAsync(long rubricCode)
         {
             if (State.Rubrics != null)
             {
@@ -22,33 +36,70 @@ namespace NuClear.Broadway.Grains
                 State.Rubrics = new HashSet<long>();
             }
 
-            State.Rubrics.Add(rubricCode);
-            await WriteStateAsync();
+            RaiseEvent(new RubricAddedToSecondRubricEvent(rubricCode));
+            await ConfirmEvents();
         }
 
         [StateModification]
-        public async Task RemoveRubric(long rubricCode)
+        public async Task RemoveRubricAsync(long rubricCode)
         {
             if (State.Rubrics != null)
             {
-                State.Rubrics.Remove(rubricCode);
-                await WriteStateAsync();
+                RaiseEvent(new RubricRemovedFromSecondRubricEvent(rubricCode));
+                await ConfirmEvents();
             }
+        }
+
+        [StateModification]
+        public async Task DeleteAsync()
+        {
+            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(State.CategoryCode);
+            await categoryGrain.RemoveSecondRubricAsync(State.Code);
+
+            RaiseEvent(new ObjectDeletedEvent());
+            await ConfirmEvents();
         }
 
         [StateModification]
         public async Task UpdateStateAsync(SecondRubric secondRubric)
         {
-            State.Code = secondRubric.Code;
-            State.IsDeleted = secondRubric.IsDeleted;
+            RaiseEvent(new StateChangedEvent<SecondRubric>(secondRubric));
+            await ConfirmEvents();
 
-            if (!secondRubric.IsDeleted)
+            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(State.CategoryCode);
+            await categoryGrain.AddSecondRubricAsync(State.Code);
+        }
+
+        protected override void TransitionState(SecondRubric state, object @event)
+        {
+            switch (@event)
             {
-                State.CategoryCode = secondRubric.CategoryCode;
-                State.Localizations = secondRubric.Localizations;
-            }
+                case RubricAddedToSecondRubricEvent rubricAddedToSecondRubricEvent:
+                    state.Rubrics.Add(rubricAddedToSecondRubricEvent.RubricCode);
 
-            await WriteStateAsync();
+                    break;
+                case RubricRemovedFromSecondRubricEvent rubricRemovedFromSecondRubricEvent:
+                    state.Rubrics.Remove(rubricRemovedFromSecondRubricEvent.RubricCode);
+
+                    break;
+                case StateChangedEvent<SecondRubric> stateChangedEvent:
+                    state.Code = stateChangedEvent.State.Code;
+                    state.CategoryCode = stateChangedEvent.State.CategoryCode;
+                    state.Localizations = stateChangedEvent.State.Localizations;
+
+                    break;
+                case ObjectDeletedEvent _:
+                    state.IsDeleted = true;
+
+                    break;
+                default:
+                    _logger.LogWarning(
+                        "Got an {eventType} event, but the state wasn't updated. Current version is {version}.",
+                        @event.GetType(),
+                        Version);
+
+                    return;
+            }
         }
     }
 }

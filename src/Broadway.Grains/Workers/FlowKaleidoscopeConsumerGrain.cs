@@ -75,7 +75,7 @@ namespace NuClear.Broadway.Grains.Workers
             }
             else
             {
-                await categoryGrain.DeleteAsync();
+                await categoryGrain.DeleteAsync(code);
             }
         }
 
@@ -105,7 +105,7 @@ namespace NuClear.Broadway.Grains.Workers
             }
             else
             {
-                await secondRubricGrain.DeleteAsync();
+                await secondRubricGrain.DeleteAsync(code);
             }
         }
 
@@ -145,7 +145,7 @@ namespace NuClear.Broadway.Grains.Workers
             }
             else
             {
-                await rubricGrain.DeleteAsync();
+                await rubricGrain.DeleteAsync(code);
             }
         }
     }

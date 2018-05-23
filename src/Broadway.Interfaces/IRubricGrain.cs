@@ -6,6 +6,6 @@ namespace NuClear.Broadway.Interfaces
     public interface IRubricGrain : IGrainWithIntegerKey
     {
         Task UpdateStateAsync(Rubric rubric);
-        Task DeleteAsync();
+        Task DeleteAsync(long code);
     }
 }

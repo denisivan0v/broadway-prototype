@@ -58,9 +58,9 @@ namespace NuClear.Broadway.Grains
         }
 
         [StateModification]
-        public async Task DeleteAsync()
+        public async Task DeleteAsync(long code)
         {
-            RaiseEvent(new ObjectDeletedEvent());
+            RaiseEvent(new ObjectDeletedEvent(code));
             await ConfirmEvents();
         }
 
@@ -79,7 +79,8 @@ namespace NuClear.Broadway.Grains
                     state.Localizations = stateChangedEvent.State.Localizations;
 
                     break;
-                case ObjectDeletedEvent _:
+                case ObjectDeletedEvent objectDeletedEvent:
+                    state.Code = objectDeletedEvent.Id;
                     state.IsDeleted = true;
 
                     break;

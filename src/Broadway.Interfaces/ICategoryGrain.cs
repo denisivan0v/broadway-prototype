@@ -8,6 +8,6 @@ namespace NuClear.Broadway.Interfaces
         Task AddSecondRubricAsync(long secondRubricCode);
         Task RemoveSecondRubricAsync(long secondRubricCode);
         Task UpdateStateAsync(Category category);
-        Task DeleteAsync();
+        Task DeleteAsync(long code);
     }
 }

@@ -31,12 +31,15 @@ namespace NuClear.Broadway.Grains
         }
 
         [StateModification]
-        public async Task DeleteAsync()
+        public async Task DeleteAsync(long code)
         {
-            var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(State.SecondRubricCode);
-            await secondRubricGrain.RemoveRubricAsync(State.Code);
+            if (State.SecondRubricCode != default)
+            {
+                var secondRubricGrain = GrainFactory.GetGrain<ISecondRubricGrain>(State.SecondRubricCode);
+                await secondRubricGrain.RemoveRubricAsync(State.Code);
+            }
 
-            RaiseEvent(new ObjectDeletedEvent());
+            RaiseEvent(new ObjectDeletedEvent(code));
             await ConfirmEvents();
         }
 
@@ -52,7 +55,8 @@ namespace NuClear.Broadway.Grains
                     state.Branches = stateChangedEvent.State.Branches;
 
                     break;
-                case ObjectDeletedEvent _:
+                case ObjectDeletedEvent objectDeletedEvent:
+                    state.Code = objectDeletedEvent.Id;
                     state.IsDeleted = true;
 
                     break;

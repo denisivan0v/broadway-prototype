@@ -51,16 +51,6 @@ namespace NuClear.Broadway.Grains
         }
 
         [StateModification]
-        public async Task DeleteAsync()
-        {
-            var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(State.CategoryCode);
-            await categoryGrain.RemoveSecondRubricAsync(State.Code);
-
-            RaiseEvent(new ObjectDeletedEvent());
-            await ConfirmEvents();
-        }
-
-        [StateModification]
         public async Task UpdateStateAsync(SecondRubric secondRubric)
         {
             RaiseEvent(new StateChangedEvent<SecondRubric>(secondRubric));
@@ -68,6 +58,19 @@ namespace NuClear.Broadway.Grains
 
             var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(State.CategoryCode);
             await categoryGrain.AddSecondRubricAsync(State.Code);
+        }
+
+        [StateModification]
+        public async Task DeleteAsync(long code)
+        {
+            if (State.CategoryCode != default)
+            {
+                var categoryGrain = GrainFactory.GetGrain<ICategoryGrain>(State.CategoryCode);
+                await categoryGrain.RemoveSecondRubricAsync(State.Code);
+            }
+
+            RaiseEvent(new ObjectDeletedEvent(code));
+            await ConfirmEvents();
         }
 
         protected override void TransitionState(SecondRubric state, object @event)
@@ -88,7 +91,8 @@ namespace NuClear.Broadway.Grains
                     state.Localizations = stateChangedEvent.State.Localizations;
 
                     break;
-                case ObjectDeletedEvent _:
+                case ObjectDeletedEvent objectDeletedEvent:
+                    state.Code = objectDeletedEvent.Id;
                     state.IsDeleted = true;
 
                     break;

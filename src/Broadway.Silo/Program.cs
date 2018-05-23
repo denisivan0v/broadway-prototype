@@ -3,11 +3,16 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
+using NuClear.Broadway.DataProjection;
 using NuClear.Broadway.Grains;
 using NuClear.Broadway.Grains.Options;
+using NuClear.Broadway.Interfaces.Workers;
 using NuClear.Broadway.Kafka;
 using NuClear.Broadway.Silo.Concurrency;
 
@@ -16,6 +21,7 @@ using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Persistence.Cassandra;
+using Orleans.Runtime;
 
 using Serilog;
 
@@ -90,6 +96,10 @@ namespace NuClear.Broadway.Silo
                                services.AddSingleton(kafkaOptions.MergeWith(mainClusterKafkaOptions));
 
                                services.AddTransient<MessageSender>();
+
+                               var connectionString = configuration.GetConnectionString("BroadwayDataProjection");
+                               services.AddEntityFrameworkNpgsql()
+                                       .AddDbContextPool<DataProjectionContext>(builder => builder.UseNpgsql(connectionString));
                            })
                    .Configure<ClusterOptions>(
                        options =>
@@ -105,6 +115,42 @@ namespace NuClear.Broadway.Silo
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))
                    .AddIncomingGrainCallFilter<StateModificationCallFilter>()
+                   .AddStartupTask(
+                       (serviceProvider, cancellationToken) =>
+                           {
+                               var taskScheduler = TaskScheduler.Current;
+                               var tcs = new GrainCancellationTokenSource();
+                               cancellationToken.Register(() => tcs.Cancel());
+
+                               var grainFactory = serviceProvider.GetRequiredService<IGrainFactory>();
+
+                               var dataProjectionGrain = grainFactory.GetGrain<IDataProjectionMakerGrain>(Guid.NewGuid().ToString());
+                               Task.Factory.StartNew(
+                                   async () =>
+                                       {
+                                           while (true)
+                                           {
+                                               try
+                                               {
+                                                   await dataProjectionGrain.StartExecutingAsync(tcs.Token);
+                                               }
+                                               catch (Exception ex)
+                                               {
+                                                   logger.Error(
+                                                       ex,
+                                                       "Unexpected error occured in worker {workerType}. Worker will be restarted.",
+                                                       dataProjectionGrain.GetType().FullName);
+
+                                                   await Task.Delay(1000, cancellationToken);
+                                               }
+                                           }
+                                       },
+                                   cancellationToken,
+                                   TaskCreationOptions.LongRunning,
+                                   taskScheduler);
+
+                               return Task.CompletedTask;
+                           })
                    .Build();
         }
 

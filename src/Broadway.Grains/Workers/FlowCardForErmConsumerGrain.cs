@@ -5,7 +5,9 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 
 using NuClear.Broadway.Grains.Options;
-using NuClear.Broadway.Interfaces;
+using NuClear.Broadway.Interfaces.Grains;
+using NuClear.Broadway.Interfaces.Models;
+
 using Orleans.Concurrency;
 using NuClear.Broadway.Interfaces.Workers;
 
@@ -19,9 +21,7 @@ namespace NuClear.Broadway.Grains.Workers
 
         private readonly ILogger<FlowCardForErmConsumerGrain> _logger;
 
-        public FlowCardForErmConsumerGrain(
-            ILogger<FlowCardForErmConsumerGrain> logger,
-            ReferenceObjectsClusterKafkaOptions kafkaOptions)
+        public FlowCardForErmConsumerGrain(ILogger<FlowCardForErmConsumerGrain> logger, ReferenceObjectsClusterKafkaOptions kafkaOptions)
             : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
         {
             _logger = logger;

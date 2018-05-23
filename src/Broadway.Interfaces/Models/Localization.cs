@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NuClear.Broadway.Interfaces
+namespace NuClear.Broadway.Interfaces.Models
 {
     public struct Localization : IEquatable<Localization>
     {

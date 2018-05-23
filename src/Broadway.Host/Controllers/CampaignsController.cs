@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using NuClear.Broadway.Host.Commands;
-using NuClear.Broadway.Interfaces;
+using NuClear.Broadway.Interfaces.Grains;
 
 using Orleans;
 

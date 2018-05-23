@@ -2,8 +2,9 @@
 
 using Microsoft.Extensions.Logging;
 
-using NuClear.Broadway.Interfaces;
 using NuClear.Broadway.Interfaces.Events;
+using NuClear.Broadway.Interfaces.Grains;
+using NuClear.Broadway.Interfaces.Models;
 
 using Orleans.EventSourcing;
 

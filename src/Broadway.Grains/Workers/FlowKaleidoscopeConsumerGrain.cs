@@ -5,7 +5,8 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 
 using NuClear.Broadway.Grains.Options;
-using NuClear.Broadway.Interfaces;
+using NuClear.Broadway.Interfaces.Grains;
+using NuClear.Broadway.Interfaces.Models;
 using NuClear.Broadway.Interfaces.Workers;
 
 using Orleans.Concurrency;

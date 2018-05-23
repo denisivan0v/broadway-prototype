@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NuClear.Broadway.Interfaces
+namespace NuClear.Broadway.Interfaces.Models
 {
     public sealed class CardForERM
     {

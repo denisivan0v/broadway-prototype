@@ -17,7 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 
 using NuClear.Broadway.Host.Options;
-using NuClear.Broadway.Interfaces;
+using NuClear.Broadway.Interfaces.Grains;
 
 using Orleans;
 using Orleans.Clustering.Cassandra;

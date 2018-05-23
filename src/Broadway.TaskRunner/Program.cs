@@ -6,7 +6,9 @@ using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NuClear.Broadway.Interfaces;
+
+using NuClear.Broadway.Interfaces.Grains;
+
 using Orleans;
 using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;

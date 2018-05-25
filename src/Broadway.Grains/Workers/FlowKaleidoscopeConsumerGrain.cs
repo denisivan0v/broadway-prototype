@@ -67,10 +67,12 @@ namespace NuClear.Broadway.Grains.Workers
                 category.Localizations =
                     localizations?.Elements()
                                  .Select(
-                                     x => new Localization(
-                                         (string)x.Attribute(nameof(Localization.Lang)),
-                                         (string)x.Attribute(nameof(Localization.Name))))
-                                 .ToHashSet();
+                                     x => new Localization
+                                         {
+                                             Lang = (string)x.Attribute(nameof(Localization.Lang)),
+                                             Name = (string)x.Attribute(nameof(Localization.Name))
+                                         })
+                                 .ToList();
 
                 await categoryGrain.UpdateStateAsync(category);
             }
@@ -98,10 +100,12 @@ namespace NuClear.Broadway.Grains.Workers
                 secondRubric.Localizations =
                     localizations?.Elements()
                                  .Select(
-                                     x => new Localization(
-                                         (string)x.Attribute(nameof(Localization.Lang)),
-                                         (string)x.Attribute(nameof(Localization.Name))))
-                                 .ToHashSet();
+                                     x => new Localization
+                                         {
+                                             Lang = (string)x.Attribute(nameof(Localization.Lang)),
+                                             Name = (string)x.Attribute(nameof(Localization.Name))
+                                         })
+                                 .ToList();
                 await secondRubricGrain.UpdateStateAsync(secondRubric);
             }
             else
@@ -129,11 +133,13 @@ namespace NuClear.Broadway.Grains.Workers
                 rubric.Localizations =
                     localizations?.Elements()
                                  .Select(
-                                     x => new Localization(
-                                         (string)x.Attribute(nameof(Localization.Lang)),
-                                         (string)x.Attribute(nameof(Localization.Name)),
-                                         (string)x.Attribute(nameof(Localization.ShortName))))
-                                 .ToHashSet();
+                                     x => new Localization
+                                         {
+                                             Lang = (string)x.Attribute(nameof(Localization.Lang)),
+                                             Name = (string)x.Attribute(nameof(Localization.Name)),
+                                             ShortName = (string)x.Attribute(nameof(Localization.ShortName))
+                                         })
+                                 .ToList();
 
                 rubric.Branches = xml.Elements("Groups")
                                      .Elements()

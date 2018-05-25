@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 using NuClear.Broadway.Interfaces.Models;
 
@@ -6,8 +7,7 @@ namespace NuClear.Broadway.DataProjection
 {
     public sealed class DataProjectionContext : DbContext
     {
-        public DataProjectionContext(DbContextOptions<DataProjectionContext> options)
-            : base(options)
+        public DataProjectionContext(DbContextOptions options) : base(options)
         {
         }
 
@@ -17,18 +17,39 @@ namespace NuClear.Broadway.DataProjection
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var category = modelBuilder.Entity<Category>();
-            var secondRubric = modelBuilder.Entity<SecondRubric>();
-            var rubric = modelBuilder.Entity<Rubric>();
-
-            category.HasKey(x => x.Code);
-            category.Property(x => x.IsDeleted).IsRequired();
-
-            secondRubric.HasKey(x => x.Code);
-            secondRubric.Property(x => x.IsDeleted).IsRequired();
-
-            rubric.HasKey(x => x.Code);
-            rubric.Property(x => x.Code).IsRequired();
+            modelBuilder.Entity<Localization>(
+                builder =>
+                    {
+                        builder.Property<long>("Id");
+                        builder.Property(x => x.Lang).IsRequired();
+                        builder.Property(x => x.Name).IsRequired();
+                        builder.HasKey("Id");
+                        builder.ToTable("Localizations");
+                    });
+            modelBuilder.Entity<Category>(
+                builder =>
+                    {
+                        builder.HasKey(x => x.Code);
+                        builder.Property(x => x.IsDeleted).IsRequired();
+                        builder.HasMany(x => x.Localizations).WithOne();
+                        builder.Ignore(x => x.SecondRubrics);
+                    });
+            modelBuilder.Entity<SecondRubric>(
+                builder =>
+                    {
+                        builder.HasKey(x => x.Code);
+                        builder.Property(x => x.IsDeleted).IsRequired();
+                        builder.HasMany(x => x.Localizations).WithOne();
+                        builder.Ignore(x => x.Rubrics);
+                    });
+            modelBuilder.Entity<Rubric>(
+                builder =>
+                    {
+                        builder.HasKey(x => x.Code);
+                        builder.Property(x => x.Code).IsRequired();
+                        builder.HasMany(x => x.Localizations).WithOne();
+                        builder.Ignore(x => x.Branches);
+                    });
         }
     }
 }

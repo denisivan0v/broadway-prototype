@@ -7,7 +7,7 @@ namespace NuClear.Broadway.Interfaces.Models
         public long Code { get; set; }
         public long CategoryCode { get; set; }
         public bool IsDeleted { get; set; }
-        public ISet<Localization> Localizations { get; set; }
+        public List<Localization> Localizations { get; set; }
         public ISet<long> Rubrics { get; set; }
     }
 }

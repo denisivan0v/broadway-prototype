@@ -10,16 +10,20 @@ using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class RubricGrain : JournaledGrain<Rubric>, IRubricGrain, IVersionedGrain
+    public class RubricGrain : JournaledGrain<Rubric>, IRubricGrain
     {
         private readonly ILogger<Rubric> _logger;
+        private readonly IDataProjector<Rubric> _dataProjector;
 
-        public RubricGrain(ILogger<Rubric> logger)
+        public RubricGrain(ILogger<Rubric> logger, IDataProjector<Rubric> dataProjector)
         {
             _logger = logger;
+            _dataProjector = dataProjector;
         }
 
-        public int GetCurrentVersion() => Version;
+        public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
+
+        public async Task ProjectStateAsync() => await _dataProjector.ProjectAsync(State);
 
         [StateModification]
         public async Task UpdateStateAsync(Rubric rubric)

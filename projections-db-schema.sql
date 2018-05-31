@@ -1,11 +1,11 @@
 ﻿CREATE TABLE "Categories" (
-    "Code" bigserial NOT NULL,
+    "Code" int8 NOT NULL,
     "IsDeleted" bool NOT NULL,
     CONSTRAINT "PK_Categories" PRIMARY KEY ("Code")
 );
 
 CREATE TABLE "Rubrics" (
-    "Code" bigserial NOT NULL,
+    "Code" int8 NOT NULL,
     "IsCommercial" bool NOT NULL,
     "IsDeleted" bool NOT NULL,
     "SecondRubricCode" int8 NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE "Rubrics" (
 );
 
 CREATE TABLE "SecondRubrics" (
-    "Code" bigserial NOT NULL,
+    "Code" int8 NOT NULL,
     "CategoryCode" int8 NOT NULL,
     "IsDeleted" bool NOT NULL,
     CONSTRAINT "PK_SecondRubrics" PRIMARY KEY ("Code")
@@ -22,8 +22,8 @@ CREATE TABLE "SecondRubrics" (
 CREATE TABLE "Localizations" (
     "Id" bigserial NOT NULL,
     "CategoryCode" int8 NULL,
-    "Lang" text NULL,
-    "Name" text NULL,
+    "Lang" text NOT NULL,
+    "Name" text NOT NULL,
     "RubricCode" int8 NULL,
     "SecondRubricCode" int8 NULL,
     "ShortName" text NULL,

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 using NuClear.Broadway.Interfaces.Models;
 
@@ -20,7 +19,7 @@ namespace NuClear.Broadway.DataProjection
             modelBuilder.Entity<Localization>(
                 builder =>
                     {
-                        builder.Property<long>("Id");
+                        builder.Property<long>("Id").UseNpgsqlSerialColumn();
                         builder.Property(x => x.Lang).IsRequired();
                         builder.Property(x => x.Name).IsRequired();
                         builder.HasKey("Id");
@@ -30,6 +29,7 @@ namespace NuClear.Broadway.DataProjection
                 builder =>
                     {
                         builder.HasKey(x => x.Code);
+                        builder.Property(x => x.Code).ValueGeneratedNever();
                         builder.Property(x => x.IsDeleted).IsRequired();
                         builder.HasMany(x => x.Localizations).WithOne();
                         builder.Ignore(x => x.SecondRubrics);
@@ -38,6 +38,7 @@ namespace NuClear.Broadway.DataProjection
                 builder =>
                     {
                         builder.HasKey(x => x.Code);
+                        builder.Property(x => x.Code).ValueGeneratedNever();
                         builder.Property(x => x.IsDeleted).IsRequired();
                         builder.HasMany(x => x.Localizations).WithOne();
                         builder.Ignore(x => x.Rubrics);
@@ -46,6 +47,7 @@ namespace NuClear.Broadway.DataProjection
                 builder =>
                     {
                         builder.HasKey(x => x.Code);
+                        builder.Property(x => x.Code).ValueGeneratedNever();
                         builder.Property(x => x.Code).IsRequired();
                         builder.HasMany(x => x.Localizations).WithOne();
                         builder.Ignore(x => x.Branches);

@@ -12,7 +12,7 @@ using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class FirmGrain : JournaledGrain<Firm>, IFirmGrain, IVersionedGrain
+    public class FirmGrain : JournaledGrain<Firm>, IFirmGrain, IStateProjectorGrain
     {
         private readonly ILogger<FirmGrain> _logger;
 
@@ -21,7 +21,12 @@ namespace NuClear.Broadway.Grains
             _logger = logger;
         }
 
-        public int GetCurrentVersion() => Version;
+        public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
+
+        public Task ProjectStateAsync()
+        {
+            throw new System.NotImplementedException();
+        }
 
         [StateModification]
         public async Task AddCardAsync(long cardCode)

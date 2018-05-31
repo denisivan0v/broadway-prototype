@@ -13,7 +13,7 @@ using Orleans.Providers;
 namespace NuClear.Broadway.Grains
 {
     [LogConsistencyProvider(ProviderName = "LogStorage")]
-    public class CampaignGrain : JournaledGrain<Campaign>, ICampaignGrain, IVersionedGrain
+    public class CampaignGrain : JournaledGrain<Campaign>, ICampaignGrain, IStateProjectorGrain
     {
         private readonly ILogger<CampaignGrain> _logger;
 
@@ -22,7 +22,12 @@ namespace NuClear.Broadway.Grains
             _logger = logger;
         }
 
-        public int GetCurrentVersion() => Version;
+        public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
+
+        public Task ProjectStateAsync()
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<Campaign> GetStateAsync() => Task.FromResult(State);
 

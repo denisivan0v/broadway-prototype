@@ -6,7 +6,7 @@ using Orleans;
 
 namespace NuClear.Broadway.Interfaces.Grains
 {
-    public interface ICategoryGrain : IGrainWithIntegerKey
+    public interface ICategoryGrain : IStateProjectorGrain
     {
         Task AddSecondRubricAsync(long secondRubricCode);
         Task RemoveSecondRubricAsync(long secondRubricCode);

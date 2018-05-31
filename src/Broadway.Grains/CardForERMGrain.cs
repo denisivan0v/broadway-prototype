@@ -8,9 +8,14 @@ using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class CardForERMGrain : JournaledGrain<CardForERM, StateChangedEvent<CardForERM>>, ICardForERMGrain, IVersionedGrain
+    public class CardForERMGrain : JournaledGrain<CardForERM, StateChangedEvent<CardForERM>>, ICardForERMGrain, IStateProjectorGrain
     {
-        public int GetCurrentVersion() => Version;
+        public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
+
+        public Task ProjectStateAsync()
+        {
+            throw new System.NotImplementedException();
+        }
 
         public Task<long> GetFirmCodeAsync() => Task.FromResult(State.FirmCode);
 

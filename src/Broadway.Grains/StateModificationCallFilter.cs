@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using NuClear.Broadway.Interfaces.Events;
 using NuClear.Broadway.Interfaces.Grains;
 using NuClear.Broadway.Kafka;
 
@@ -26,13 +27,14 @@ namespace NuClear.Broadway.Grains
             var attribute = context.ImplementationMethod.GetCustomAttribute<StateModificationAttribute>();
             if (attribute != null)
             {
-                if (context.Grain is IVersionedGrain versionedGrain)
+                if (context.Grain is IStateProjectorGrain stateProjectorGrain)
                 {
                     var grainType = context.ImplementationMethod.DeclaringType.FullName;
                     var grainKey = context.Grain.GetPrimaryKeyLong();
-                    var grainVersion = versionedGrain.GetCurrentVersion();
+                    var grainVersion = await stateProjectorGrain.GetCurrentVersionAsync();
 
-                    var message = JsonConvert.SerializeObject(new { grainType, grainKey, grainVersion });
+                    var @event = new GrainStateModifyingEvent(grainType, grainKey, grainVersion);
+                    var message = @event.Serialize();
 
                     var messageKey = $"{grainType}|{grainKey}";
                     await _messageSender.SendAsync(Topic, messageKey, message);

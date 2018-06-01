@@ -58,48 +58,70 @@ namespace NuClear.Broadway.Grains.Workers
             return task;
         }
 
-        public async Task StartExecutingAsync(GrainCancellationToken cancellation)
+        public Task StartExecutingAsync(GrainCancellationToken cancellation)
         {
-            var waitHandler = new ManualResetEventSlim(false);
+            var waitHandle = new ManualResetEventSlim(false);
 
-            var consumingTask = Task.Run(() =>
-            {
-                while (!cancellation.CancellationToken.IsCancellationRequested)
-                {
-                    if (_messageProcessingQueue.Count >= BufferSize)
-                    {
-                        _logger.LogTrace("Enabling consumer backpressure...");
-                        waitHandler.Reset();
-                        waitHandler.Wait();
-                    }
+            RunPollLoopOnThreadpool(cancellation.CancellationToken, waitHandle);
 
-                    _messageReceiver.Poll();
-                }
+            RunMessageProcessingLoop(cancellation.CancellationToken, waitHandle);
 
-                _logger.LogTrace("Kafka poll loop started.");
-            });
-
-            while (await _messageProcessingQueue.OutputAvailableAsync(cancellation.CancellationToken))
-            {
-                var message = await _messageProcessingQueue.ReceiveAsync();
-                _logger.LogTrace("Got new message from Kafka.");
-
-                if (_messageProcessingQueue.Count < BufferSize && !waitHandler.IsSet)
-                {
-                    waitHandler.Set();
-                    _logger.LogTrace("Consumer backpressure disabled.");
-                }
-
-                await ProcessMessage(message);
-
-                await _messageReceiver.CommitAsync(message);
-
-                _logger.LogTrace("A message from Kafka processed successfully.");
-            }
+            return Task.CompletedTask;
         }
 
         protected abstract Task ProcessMessage(Message<string, string> message);
 
         private void OnMessage(object sender, Message<string, string> message) => _messageProcessingQueue.Post(message);
+
+        private void RunPollLoopOnThreadpool(CancellationToken cancellationToken, ManualResetEventSlim waitHandle)
+        {
+            Task.Run(
+                () =>
+                    {
+                        while (!cancellationToken.IsCancellationRequested)
+                        {
+                            if (_messageProcessingQueue.Count >= BufferSize)
+                            {
+                                _logger.LogTrace("Enabling consumer backpressure...");
+                                waitHandle.Reset();
+                                waitHandle.Wait(cancellationToken);
+                            }
+
+                            _messageReceiver.Poll();
+                        }
+                    },
+                cancellationToken);
+
+            _logger.LogTrace("Kafka poll loop started.");
+        }
+
+        private void RunMessageProcessingLoop(CancellationToken cancellationToken, ManualResetEventSlim waitHandle)
+        {
+            var scheduler = TaskScheduler.Current;
+            Task.Factory.StartNew(
+                async () =>
+                    {
+                        while (await _messageProcessingQueue.OutputAvailableAsync(cancellationToken))
+                        {
+                            var message = await _messageProcessingQueue.ReceiveAsync(cancellationToken);
+                            _logger.LogTrace("Got new message from Kafka.");
+
+                            if (_messageProcessingQueue.Count < BufferSize && !waitHandle.IsSet)
+                            {
+                                waitHandle.Set();
+                                _logger.LogTrace("Consumer backpressure disabled.");
+                            }
+
+                            await ProcessMessage(message);
+
+                            await _messageReceiver.CommitAsync(message);
+
+                            _logger.LogTrace("A message from Kafka processed successfully.");
+                        }
+                    },
+                cancellationToken,
+                TaskCreationOptions.LongRunning,
+                scheduler);
+        }
     }
 }

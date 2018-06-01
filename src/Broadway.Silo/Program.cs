@@ -17,6 +17,7 @@ using NuClear.Broadway.Interfaces.Models;
 using NuClear.Broadway.Interfaces.Workers;
 using NuClear.Broadway.Kafka;
 using NuClear.Broadway.Silo.Concurrency;
+using NuClear.Broadway.Silo.StartupTasks;
 
 using Orleans;
 using Orleans.Clustering.Cassandra;
@@ -119,69 +120,7 @@ namespace NuClear.Broadway.Silo
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))
                    .AddIncomingGrainCallFilter<StateModificationCallFilter>()
-                   /*
-                   .AddStartupTask(
-                       (serviceProvider, cancellationToken) =>
-                           {
-                               var taskScheduler = TaskScheduler.Current;
-                               var tcs = new GrainCancellationTokenSource();
-                               cancellationToken.Register(() => tcs.Cancel());
-
-                               Task.Factory.StartNew(
-                                   async () =>
-                                       {
-                                           var grainFactory = serviceProvider.GetRequiredService<IGrainFactory>();
-                                           var flowKaleidoscopeConsumerGrain = grainFactory.GetGrain<IFlowKaleidoscopeConsumerGrain>(Guid.NewGuid().ToString());
-                                           while (true)
-                                           {
-                                               try
-                                               {
-                                                   await flowKaleidoscopeConsumerGrain.StartExecutingAsync(tcs.Token);
-                                               }
-                                               catch (Exception ex)
-                                               {
-                                                   logger.Error(
-                                                       ex,
-                                                       "Unexpected error occured in worker {workerType}. Worker will be restarted.",
-                                                       flowKaleidoscopeConsumerGrain.GetType().FullName);
-
-                                                   await Task.Delay(1000, cancellationToken);
-                                               }
-                                           }
-                                       },
-                                   cancellationToken,
-                                   TaskCreationOptions.LongRunning,
-                                   taskScheduler);
-
-                               Task.Factory.StartNew(
-                                   async () =>
-                                       {
-                                           var grainFactory = serviceProvider.GetRequiredService<IGrainFactory>();
-                                           var dataProjectionGrain = grainFactory.GetGrain<IDataProjectionDispatchingGrain>(Guid.NewGuid().ToString());
-                                           while (true)
-                                           {
-                                               try
-                                               {
-                                                   await dataProjectionGrain.StartExecutingAsync(tcs.Token);
-                                               }
-                                               catch (Exception ex)
-                                               {
-                                                   logger.Error(
-                                                       ex,
-                                                       "Unexpected error occured in worker {workerType}. Worker will be restarted.",
-                                                       dataProjectionGrain.GetType().FullName);
-
-                                                   await Task.Delay(1000, cancellationToken);
-                                               }
-                                           }
-                                       },
-                                   cancellationToken,
-                                   TaskCreationOptions.LongRunning,
-                                   taskScheduler);
-
-                               return Task.CompletedTask;
-                           })
-                           */
+                   //.AddStartupTask<RunFlowConsumersStartupTask>()
                    .Build();
         }
 

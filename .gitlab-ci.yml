@@ -96,7 +96,7 @@ deploy-testing:
     - export BROADWAY_VERSION=${CI_TAG}
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - pip install cassandra-driver
-    - python run-cql.py ${CASSANDRA_STAGE_HOST} "CREATE KEYSPACE ${ENVIRONMENT_KEYSPACE} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} AND durable_writes = true"
+    - "python run-cql.py ${CASSANDRA_STAGE_HOST} \"CREATE KEYSPACE ${ENVIRONMENT_KEYSPACE} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} AND durable_writes = true\""
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   except:
     - master

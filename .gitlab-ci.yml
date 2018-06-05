@@ -83,7 +83,7 @@ deploy-staging:
   tags: [ 2gis, docker ]
   environment:
     name: broadway-prototype
-    url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
+    url: http://broadway-${CI_COMMIT_REF_SLUG}.web-staging.2gis.ru/swagger
 
 deploy-testing:
   stage: deploy
@@ -103,7 +103,7 @@ deploy-testing:
   tags: [ 2gis, docker ]
   environment:
     name: testing/${CI_COMMIT_REF_NAME}
-    url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
+    url: http://broadway-${CI_COMMIT_REF_SLUG}.web-staging.2gis.ru/swagger
     on_stop: destroy-testing
 
 destroy-testing:

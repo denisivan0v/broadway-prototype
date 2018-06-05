@@ -29,7 +29,7 @@ build-apps:
     paths:
       - publish/broadway-host/
       - publish/broadway-silo/
-      
+
 storage-up:
   stage: pre
   when: always
@@ -40,9 +40,9 @@ storage-up:
   tags: [ 2gis, docker ]
   only:
     - master
-      
+
 # ================= Dockerize =================
-      
+
 broadway-host-image:
   stage: dockerize
 #  when: manual
@@ -64,10 +64,10 @@ broadway-silo-image:
   tags: [ docker-engine, io ]
   dependencies:
     - build-apps
-    
+
 # ================ Deploy =================
 
-broadway-prototype:
+deploy-staging:
   stage: deploy
 #  when: manual
   image: $REGISTRY/2gis-io/k8s-handle:latest
@@ -84,7 +84,52 @@ broadway-prototype:
   environment:
     name: broadway-prototype
     url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
-      
+
+deploy-testing:
+  stage: deploy
+  when: manual
+  image: $REGISTRY/2gis-io/k8s-handle:latest
+  script:
+    - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
+    - export ENVIRONMENT_KEYSPACE=${CI_COMMIT_REF_SLUG}
+    - export ROADS_ENVIRONMENT=stage
+    - export BROADWAY_VERSION=${CI_TAG}
+    - export TEMP_DIR=${CI_PROJECT_DIR}/k8s_deploy
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
+    - pip install cassandra-driver
+    - python run-cql.py "${CASSANDRA_STAGE_HOST}" "CREATE KEYSPACE ${ENVIRONMENT_KEYSPACE} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} AND durable_writes = true"
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
+  except:
+    - master
+    - tags
+  dependencies: []
+  tags: [ 2gis, docker ]
+  environment:
+    name: testing/${CI_COMMIT_REF_NAME}
+    url: http://${CI_ENVIRONMENT_SLUG}.web-staging.2gis.ru/swagger
+    on_stop: destroy-testing
+  artifacts:
+    paths:
+      - k8s_deploy/
+    when: always
+    expire_in: 1 month
+
+destroy-testing:
+  stage: deploy
+  when: manual
+  image: $REGISTRY/2gis-io/k8s-handle:latest
+  script:
+    - k8s-handle destroy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
+    - pip install cassandra-driver
+    - k8s-handle destroy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 60
+    - python run-cql.py "${CASSANDRA_STAGE_HOST}" "DROP KEYSPACE ${CI_COMMIT_REF_SLUG}"
+  dependencies:
+    - deploy-testing
+  tags: [ 2gis, docker ]
+  environment:
+    name: testing/${CI_COMMIT_REF_NAME}
+    action: stop
+
 # ================= End =================
 
 cleanup:registry:

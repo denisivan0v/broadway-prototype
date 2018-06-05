@@ -1,8 +1,6 @@
 common:
   kafka_brokers: "roads-{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
 
-deploy-storage:
-
   k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
   k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
   k8s_namespace: "erm-roads"
@@ -15,6 +13,8 @@ deploy-storage:
   max_unavailable: 0 
   node_selector: "worker"
   termination_grace_period_seconds: 60
+
+deploy-storage:
   revision_history_limit: 3
 
   postgres_path: "postgres"
@@ -52,51 +52,9 @@ deploy-storage:
   - template: service-postgres.yaml.j2
   - template: service-zookeeper.yaml.j2
   - template: service-kafka.yaml.j2
-  
-deploy-cassandra:
-
-  k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
-  k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
-  k8s_namespace: "erm-roads"
-  k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
-  
-  vendor: "roads"
-  id: "{{ env='DOMAIN_POSTFIX' }}"
-
-  max_surge: 1
-  max_unavailable: 0 
-  node_selector: "worker"
-  termination_grace_period_seconds: 60
-
-  cassandra_path: "cassandra"
-  cassandra_version: "3.11.2"
-  cassandra_limits_cpu: "300m"
-  cassandra_limits_memory: "500Mi"
-  cassandra_requests_cpu: "100m"
-  cassandra_requests_memory: "200Mi"
-  cassandra_replicas: 2
-  java_max_heap_size: "200M"
-  cassandra_sluster_name: "roads"
-  cassandra_dc: "n3"
-
-  kubectl:
-  - template: statefulset-cassandra.yaml.j2
-  - template: service-cassandra.yaml.j2
 
 deploy-apps:
 
-  k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
-  k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
-  k8s_namespace: "erm-roads"
-  k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
-  
-  vendor: "roads"
-  id: "{{ env='DOMAIN_POSTFIX' }}"
-  
-  max_surge: 1
-  max_unavailable: 0
-  node_selector: "worker"
-  termination_grace_period_seconds: 60
   revision_history_limit: 3
 
   replicas_count_apps: 1
@@ -140,4 +98,3 @@ deploy-apps:
   - template: deployment-host.yaml.j2
   - template: service-silo.yaml.j2
   - template: service-host.yaml.j2  
-

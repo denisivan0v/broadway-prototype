@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -29,18 +28,6 @@ namespace NuClear.Broadway.Grains
         [StateModification]
         public async Task AddRubricAsync(long rubricCode)
         {
-            if (State.Rubrics != null)
-            {
-                if (State.Rubrics.Contains(rubricCode))
-                {
-                    return;
-                }
-            }
-            else
-            {
-                State.Rubrics = new HashSet<long>();
-            }
-
             RaiseEvent(new RubricAddedToSecondRubricEvent(rubricCode));
             await ConfirmEvents();
         }
@@ -48,11 +35,8 @@ namespace NuClear.Broadway.Grains
         [StateModification]
         public async Task RemoveRubricAsync(long rubricCode)
         {
-            if (State.Rubrics != null)
-            {
-                RaiseEvent(new RubricRemovedFromSecondRubricEvent(rubricCode));
-                await ConfirmEvents();
-            }
+            RaiseEvent(new RubricRemovedFromSecondRubricEvent(rubricCode));
+            await ConfirmEvents();
         }
 
         [StateModification]
@@ -83,11 +67,11 @@ namespace NuClear.Broadway.Grains
             switch (@event)
             {
                 case RubricAddedToSecondRubricEvent rubricAddedToSecondRubricEvent:
-                    state.Rubrics.Add(rubricAddedToSecondRubricEvent.RubricCode);
+                    state.AddRubric(rubricAddedToSecondRubricEvent.RubricCode);
 
                     break;
                 case RubricRemovedFromSecondRubricEvent rubricRemovedFromSecondRubricEvent:
-                    state.Rubrics.Remove(rubricRemovedFromSecondRubricEvent.RubricCode);
+                    state.RemoveRubric(rubricRemovedFromSecondRubricEvent.RubricCode);
 
                     break;
                 case StateChangedEvent<SecondRubric> stateChangedEvent:

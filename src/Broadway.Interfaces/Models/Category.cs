@@ -7,6 +7,28 @@ namespace NuClear.Broadway.Interfaces.Models
         public long Code { get; set; }
         public bool IsDeleted { get; set; }
         public List<Localization> Localizations { get; set; }
-        public ISet<long> SecondRubrics { get; set; }
+        public ISet<long> SecondRubrics { get; private set; }
+
+        public void AddSecondRubric(long secondRubricCode)
+        {
+            if (SecondRubrics != default)
+            {
+                if (SecondRubrics.Contains(secondRubricCode))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                SecondRubrics = new HashSet<long>();
+            }
+
+            SecondRubrics.Add(secondRubricCode);
+        }
+
+        public void RemoveSecondRubric(long secondRubricCode)
+        {
+            SecondRubrics?.Remove(secondRubricCode);
+        }
     }
 }

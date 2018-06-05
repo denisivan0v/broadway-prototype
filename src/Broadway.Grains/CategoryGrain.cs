@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -29,18 +28,6 @@ namespace NuClear.Broadway.Grains
         [StateModification]
         public async Task AddSecondRubricAsync(long secondRubricCode)
         {
-            if (State.SecondRubrics != null)
-            {
-                if (State.SecondRubrics.Contains(secondRubricCode))
-                {
-                    return;
-                }
-            }
-            else
-            {
-                State.SecondRubrics = new HashSet<long>();
-            }
-
             RaiseEvent(new SecondRubricAddedToCategoryEvent(secondRubricCode));
             await ConfirmEvents();
         }
@@ -48,11 +35,8 @@ namespace NuClear.Broadway.Grains
         [StateModification]
         public async Task RemoveSecondRubricAsync(long secondRubricCode)
         {
-            if (State.SecondRubrics != null)
-            {
-                RaiseEvent(new SecondRubricRemovedFromCategoryEvent(secondRubricCode));
-                await ConfirmEvents();
-            }
+            RaiseEvent(new SecondRubricRemovedFromCategoryEvent(secondRubricCode));
+            await ConfirmEvents();
         }
 
         [StateModification]
@@ -74,10 +58,12 @@ namespace NuClear.Broadway.Grains
             switch (@event)
             {
                 case SecondRubricAddedToCategoryEvent secondRubricAddedToCategoryEvent:
-                    state.SecondRubrics.Add(secondRubricAddedToCategoryEvent.SecondRubricCode);
+                    state.AddSecondRubric(secondRubricAddedToCategoryEvent.SecondRubricCode);
+
                     break;
                 case SecondRubricRemovedFromCategoryEvent secondRubricRemovedFromCategoryEvent:
-                    state.SecondRubrics.Remove(secondRubricRemovedFromCategoryEvent.SecondRubricCode);
+                    state.RemoveSecondRubric(secondRubricRemovedFromCategoryEvent.SecondRubricCode);
+
                     break;
                 case StateChangedEvent<Category> stateChangedEvent:
                     state.Code = stateChangedEvent.State.Code;
@@ -94,6 +80,7 @@ namespace NuClear.Broadway.Grains
                         "Got an {eventType} event, but the state wasn't updated. Current version is {version}.",
                         @event.GetType(),
                         Version);
+
                     return;
             }
         }

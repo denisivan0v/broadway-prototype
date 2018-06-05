@@ -23,11 +23,11 @@ namespace NuClear.Broadway.Silo.StartupTasks
             var tcs = new GrainCancellationTokenSource();
             cancellationToken.Register(() => tcs.Cancel());
 
-            var flowKaleidoscopeConsumerGrain = _grainFactory.GetGrain<IFlowKaleidoscopeConsumerGrain>(Guid.NewGuid().ToString());
             var dataProjectionGrain = _grainFactory.GetGrain<IDataProjectionDispatchingGrain>(Guid.NewGuid().ToString());
-
-            await flowKaleidoscopeConsumerGrain.StartExecutingAsync(tcs.Token);
             await dataProjectionGrain.StartExecutingAsync(tcs.Token);
+
+            var flowKaleidoscopeConsumerGrain = _grainFactory.GetGrain<IFlowKaleidoscopeConsumerGrain>(Guid.NewGuid().ToString());
+            await flowKaleidoscopeConsumerGrain.StartExecutingAsync(tcs.Token);
         }
     }
 }

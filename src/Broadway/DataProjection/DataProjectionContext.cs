@@ -19,7 +19,7 @@ namespace NuClear.Broadway.DataProjection
             modelBuilder.Entity<Localization>(
                 builder =>
                     {
-                        builder.Property<long>("Id").UseNpgsqlSerialColumn();
+                        builder.Property<long>("Id").ForNpgsqlUseSequenceHiLo();
                         builder.Property(x => x.Lang).IsRequired();
                         builder.Property(x => x.Name).IsRequired();
                         builder.HasKey("Id");

@@ -8,6 +8,28 @@ namespace NuClear.Broadway.Interfaces.Models
         public long CategoryCode { get; set; }
         public bool IsDeleted { get; set; }
         public List<Localization> Localizations { get; set; }
-        public ISet<long> Rubrics { get; set; }
+        public ISet<long> Rubrics { get; private set; }
+
+        public void AddRubric(long rubricCode)
+        {
+            if (Rubrics != default)
+            {
+                if (Rubrics.Contains(rubricCode))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                Rubrics = new HashSet<long>();
+            }
+
+            Rubrics.Add(rubricCode);
+        }
+
+        public void RemoveRubric(long rubricCode)
+        {
+            Rubrics?.Remove(rubricCode);
+        }
     }
 }

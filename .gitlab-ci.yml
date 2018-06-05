@@ -117,8 +117,7 @@ destroy-testing:
     - pip install cassandra-driver
     - k8s-handle destroy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 60
     - python run-cql.py ${CASSANDRA_STAGE_HOST} "DROP KEYSPACE ${CI_COMMIT_REF_SLUG}"
-  dependencies:
-    - deploy-testing
+  dependencies: []
   tags: [ 2gis, docker ]
   environment:
     name: testing/${CI_COMMIT_REF_NAME}

@@ -95,8 +95,6 @@ deploy-testing:
     - export ROADS_ENVIRONMENT=stage
     - export BROADWAY_VERSION=${CI_TAG}
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
-    - pip install cassandra-driver
-    - "python run-cql.py ${CASSANDRA_STAGE_HOST} \"CREATE KEYSPACE ${ENVIRONMENT_KEYSPACE} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} AND durable_writes = true\""
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   except:
     - master
@@ -118,9 +116,9 @@ destroy-testing:
     - export ROADS_ENVIRONMENT=stage
     - export BROADWAY_VERSION=${CI_TAG}
     - k8s-handle destroy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
-    - pip install cassandra-driver
     - k8s-handle destroy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 60
-    - python run-cql.py ${CASSANDRA_STAGE_HOST} "DROP KEYSPACE ${CI_COMMIT_REF_SLUG}"
+    - pip install cassandra-driver
+    - python run-cql.py ${CASSANDRA_STAGE_HOST} ${CASSANDRA_STAGE_PORT} "DROP KEYSPACE ${ENVIRONMENT_KEYSPACE}"
   dependencies: []
   tags: [ 2gis, docker ]
   environment:

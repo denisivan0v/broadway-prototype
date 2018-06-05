@@ -17,7 +17,7 @@ before_script:
 build-apps:
   stage: pre
   when: always
-  image: $REGISTRY/microsoft/aspnetcore-build:2.0.6-2.1.101
+  image: $REGISTRY/microsoft/dotnet:2.1.300-sdk-alpine3.7
   script:
     - dotnet restore --runtime debian-x64
     - dotnet publish src/Broadway.Host --configuration Release --runtime debian-x64 --output ../../publish/broadway-host

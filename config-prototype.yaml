@@ -104,10 +104,10 @@ deploy-apps:
   roads_env: "{{ env='ROADS_ENVIRONMENT' }}"
   
   silo_path: "docker-hub.2gis.ru/roads/broadway-silo"
-  silo_limits_cpu: "300m"
-  silo_limits_memory: "250Mi"
-  silo_requests_cpu: "150m"
-  silo_requests_memory: "150Mi"
+  silo_limits_cpu: "500m"
+  silo_limits_memory: "500Mi"
+  silo_requests_cpu: "250m"
+  silo_requests_memory: "250Mi"
   silo_metrics_port: 3000
   
   host_domain: "{{ env='DOMAIN_POSTFIX' }}"

@@ -24,7 +24,7 @@ deploy-storage:
   postgres_limits_memory: "400Mi"
   postgres_requests_cpu: "50m"
   postgres_requests_memory: "100Mi"
-  postgres_db: "orleans"
+  postgres_db: "BroadwayDataProjection"
   postgres_user: "postgres"
   postgres_password: "postgres"
   

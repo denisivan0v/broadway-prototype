@@ -52,3 +52,5 @@ spec:
           value: '{{ broadway_ref_objects_cluster_kafka_brokers }}'
         - name: ROADS_ReferenceObjectsKafkaCluster__ConsumerGroupPostfix
           value: '{{ broadway_consumer_group_postfix }}'
+        - name: ROADS_ConnectionStrings_BroadwayDataProjection
+          value: 'Host={{ vendor }}-{{ id }}-postgres.erm-roads;Port={{ postgres_port }};Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'

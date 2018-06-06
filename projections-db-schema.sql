@@ -1,4 +1,6 @@
-﻿CREATE TABLE "Categories" (
+﻿CREATE SEQUENCE "EntityFrameworkHiLoSequence" START WITH 1 INCREMENT BY 10 NO MINVALUE NO MAXVALUE NO CYCLE;
+
+CREATE TABLE "Categories" (
     "Code" int8 NOT NULL,
     "IsDeleted" bool NOT NULL,
     CONSTRAINT "PK_Categories" PRIMARY KEY ("Code")
@@ -17,7 +19,7 @@ CREATE TABLE "SecondRubrics" (
     CONSTRAINT "PK_SecondRubrics" PRIMARY KEY ("Code")
 );
 CREATE TABLE "Localizations" (
-    "Id" bigserial NOT NULL,
+    "Id" int8 NOT NULL,
     "CategoryCode" int8 NULL,
     "Lang" text NOT NULL,
     "Name" text NOT NULL,

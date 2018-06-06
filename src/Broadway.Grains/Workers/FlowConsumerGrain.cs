@@ -1,11 +1,19 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+
 using Confluent.Kafka;
+
 using Microsoft.Extensions.Logging;
+
 using NuClear.Broadway.Interfaces.Workers;
 using NuClear.Broadway.Kafka;
+
 using Orleans;
+
+using Polly;
+using Polly.Retry;
 
 namespace NuClear.Broadway.Grains.Workers
 {
@@ -17,6 +25,7 @@ namespace NuClear.Broadway.Grains.Workers
         private readonly KafkaOptions _kafkaOptions;
         private readonly string _consumerGroupToken;
         private readonly string _topic;
+        private readonly RetryPolicy _retryPolicy;
 
         private readonly BufferBlock<Message<string, string>> _messageProcessingQueue =
             new BufferBlock<Message<string, string>>();
@@ -29,6 +38,18 @@ namespace NuClear.Broadway.Grains.Workers
             _kafkaOptions = kafkaOptions;
             _consumerGroupToken = consumerGroupToken;
             _topic = topic;
+
+            _retryPolicy =
+                Policy.Handle<Exception>(ex => !(ex is ObjectDisposedException))
+                      .WaitAndRetryForeverAsync(
+                          attempt => TimeSpan.FromMilliseconds(1000),
+                          (ex, duration) =>
+                              {
+                                  _logger.LogWarning(
+                                      ex,
+                                      "Unexpected error occured while consuming from topic {topic}",
+                                      _topic);
+                              });
         }
 
         public override async Task OnActivateAsync()
@@ -63,7 +84,6 @@ namespace NuClear.Broadway.Grains.Workers
             var waitHandle = new ManualResetEventSlim(false);
 
             RunPollLoopOnThreadpool(cancellation.CancellationToken, waitHandle);
-
             RunMessageProcessingLoop(cancellation.CancellationToken, waitHandle);
 
             return Task.CompletedTask;
@@ -78,17 +98,24 @@ namespace NuClear.Broadway.Grains.Workers
             Task.Run(
                 () =>
                     {
-                        while (!cancellationToken.IsCancellationRequested)
-                        {
-                            if (_messageProcessingQueue.Count >= BufferSize)
-                            {
-                                _logger.LogTrace("Enabling consumer backpressure...");
-                                waitHandle.Reset();
-                                waitHandle.Wait(cancellationToken);
-                            }
+                        _retryPolicy.ExecuteAsync(
+                            token =>
+                                {
+                                    while (!token.IsCancellationRequested)
+                                    {
+                                        if (_messageProcessingQueue.Count >= BufferSize)
+                                        {
+                                            _logger.LogTrace("Enabling consumer backpressure...");
+                                            waitHandle.Reset();
+                                            waitHandle.Wait(token);
+                                        }
 
-                            _messageReceiver.Poll();
-                        }
+                                        _messageReceiver.Poll();
+                                    }
+
+                                    return Task.CompletedTask;
+                                },
+                            cancellationToken);
                     },
                 cancellationToken);
 
@@ -99,25 +126,31 @@ namespace NuClear.Broadway.Grains.Workers
         {
             var scheduler = TaskScheduler.Current;
             Task.Factory.StartNew(
-                async () =>
+                () =>
                     {
-                        while (await _messageProcessingQueue.OutputAvailableAsync(cancellationToken))
-                        {
-                            var message = await _messageProcessingQueue.ReceiveAsync(cancellationToken);
-                            _logger.LogTrace("Got new message from Kafka.");
+                        _retryPolicy.ExecuteAsync(
+                            async token =>
+                                {
+                                    while (await _messageProcessingQueue.OutputAvailableAsync(token))
+                                    {
+                                        var message = await _messageProcessingQueue.ReceiveAsync(token);
+                                        _logger.LogTrace("Got new message from Kafka.");
 
-                            if (_messageProcessingQueue.Count < BufferSize && !waitHandle.IsSet)
-                            {
-                                waitHandle.Set();
-                                _logger.LogTrace("Consumer backpressure disabled.");
-                            }
+                                        if (_messageProcessingQueue.Count < BufferSize && !waitHandle.IsSet)
+                                        {
+                                            waitHandle.Set();
+                                            _logger.LogTrace("Consumer backpressure disabled.");
+                                        }
 
-                            await ProcessMessage(message);
+                                        await ProcessMessage(message);
 
-                            await _messageReceiver.CommitAsync(message);
+                                        await _messageReceiver.CommitAsync(message);
 
-                            _logger.LogTrace("A message from Kafka processed successfully.");
-                        }
+                                        _logger.LogTrace("A message from Kafka processed successfully.");
+                                    }
+                                },
+                            cancellationToken,
+                            true);
                     },
                 cancellationToken,
                 TaskCreationOptions.LongRunning,

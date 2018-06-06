@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +18,7 @@ namespace NuClear.Broadway.DataProjection
 
         public async Task ProjectAsync(Rubric state)
         {
-            var rubric = await _dbContext.Rubrics.FindAsync(state.Code);
+            var rubric = await _dbContext.Rubrics.Include(x => x.Localizations).SingleOrDefaultAsync(x => x.Code == state.Code);
             if (rubric == null)
             {
                 await _dbContext.AddAsync(state);

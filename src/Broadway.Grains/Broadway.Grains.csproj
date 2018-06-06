@@ -9,6 +9,7 @@
     <!--<PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />-->
     <PackageReference Include="Microsoft.Orleans.EventSourcing" Version="$(OrleansPackageVersion)" />
     <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator.Build" Version="$(OrleansPackageVersion)" />
+    <PackageReference Include="Polly" Version="6.0.1" />
     <PackageReference Include="Serilog" Version="2.6.0" />
   </ItemGroup>
   <ItemGroup>

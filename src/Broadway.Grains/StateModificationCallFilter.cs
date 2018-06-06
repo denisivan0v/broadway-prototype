@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
 using System.Threading.Tasks;
 
-using Newtonsoft.Json;
-
 using NuClear.Broadway.Interfaces.Events;
 using NuClear.Broadway.Interfaces.Grains;
 using NuClear.Broadway.Kafka;

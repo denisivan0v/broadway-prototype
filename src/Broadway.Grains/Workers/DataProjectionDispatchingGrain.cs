@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Confluent.Kafka;
@@ -14,11 +15,19 @@ using NuClear.Broadway.Kafka;
 using Orleans;
 using Orleans.Concurrency;
 
+using Polly;
+using Polly.Retry;
+
 namespace NuClear.Broadway.Grains.Workers
 {
     [StatelessWorker]
     public sealed class DataProjectionDispatchingGrain : FlowConsumerGrain, IDataProjectionDispatchingGrain
     {
+        private const string EventTypeContextKey = nameof(EventTypeContextKey);
+        private const string GrainTypeContextKey = nameof(GrainTypeContextKey);
+        private const string GrainKeyContextKey = nameof(GrainKeyContextKey);
+        private const string GrainVersionContextKey = nameof(GrainVersionContextKey);
+
         private const string ConsumerGroupToken = "roads-state-events-consumer";
         private const string Topic = "roads_test_state_events";
 
@@ -30,12 +39,26 @@ namespace NuClear.Broadway.Grains.Workers
                     { typeof(RubricGrain).FullName, (factory, id) => factory.GetGrain<IRubricGrain>(id) }
                 };
 
-        private readonly ILogger<DataProjectionDispatchingGrain> _logger;
+        private readonly RetryPolicy<bool> _waitPolicy;
 
         public DataProjectionDispatchingGrain(ILogger<DataProjectionDispatchingGrain> logger, KafkaOptions kafkaOptions)
             : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
         {
-            _logger = logger;
+            _waitPolicy =
+                Policy.HandleResult(true)
+                      .WaitAndRetryForeverAsync(
+                          (attempt, context) => TimeSpan.FromSeconds(1),
+                          (result, duration, context) =>
+                              {
+                                  logger.LogWarning(
+                                      "Race condition: {eventType} has arrived earlier than grain state was actually modified. " +
+                                      "This check will be retried until grain version increase. " +
+                                      "Grain: {grainType}:{grainKey}. Grain version: {grainVersion}.",
+                                      context[EventTypeContextKey],
+                                      context[GrainTypeContextKey],
+                                      context[GrainKeyContextKey],
+                                      context[GrainVersionContextKey]);
+                              });
         }
 
         protected override async Task ProcessMessage(Message<string, string> message)
@@ -45,22 +68,22 @@ namespace NuClear.Broadway.Grains.Workers
             {
                 var grain = (IStateProjectorGrain)provider(GrainFactory, @event.GrainKey);
 
-                var currentVersion = await grain.GetCurrentVersionAsync();
-                while (currentVersion == @event.GrainVersion)
-                {
-                    _logger.LogWarning(
-                        "Race condition: {eventType} has arrived earlier than grain state was actually modified. " +
-                        "This check will be retried until grain version increase. " +
-                        "Grain: {grainType}:{grainKey}. Grain version: {grainVersion}.",
-                        nameof(GrainStateModifyingEvent),
-                        @event.GrainType,
-                        @event.GrainKey,
-                        @event.GrainVersion);
+                await _waitPolicy.ExecuteAsync(
+                    async (cancellationToken, context) =>
+                        {
+                            var currentVersion = await grain.GetCurrentVersionAsync();
 
-                    await Task.Delay(1000);
-
-                    currentVersion = await grain.GetCurrentVersionAsync();
-                }
+                            return currentVersion == @event.GrainVersion;
+                        },
+                    new Dictionary<string, object>
+                        {
+                            { EventTypeContextKey, nameof(GrainStateModifyingEvent) },
+                            { GrainTypeContextKey, @event.GrainType },
+                            { GrainKeyContextKey, @event.GrainKey },
+                            { GrainVersionContextKey, @event.GrainVersion },
+                        },
+                    CancellationToken.None,
+                    true);
 
                 await grain.ProjectStateAsync();
             }

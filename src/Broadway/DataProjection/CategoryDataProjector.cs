@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +18,7 @@ namespace NuClear.Broadway.DataProjection
 
         public async Task ProjectAsync(Category state)
         {
-            var category = await _dbContext.Categories.FindAsync(state.Code);
+            var category = await _dbContext.Categories.Include(x => x.Localizations).SingleOrDefaultAsync(x => x.Code == state.Code);
             if (category == null)
             {
                 await _dbContext.AddAsync(state);

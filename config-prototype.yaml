@@ -1,4 +1,8 @@
 common:
+  postgres_port: 5432
+  postgres_db: "BroadwayDataProjection"
+  postgres_user: "postgres"
+  postgres_password: "postgres"
   kafka_brokers: "roads-{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
 
   k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
@@ -19,14 +23,10 @@ deploy-storage:
 
   postgres_path: "postgres"
   postgres_version: "9.6.8-alpine"
-  postgres_port: 5432
   postgres_limits_cpu: "700m"
   postgres_limits_memory: "400Mi"
   postgres_requests_cpu: "50m"
   postgres_requests_memory: "100Mi"
-  postgres_db: "orleans"
-  postgres_user: "postgres"
-  postgres_password: "postgres"
   postgres_restore_schema: "{{ file='projections-db-schema.sql' }}"
   
   kafka_path: "wurstmeister/kafka"
@@ -64,10 +64,10 @@ deploy-apps:
   roads_env: "{{ env='ROADS_ENVIRONMENT' }}"
   
   silo_path: "docker-hub.2gis.ru/roads/broadway-silo"
-  silo_limits_cpu: "300m"
-  silo_limits_memory: "250Mi"
-  silo_requests_cpu: "150m"
-  silo_requests_memory: "150Mi"
+  silo_limits_cpu: "500m"
+  silo_limits_memory: "500Mi"
+  silo_requests_cpu: "250m"
+  silo_requests_memory: "250Mi"
   silo_metrics_port: 3000
   
   host_domain: "{{ env='DOMAIN_POSTFIX' }}"
@@ -84,10 +84,6 @@ deploy-apps:
 
   prometheus_blackbox_probe: "false"
   prometheus_scrape_metrics: "false"
-
-  postgres_db: "orleans"
-  postgres_user: "postgres"
-  postgres_password: "postgres"
   
   cassandra_keyspace: "{{ env='ENVIRONMENT_KEYSPACE' }}"
 

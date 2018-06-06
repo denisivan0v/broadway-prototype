@@ -9,7 +9,6 @@ stages:
 
 before_script:
   - export APPLICATION=`make -s print-APPLICATION`
-  - source ${CI_PROJECT_DIR}/ci-starter-kit/utils.sh
   - export CI_TAG=`[[ -z ${CI_COMMIT_TAG} ]] && echo "branch-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA:0:8}" || echo "${CI_COMMIT_TAG}"`
 
 # ================= Build, Test & Orleans Storage Up =================
@@ -17,7 +16,7 @@ before_script:
 build-apps:
   stage: pre
   when: always
-  image: $REGISTRY/microsoft/aspnetcore-build:2.0.6-2.1.101
+  image: $REGISTRY/microsoft/dotnet:2.1.300-sdk-alpine3.7
   script:
     - dotnet restore --runtime debian-x64
     - dotnet publish src/Broadway.Host --configuration Release --runtime debian-x64 --output ../../publish/broadway-host

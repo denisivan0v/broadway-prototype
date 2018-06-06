@@ -14,7 +14,6 @@ using NuClear.Broadway.Grains;
 using NuClear.Broadway.Grains.Options;
 using NuClear.Broadway.Interfaces.Grains;
 using NuClear.Broadway.Interfaces.Models;
-using NuClear.Broadway.Interfaces.Workers;
 using NuClear.Broadway.Kafka;
 using NuClear.Broadway.Silo.Concurrency;
 using NuClear.Broadway.Silo.StartupTasks;
@@ -24,7 +23,6 @@ using Orleans.Clustering.Cassandra;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Persistence.Cassandra;
-using Orleans.Runtime;
 
 using Serilog;
 
@@ -120,7 +118,7 @@ namespace NuClear.Broadway.Silo
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))
                    .AddIncomingGrainCallFilter<StateModificationCallFilter>()
-                   //.AddStartupTask<RunFlowConsumersStartupTask>()
+                   .AddStartupTask<RunFlowConsumersStartupTask>()
                    .Build();
         }
 

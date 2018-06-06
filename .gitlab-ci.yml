@@ -17,6 +17,8 @@ before_script:
 build-apps:
   stage: pre
   when: always
+  only:
+    - master
   image: $REGISTRY/microsoft/aspnetcore-build:2.0.6-2.1.101
   script:
     - dotnet restore --runtime debian-x64
@@ -46,6 +48,8 @@ storage-up:
 broadway-host-image:
   stage: dockerize
 #  when: manual
+  only:
+    - master
   allow_failure: false
   script:
     - IMAGE=roads/broadway-host TAG=$CI_TAG DOCKER_FILE=publish/broadway-host/Dockerfile DOCKER_BUILD_CONTEXT=publish/broadway-host make docker-build
@@ -57,6 +61,8 @@ broadway-host-image:
 broadway-silo-image:
   stage: dockerize
 #  when: manual
+  only:
+    - master
   allow_failure: false
   script:
     - IMAGE=roads/broadway-silo TAG=$CI_TAG DOCKER_FILE=publish/broadway-silo/Dockerfile DOCKER_BUILD_CONTEXT=publish/broadway-silo make docker-build

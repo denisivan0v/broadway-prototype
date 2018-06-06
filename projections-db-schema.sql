@@ -3,7 +3,6 @@
     "IsDeleted" bool NOT NULL,
     CONSTRAINT "PK_Categories" PRIMARY KEY ("Code")
 );
-
 CREATE TABLE "Rubrics" (
     "Code" int8 NOT NULL,
     "IsCommercial" bool NOT NULL,
@@ -11,14 +10,12 @@ CREATE TABLE "Rubrics" (
     "SecondRubricCode" int8 NOT NULL,
     CONSTRAINT "PK_Rubrics" PRIMARY KEY ("Code")
 );
-
 CREATE TABLE "SecondRubrics" (
     "Code" int8 NOT NULL,
     "CategoryCode" int8 NOT NULL,
     "IsDeleted" bool NOT NULL,
     CONSTRAINT "PK_SecondRubrics" PRIMARY KEY ("Code")
 );
-
 CREATE TABLE "Localizations" (
     "Id" bigserial NOT NULL,
     "CategoryCode" int8 NULL,
@@ -32,9 +29,6 @@ CREATE TABLE "Localizations" (
     CONSTRAINT "FK_Localizations_Rubrics_RubricCode" FOREIGN KEY ("RubricCode") REFERENCES "Rubrics" ("Code") ON DELETE RESTRICT,
     CONSTRAINT "FK_Localizations_SecondRubrics_SecondRubricCode" FOREIGN KEY ("SecondRubricCode") REFERENCES "SecondRubrics" ("Code") ON DELETE RESTRICT
 );
-
 CREATE INDEX "IX_Localizations_CategoryCode" ON "Localizations" ("CategoryCode");
-
 CREATE INDEX "IX_Localizations_RubricCode" ON "Localizations" ("RubricCode");
-
 CREATE INDEX "IX_Localizations_SecondRubricCode" ON "Localizations" ("SecondRubricCode");

@@ -27,8 +27,6 @@ build-apps:
     paths:
       - publish/broadway-host/
       - publish/broadway-silo/
-  only:
-    - master
 
 storage-up:
   stage: pre
@@ -54,8 +52,6 @@ broadway-host-image:
   tags: [ docker-engine, io ]
   dependencies:
     - build-apps
-  only:
-    - master
 
 broadway-silo-image:
   stage: dockerize
@@ -68,8 +64,6 @@ broadway-silo-image:
   tags: [ docker-engine, io ]
   dependencies:
     - build-apps
-  only:
-    - master
 
 # ================ Deploy =================
 
@@ -82,6 +76,9 @@ broadway-silo-image:
   before_script:
     - export ENVIRONMENT_KEYSPACE=`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`
   tags: [ 2gis, docker ]
+  except:
+    - master
+    - tags
 
 deploy-staging:
   stage: deploy
@@ -109,16 +106,11 @@ deploy-testing:
     - export ENVIRONMENT_KEYSPACE=`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
-  except:
-    - master
-    - tags
   dependencies: []
   environment:
     name: ${CI_COMMIT_REF_NAME}
     url: http://broadway-${CI_COMMIT_REF_SLUG}.web-staging.2gis.ru/swagger
     on_stop: destroy-testing
-  only:
-    - master
 
 destroy-testing:
   <<: *deploy_testing_template
@@ -133,8 +125,6 @@ destroy-testing:
   environment:
     name: ${CI_COMMIT_REF_NAME}
     action: stop
-  only:
-    - master
 
 # ================= End =================
 
@@ -142,7 +132,7 @@ destroy-testing:
   script:
     - echo "Tags list for $REGISTRY/$IMAGE:"
     - hub-tool tags:list $IMAGE | grep "^$TAG_MASK"
-    - hub-tool tags:cleanup --path $IMAGE --regexp "$TAG_MASK*" --days $IMAGE_LIFE_TIME_DAYS --dry-run
+    - hub-tool tags:cleanup --path $IMAGE --regexp "$TAG_MASK*" --days $IMAGE_LIFE_TIME_DAYS
   tags: [ docker-engine, io ]
 
 cleanup:registry:host:
@@ -166,26 +156,3 @@ cleanup:registry:silo:
     TAG_MASK: "branch-"
     IMAGE_LIFE_TIME_DAYS: "7"
   dependencies: []
-
-cleanup:runner:
-  stage: end
-  when: always
-  variables:
-    GIT_STRATEGY: none
-    IMAGE: roads/broadway-host
-  script:
-    - export TAGS=`docker images -a | tr -s ' ' | grep "^$REGISTRY/$IMAGE" | awk '{print $2}' | sort | uniq | grep -v '<none>'`
-    - >
-      for TAG in $TAGS; do \
-        CONTAINERS=`docker ps -f "ancestor=$REGISTRY/$IMAGE:$TAG" --all -f "status=exited" -f "status=dead" | grep -v 'CONTAINER ID'` ; \
-        echo "Docker stopped containers list for $REGISTRY/$IMAGE:$TAG :" ; \
-        echo "$CONTAINERS" ; \
-        [ -z "$CONTAINERS" ] && continue ; \
-        printf '%s\n' "$CONTAINERS" | while IFS= read -r CONTAINER_INFO; do \
-          set $CONTAINER_INFO ; \
-          CONTAINER_ID=$1 ; \
-          docker rm -v $CONTAINER_ID ; \
-        done ; \
-      done
-  dependencies: []
-  tags: [ docker-engine, io ]

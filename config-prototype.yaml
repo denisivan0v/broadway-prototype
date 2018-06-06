@@ -1,4 +1,8 @@
 common:
+  postgres_port: 5432
+  postgres_db: "BroadwayDataProjection"
+  postgres_user: "postgres"
+  postgres_password: "postgres"
   kafka_brokers: "roads-{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
 
 deploy-storage:
@@ -19,14 +23,10 @@ deploy-storage:
 
   postgres_path: "postgres"
   postgres_version: "9.6.3"
-  postgres_port: 5432
   postgres_limits_cpu: "700m"
   postgres_limits_memory: "400Mi"
   postgres_requests_cpu: "50m"
   postgres_requests_memory: "100Mi"
-  postgres_db: "BroadwayDataProjection"
-  postgres_user: "postgres"
-  postgres_password: "postgres"
   
   kafka_path: "wurstmeister/kafka"
   kafka_version: "0.10.2.1"
@@ -124,10 +124,6 @@ deploy-apps:
 
   prometheus_blackbox_probe: "false"
   prometheus_scrape_metrics: "false"
-
-  postgres_db: "orleans"
-  postgres_user: "postgres"
-  postgres_password: "postgres"
   
   cassandra_keyspace: "{{ env='ENVIRONMENT_KEYSPACE' }}"
 

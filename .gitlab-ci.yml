@@ -74,8 +74,8 @@ broadway-silo-image:
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
-    BROADWAY_VERSION: ${CI_TAG}
   before_script:
+    - export BROADWAY_VERSION="${CI_TAG}"
     - export ENVIRONMENT_KEYSPACE=`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`
   tags: [ 2gis, docker ]
   except:

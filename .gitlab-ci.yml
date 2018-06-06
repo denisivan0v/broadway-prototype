@@ -153,7 +153,7 @@ cleanup:registry:host:
     GIT_STRATEGY: none
     IMAGE: roads/broadway-host
     TAG_MASK: "branch-"
-    IMAGE_LIFE_TIME_DAYS: "3"
+    IMAGE_LIFE_TIME_DAYS: "7"
   dependencies: []
 
 cleanup:registry:silo:
@@ -164,7 +164,7 @@ cleanup:registry:silo:
     GIT_STRATEGY: none
     IMAGE: roads/broadway-silo
     TAG_MASK: "branch-"
-    IMAGE_LIFE_TIME_DAYS: "3"
+    IMAGE_LIFE_TIME_DAYS: "7"
   dependencies: []
 
 cleanup:runner:

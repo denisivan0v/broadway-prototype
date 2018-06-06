@@ -118,7 +118,7 @@ namespace NuClear.Broadway.Silo
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))
                    .AddIncomingGrainCallFilter<StateModificationCallFilter>()
-                   //.AddStartupTask<RunFlowConsumersStartupTask>()
+                   .AddStartupTask<RunFlowConsumersStartupTask>()
                    .Build();
         }
 

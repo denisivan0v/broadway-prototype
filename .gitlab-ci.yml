@@ -69,6 +69,8 @@ broadway-silo-image:
 
 .deploy-testing:template: &deploy_testing_template
   image: $REGISTRY/2gis-io/k8s-handle:latest
+  stage: deploy
+  when: manual
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
@@ -100,10 +102,7 @@ deploy-staging:
 
 deploy-testing:
   <<: *deploy_testing_template
-  stage: deploy
-  when: manual
   script:
-    - export ENVIRONMENT_KEYSPACE=`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   dependencies: []
@@ -114,8 +113,6 @@ deploy-testing:
 
 destroy-testing:
   <<: *deploy_testing_template
-  stage: deploy
-  when: manual
   script:
     - k8s-handle destroy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
     - k8s-handle destroy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 60

@@ -1,5 +1,4 @@
 ﻿CREATE SEQUENCE "EntityFrameworkHiLoSequence" START WITH 1 INCREMENT BY 10 NO MINVALUE NO MAXVALUE NO CYCLE;
-
 CREATE TABLE "Categories" (
     "Code" int8 NOT NULL,
     "IsDeleted" bool NOT NULL,

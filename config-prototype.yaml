@@ -49,8 +49,8 @@ deploy-storage:
   zookeeper_requests_memory: "100Mi"
 
   kubectl:
-  - template: deployment-storage.yaml.j2
   - template: configmap-postgres.yaml.j2
+  - template: deployment-storage.yaml.j2
   - template: service-postgres.yaml.j2
   - template: service-zookeeper.yaml.j2
   - template: service-kafka.yaml.j2

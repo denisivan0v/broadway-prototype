@@ -141,23 +141,23 @@ destroy-testing:
 .cleanup:registry:template: &cleanup_registry_template
   script:
     - echo 'Run docker registry images cleanup...'
-    - export TAGS=`curl -sS -X GET https://$(REGISTRY)/v2/$(IMAGE)/tags/list --stderr - | docker run -i --rm $(REGISTRY)/2gis/jq:1.5 '.tags|.[]' --raw-output | grep "^$(TAG_MASK)"`
-    - echo "Tags list for $(REGISTRY)/$(IMAGE):"
+    - export TAGS=`curl -sS -X GET https://$REGISTRY/v2/$IMAGE/tags/list --stderr - | docker run -i --rm $REGISTRY/2gis/jq:1.5 '.tags|.[]' --raw-output | grep "^$TAG_MASK"`
+    - echo "Tags list for $REGISTRY/$IMAGE:"
     - echo "$TAGS" | awk '{printf "%d) %s\n", NR, $$0}'
     - echo '========='
     - "[[ -z $TAGS ]] && exit 0"
     - export CURRENT_TIME=`date +%s`
     - >
       for TAG in $TAGS; do \
-        IMAGE_CREATED=`curl -sS -X GET -H "Accept: application/vnd.docker.distribution.manifest.v1+json" https://$(REGISTRY)/v2/$(IMAGE)/manifests/$$TAG --stderr - | docker run -i --rm $(REGISTRY)/2gis/jq:1.5 '.history[0].v1Compatibility|fromjson|.created' --raw-output` ; \
-        echo "Image $(REGISTRY)/$(IMAGE):$$TAG was created at $$IMAGE_CREATED" ; \
+        IMAGE_CREATED=`curl -sS -X GET -H "Accept: application/vnd.docker.distribution.manifest.v1+json" https://$REGISTRY/v2/$IMAGE/manifests/$$TAG --stderr - | docker run -i --rm $REGISTRY/2gis/jq:1.5 '.history[0].v1Compatibility|fromjson|.created' --raw-output` ; \
+        echo "Image $REGISTRY/$IMAGE:$$TAG was created at $$IMAGE_CREATED" ; \
         DIFF_TIME=`expr $CURRENT_TIME - $$(date --date="$$IMAGE_CREATED" +"%s")` ; \
         if [ $$DIFF_TIME -gt $(TIME_LIFE_IMAGE) ]; then \
-          echo "Delete $(REGISTRY)/$(IMAGE):$$TAG from registry ..." ; \
-          SHA=`curl -sS -X GET -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -I https://$(REGISTRY)/v2/$(IMAGE)/manifests/$$TAG --stderr - \
+          echo "Delete $REGISTRY/$IMAGE:$$TAG from registry ..." ; \
+          SHA=`curl -sS -X GET -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -I https://$REGISTRY/v2/$IMAGE/manifests/$$TAG --stderr - \
             | grep Docker-Content-Digest | awk '{print $$2}' | tr -d '\n\r'` ; \
           echo "Docker-Content-Digest: $$SHA" ; \
-          [ -z "$$SHA" ] || curl -sS -X DELETE -I -S https://$(REGISTRY)/v2/$(IMAGE)/manifests/$$SHA \
+          [ -z "$$SHA" ] || curl -sS -X DELETE -I -S https://$REGISTRY/v2/$IMAGE/manifests/$$SHA \
         fi ; \
       done;
   tags: [ docker-engine, io ]
@@ -189,13 +189,13 @@ cleanup:runner:
   when: always
   variables:
     GIT_STRATEGY: none
+    IMAGE: roads/broadway-host
   script:
-    - export IMAGE=roads/broadway-host
     - >
-      TAGS=`docker images -a | tr -s ' ' | grep "^$(REGISTRY)/$(IMAGE)" | awk '{print $$2}' | sort | uniq | grep -v '<none>'` ; \
+      TAGS=`docker images -a | tr -s ' ' | grep "^$REGISTRY/$IMAGE" | awk '{print $$2}' | sort | uniq | grep -v '<none>'` ; \
       for TAG in $$TAGS; do \
-        CONTAINERS=`docker ps -f "ancestor=$(REGISTRY)/$(IMAGE):$$TAG" --all -f "status=exited" -f "status=dead" | grep -v 'CONTAINER ID'` ; \
-        echo "Docker stopped containers list for $(REGISTRY)/$(IMAGE):$$TAG :" ; \
+        CONTAINERS=`docker ps -f "ancestor=$REGISTRY/$IMAGE:$$TAG" --all -f "status=exited" -f "status=dead" | grep -v 'CONTAINER ID'` ; \
+        echo "Docker stopped containers list for $REGISTRY/$IMAGE:$$TAG :" ; \
         echo "$$CONTAINERS" ; \
         echo "=========" ; \
         [ -z "$$CONTAINERS" ] && continue ; \

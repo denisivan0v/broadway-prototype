@@ -102,7 +102,7 @@ deploy-testing:
   dependencies: []
   tags: [ 2gis, docker ]
   environment:
-    name: testing/${CI_COMMIT_REF_NAME}
+    name: ${CI_COMMIT_REF_NAME}
     url: http://broadway-${CI_COMMIT_REF_SLUG}.web-staging.2gis.ru/swagger
     on_stop: destroy-testing
 
@@ -122,7 +122,7 @@ destroy-testing:
   dependencies: []
   tags: [ 2gis, docker ]
   environment:
-    name: testing/${CI_COMMIT_REF_NAME}
+    name: ${CI_COMMIT_REF_NAME}
     action: stop
 
 # ================= End =================

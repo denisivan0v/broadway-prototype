@@ -38,4 +38,3 @@ CREATE INDEX "IX_Localizations_CategoryCode" ON "Localizations" ("CategoryCode")
 CREATE INDEX "IX_Localizations_RubricCode" ON "Localizations" ("RubricCode");
 
 CREATE INDEX "IX_Localizations_SecondRubricCode" ON "Localizations" ("SecondRubricCode");
-

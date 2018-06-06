@@ -18,7 +18,7 @@ deploy-storage:
   revision_history_limit: 3
 
   postgres_path: "postgres"
-  postgres_version: "9.6.3"
+  postgres_version: "9.6.8-alpine"
   postgres_port: 5432
   postgres_limits_cpu: "700m"
   postgres_limits_memory: "400Mi"
@@ -27,6 +27,7 @@ deploy-storage:
   postgres_db: "orleans"
   postgres_user: "postgres"
   postgres_password: "postgres"
+  postgres_restore_schema: "{{ file='projections-db-schema.sql' }}"
   
   kafka_path: "wurstmeister/kafka"
   kafka_version: "0.10.2.1"
@@ -49,6 +50,7 @@ deploy-storage:
 
   kubectl:
   - template: deployment-storage.yaml.j2
+  - template: configmap-postgres.yaml.j2
   - template: service-postgres.yaml.j2
   - template: service-zookeeper.yaml.j2
   - template: service-kafka.yaml.j2

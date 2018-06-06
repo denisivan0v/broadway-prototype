@@ -142,7 +142,7 @@ destroy-testing:
   script:
     - echo "Tags list for $REGISTRY/$IMAGE:"
     - hub-tool tags:list $IMAGE | grep "^$TAG_MASK"
-    - hub-tool tags:cleanup -p roads/broadway-host -r "$TAG_MASK*" -d $IMAGE_TIME_LIFE_DAYS --dry-run
+    - hub-tool tags:cleanup --path $IMAGE --regexp "$TAG_MASK*" --days $IMAGE_LIFE_TIME_DAYS --dry-run
   tags: [ docker-engine, io ]
 
 cleanup:registry:host:
@@ -153,7 +153,7 @@ cleanup:registry:host:
     GIT_STRATEGY: none
     IMAGE: roads/broadway-host
     TAG_MASK: "branch-"
-    IMAGE_TIME_LIFE_DAYS: "3"
+    IMAGE_LIFE_TIME_DAYS: "3"
   dependencies: []
 
 cleanup:registry:silo:
@@ -164,7 +164,7 @@ cleanup:registry:silo:
     GIT_STRATEGY: none
     IMAGE: roads/broadway-silo
     TAG_MASK: "branch-"
-    IMAGE_TIME_LIFE_DAYS: "3"
+    IMAGE_LIFE_TIME_DAYS: "3"
   dependencies: []
 
 cleanup:runner:

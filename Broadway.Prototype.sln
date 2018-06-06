@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{D790569B
 		.gitlab-ci.yml = .gitlab-ci.yml
 		config-prototype.yaml = config-prototype.yaml
 		Directory.Build.props = Directory.Build.props
-		Makefile = Makefile
 		nuget.config = nuget.config
 		projections-db-schema.sql = projections-db-schema.sql
 		run-cql.py = run-cql.py
@@ -35,24 +34,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{
 		templates\service-postgres.yaml.j2 = templates\service-postgres.yaml.j2
 		templates\service-silo.yaml.j2 = templates\service-silo.yaml.j2
 		templates\service-zookeeper.yaml.j2 = templates\service-zookeeper.yaml.j2
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci-starter-kit", "ci-starter-kit", "{A291DB63-282B-4453-95BF-E50FD0C11D49}"
-	ProjectSection(SolutionItems) = preProject
-		ci-starter-kit\.dockerignore.template = ci-starter-kit\.dockerignore.template
-		ci-starter-kit\.gitlab-ci.yml.template = ci-starter-kit\.gitlab-ci.yml.template
-		ci-starter-kit\Dockerfile.dev.template = ci-starter-kit\Dockerfile.dev.template
-		ci-starter-kit\Dockerfile.template = ci-starter-kit\Dockerfile.template
-		ci-starter-kit\Makefile.ci = ci-starter-kit\Makefile.ci
-		ci-starter-kit\Makefile.deis = ci-starter-kit\Makefile.deis
-		ci-starter-kit\Makefile.deis2 = ci-starter-kit\Makefile.deis2
-		ci-starter-kit\Makefile.docker = ci-starter-kit\Makefile.docker
-		ci-starter-kit\Makefile.docker-application-template = ci-starter-kit\Makefile.docker-application-template
-		ci-starter-kit\Makefile.encrypt = ci-starter-kit\Makefile.encrypt
-		ci-starter-kit\Makefile.template = ci-starter-kit\Makefile.template
-		ci-starter-kit\Procfile.template = ci-starter-kit\Procfile.template
-		ci-starter-kit\README.md = ci-starter-kit\README.md
-		ci-starter-kit\utils.sh = ci-starter-kit\utils.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway.TaskRunner", "src\Broadway.TaskRunner\Broadway.TaskRunner.csproj", "{CB1839BF-4999-4F63-82FB-C05C2C80E58E}"
@@ -117,7 +98,6 @@ Global
 		{10D6DCA3-3279-402F-B312-2359A8823452} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{92F9A126-5461-4420-97D3-B1449058247C} = {D790569B-661E-4C95-BE74-88E9E627D935}
-		{A291DB63-282B-4453-95BF-E50FD0C11D49} = {D790569B-661E-4C95-BE74-88E9E627D935}
 		{CB1839BF-4999-4F63-82FB-C05C2C80E58E} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{EBA860E2-DC36-4D1D-9138-0A496CCA14FA} = {14DE1203-7E48-438A-A115-1C78687619AE}
 		{6EF0948A-A30A-4A08-B967-627347A423AC} = {14DE1203-7E48-438A-A115-1C78687619AE}

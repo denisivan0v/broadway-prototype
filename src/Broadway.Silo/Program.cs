@@ -102,7 +102,9 @@ namespace NuClear.Broadway.Silo
                                services.AddTransient<MessageSender>()
                                        .AddTransient<IDataProjector<Category>, CategoryDataProjector>()
                                        .AddTransient<IDataProjector<SecondRubric>, SecondRubricDataProjector>()
-                                       .AddTransient<IDataProjector<Rubric>, RubricDataProjector>();
+                                       .AddTransient<IDataProjector<Rubric>, RubricDataProjector>()
+                                       .AddTransient<IDataProjector<Firm>, FirmDataProjector>()
+                                       .AddTransient<IDataProjector<CardForERM>, CardForERMDataProjector>();
                            })
                    .Configure<ClusterOptions>(
                        options =>

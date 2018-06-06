@@ -8,22 +8,36 @@ using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class CardForERMGrain : JournaledGrain<CardForERM, StateChangedEvent<CardForERM>>, ICardForERMGrain, IStateProjectorGrain
+    public class CardForERMGrain : JournaledGrain<CardForERM, StateChangedEvent<CardForERM>>, ICardForERMGrain
     {
-        public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
+        private readonly IDataProjector<CardForERM> _dataProjector;
 
-        public Task ProjectStateAsync()
+        public CardForERMGrain(IDataProjector<CardForERM> dataProjector)
         {
-            throw new System.NotImplementedException();
+            _dataProjector = dataProjector;
         }
 
-        public Task<long> GetFirmCodeAsync() => Task.FromResult(State.FirmCode);
+        public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
+
+        public Task ProjectStateAsync() => _dataProjector.ProjectAsync(State);
 
         [StateModification]
         public async Task UpdateStateAsync(CardForERM cardForErm)
         {
+            var oldFirmCode = State.FirmCode;
+
             RaiseEvent(new StateChangedEvent<CardForERM>(cardForErm));
             await ConfirmEvents();
+
+            var firmGrain = GrainFactory.GetGrain<IFirmGrain>(State.FirmCode);
+            if (oldFirmCode != default && oldFirmCode != State.FirmCode)
+            {
+                await firmGrain.RemoveCardAsync(State.Code);
+            }
+            else
+            {
+                await firmGrain.AddCardAsync(State.Code);
+            }
         }
 
         protected override void TransitionState(CardForERM state, StateChangedEvent<CardForERM> @event)

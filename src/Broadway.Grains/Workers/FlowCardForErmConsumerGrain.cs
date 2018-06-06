@@ -87,18 +87,8 @@ namespace NuClear.Broadway.Grains.Workers
                                       .ToHashSet();
             }
 
-            var firmGrain = GrainFactory.GetGrain<IFirmGrain>(card.FirmCode);
-
             var cardGrain = GrainFactory.GetGrain<ICardForERMGrain>(card.Code);
-            var firmCode = await cardGrain.GetFirmCodeAsync();
-            if (firmCode != default && card.FirmCode != firmCode)
-            {
-                await firmGrain.RemoveCardAsync(card.Code);
-            }
-            else
-            {
-                await firmGrain.AddCardAsync(card.Code);
-            }
+            await cardGrain.UpdateStateAsync(card);
 
             var firmElement = xml.Element(nameof(Firm));
             if (firmElement != null)
@@ -114,10 +104,10 @@ namespace NuClear.Broadway.Grains.Workers
 
                 card.FirmCode = firm.Code;
 
+                var firmGrain = GrainFactory.GetGrain<IFirmGrain>(card.FirmCode);
                 await firmGrain.UpdateStateAsync(firm);
             }
 
-            await cardGrain.UpdateStateAsync(card);
         }
 
         private async Task ArchiveFirm(XElement xml)

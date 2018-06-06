@@ -36,7 +36,9 @@ namespace NuClear.Broadway.Grains.Workers
                 {
                     { typeof(CategoryGrain).FullName, (factory, id) => factory.GetGrain<ICategoryGrain>(id) },
                     { typeof(SecondRubricGrain).FullName, (factory, id) => factory.GetGrain<ISecondRubricGrain>(id) },
-                    { typeof(RubricGrain).FullName, (factory, id) => factory.GetGrain<IRubricGrain>(id) }
+                    { typeof(RubricGrain).FullName, (factory, id) => factory.GetGrain<IRubricGrain>(id) },
+                    { typeof(FirmGrain).FullName, (factory, id) => factory.GetGrain<IFirmGrain>(id) },
+                    { typeof(CardForERMGrain).FullName, (factory, id) => factory.GetGrain<ICardForERMGrain>(id) }
                 };
 
         private readonly RetryPolicy<bool> _waitPolicy;
@@ -86,6 +88,12 @@ namespace NuClear.Broadway.Grains.Workers
                     true);
 
                 await grain.ProjectStateAsync();
+            }
+            else
+            {
+                throw new ApplicationException(
+                    $"Unknown grain type {@event.GrainType} used in {nameof(GrainStateModifyingEvent)}. " +
+                    $"Please check {nameof(DataProjectionDispatchingGrain)} configuration.");
             }
         }
     }

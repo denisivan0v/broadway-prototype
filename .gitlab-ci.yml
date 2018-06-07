@@ -2,7 +2,7 @@ variables:
   REGISTRY: "docker-hub.2gis.ru"
 
 stages:
-  - build
+  - pre
   - dockerize
   - deploy
   - end
@@ -14,7 +14,7 @@ before_script:
 # ================= Build & Test =================
 
 build-apps:
-  stage: build
+  stage: pre
   when: always
   image: $REGISTRY/microsoft/dotnet:2.1.300-sdk-alpine3.7
   script:
@@ -28,6 +28,18 @@ build-apps:
     paths:
       - publish/broadway-host/
       - publish/broadway-silo/
+
+storage-up:
+  stage: pre
+  when: always
+  image: $REGISTRY/2gis-io/k8s-handle:latest
+  variables:
+    DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
+  script:
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
+  tags: [ 2gis, docker ]
+  only:
+    - master
 
 # ================= Dockerize =================
 

@@ -1,87 +1,60 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{D790569B-661E-4C95-BE74-88E9E627D935}"
-ProjectSection(SolutionItems) = preProject
-	Directory.Build.props = Directory.Build.props
-	.gitlab-ci.yml = .gitlab-ci.yml
-	nuget.config = nuget.config
-	config-prototype.yaml = config-prototype.yaml
-	Makefile = Makefile
-	projections-db-schema.sql = projections-db-schema.sql
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.gitlab-ci.yml = .gitlab-ci.yml
+		config-prototype.yaml = config-prototype.yaml
+		Directory.Build.props = Directory.Build.props
+		docker-compose.yml = docker-compose.yml
+		nuget.config = nuget.config
+		projections-db-schema.sql = projections-db-schema.sql
+		run-cql.py = run-cql.py
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{14DE1203-7E48-438A-A115-1C78687619AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Host", "src\Broadway.Host\Broadway.Host.csproj", "{EEE99319-7E8A-47CE-A419-C3CA49A85675}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway.Host", "src\Broadway.Host\Broadway.Host.csproj", "{EEE99319-7E8A-47CE-A419-C3CA49A85675}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Interfaces", "src\Broadway.Interfaces\Broadway.Interfaces.csproj", "{0F6B8279-50B3-4D7E-A67D-E9D3750F411D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway.Interfaces", "src\Broadway.Interfaces\Broadway.Interfaces.csproj", "{0F6B8279-50B3-4D7E-A67D-E9D3750F411D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Grains", "src\Broadway.Grains\Broadway.Grains.csproj", "{10D6DCA3-3279-402F-B312-2359A8823452}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway.Grains", "src\Broadway.Grains\Broadway.Grains.csproj", "{10D6DCA3-3279-402F-B312-2359A8823452}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Silo", "src\Broadway.Silo\Broadway.Silo.csproj", "{B9BE13EF-1548-495F-883C-2F6E83F3C0E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway.Silo", "src\Broadway.Silo\Broadway.Silo.csproj", "{B9BE13EF-1548-495F-883C-2F6E83F3C0E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{92F9A126-5461-4420-97D3-B1449058247C}"
-ProjectSection(SolutionItems) = preProject
-	templates\deployment-storage.yaml.j2 = templates\deployment-storage.yaml.j2
-	templates\service-postgres.yaml.j2 = templates\service-postgres.yaml.j2
-	templates\deployment-host.yaml.j2 = templates\deployment-host.yaml.j2
-	templates\service-host.yaml.j2 = templates\service-host.yaml.j2
-	templates\deployment-silo.yaml.j2 = templates\deployment-silo.yaml.j2
-	templates\service-silo.yaml.j2 = templates\service-silo.yaml.j2
-	templates\service-cassandra.yaml.j2 = templates\service-cassandra.yaml.j2
-	templates\statefulset-cassandra.yaml.j2 = templates\statefulset-cassandra.yaml.j2
-	templates\service-kafka.yaml.j2 = templates\service-kafka.yaml.j2
-	templates\service-zookeeper.yaml.j2 = templates\service-zookeeper.yaml.j2
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		templates\configmap-postgres.yaml.j2 = templates\configmap-postgres.yaml.j2
+		templates\deployment-host.yaml.j2 = templates\deployment-host.yaml.j2
+		templates\deployment-silo.yaml.j2 = templates\deployment-silo.yaml.j2
+		templates\deployment-storage.yaml.j2 = templates\deployment-storage.yaml.j2
+		templates\service-host.yaml.j2 = templates\service-host.yaml.j2
+		templates\service-kafka.yaml.j2 = templates\service-kafka.yaml.j2
+		templates\service-postgres.yaml.j2 = templates\service-postgres.yaml.j2
+		templates\service-silo.yaml.j2 = templates\service-silo.yaml.j2
+		templates\service-zookeeper.yaml.j2 = templates\service-zookeeper.yaml.j2
+	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci-starter-kit", "ci-starter-kit", "{A291DB63-282B-4453-95BF-E50FD0C11D49}"
-ProjectSection(SolutionItems) = preProject
-	ci-starter-kit\.dockerignore.template = ci-starter-kit\.dockerignore.template
-	ci-starter-kit\.gitlab-ci.yml.template = ci-starter-kit\.gitlab-ci.yml.template
-	ci-starter-kit\Dockerfile.dev.template = ci-starter-kit\Dockerfile.dev.template
-	ci-starter-kit\Dockerfile.template = ci-starter-kit\Dockerfile.template
-	ci-starter-kit\Makefile.ci = ci-starter-kit\Makefile.ci
-	ci-starter-kit\Makefile.deis = ci-starter-kit\Makefile.deis
-	ci-starter-kit\Makefile.docker = ci-starter-kit\Makefile.docker
-	ci-starter-kit\Makefile.deis2 = ci-starter-kit\Makefile.deis2
-	ci-starter-kit\Makefile.docker-application-template = ci-starter-kit\Makefile.docker-application-template
-	ci-starter-kit\Makefile.encrypt = ci-starter-kit\Makefile.encrypt
-	ci-starter-kit\Makefile.template = ci-starter-kit\Makefile.template
-	ci-starter-kit\Procfile.template = ci-starter-kit\Procfile.template
-	ci-starter-kit\README.md = ci-starter-kit\README.md
-	ci-starter-kit\utils.sh = ci-starter-kit\utils.sh
-EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway.TaskRunner", "src\Broadway.TaskRunner\Broadway.TaskRunner.csproj", "{CB1839BF-4999-4F63-82FB-C05C2C80E58E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway.Worker", "src\Broadway.TaskRunner\Broadway.TaskRunner.csproj", "{CB1839BF-4999-4F63-82FB-C05C2C80E58E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Broadway", "src\Broadway\Broadway.csproj", "{EBA860E2-DC36-4D1D-9138-0A496CCA14FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Broadway", "src\Broadway\Broadway.csproj", "{EBA860E2-DC36-4D1D-9138-0A496CCA14FA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "codestyle", "codestyle", "{890FB081-69F5-4486-9853-354FE07F2262}"
-ProjectSection(SolutionItems) = preProject
-	NuClear.CodeStyle.DotSettings = NuClear.CodeStyle.DotSettings
-	NuClear.CodeStyle.ruleset = NuClear.CodeStyle.ruleset
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		NuClear.CodeStyle.DotSettings = NuClear.CodeStyle.DotSettings
+		NuClear.CodeStyle.ruleset = NuClear.CodeStyle.ruleset
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Clustering.Cassandra", "src\Orleans.Clustering.Cassandra\Orleans.Clustering.Cassandra.csproj", "{6EF0948A-A30A-4A08-B967-627347A423AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Clustering.Cassandra", "src\Orleans.Clustering.Cassandra\Orleans.Clustering.Cassandra.csproj", "{6EF0948A-A30A-4A08-B967-627347A423AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Persistence.Cassandra", "src\Orleans.Persistence.Cassandra\Orleans.Persistence.Cassandra.csproj", "{F4F0C396-BD03-4281-B49B-B38BD4290B2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Persistence.Cassandra", "src\Orleans.Persistence.Cassandra\Orleans.Persistence.Cassandra.csproj", "{F4F0C396-BD03-4281-B49B-B38BD4290B2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{EEE99319-7E8A-47CE-A419-C3CA49A85675} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{0F6B8279-50B3-4D7E-A67D-E9D3750F411D} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{10D6DCA3-3279-402F-B312-2359A8823452} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{92F9A126-5461-4420-97D3-B1449058247C} = {D790569B-661E-4C95-BE74-88E9E627D935}
-		{A291DB63-282B-4453-95BF-E50FD0C11D49} = {D790569B-661E-4C95-BE74-88E9E627D935}
-		{CB1839BF-4999-4F63-82FB-C05C2C80E58E} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{EBA860E2-DC36-4D1D-9138-0A496CCA14FA} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{6EF0948A-A30A-4A08-B967-627347A423AC} = {14DE1203-7E48-438A-A115-1C78687619AE}
-		{F4F0C396-BD03-4281-B49B-B38BD4290B2B} = {14DE1203-7E48-438A-A115-1C78687619AE}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EEE99319-7E8A-47CE-A419-C3CA49A85675}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -116,5 +89,22 @@ Global
 		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4F0C396-BD03-4281-B49B-B38BD4290B2B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EEE99319-7E8A-47CE-A419-C3CA49A85675} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{0F6B8279-50B3-4D7E-A67D-E9D3750F411D} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{10D6DCA3-3279-402F-B312-2359A8823452} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{B9BE13EF-1548-495F-883C-2F6E83F3C0E8} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{92F9A126-5461-4420-97D3-B1449058247C} = {D790569B-661E-4C95-BE74-88E9E627D935}
+		{CB1839BF-4999-4F63-82FB-C05C2C80E58E} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{EBA860E2-DC36-4D1D-9138-0A496CCA14FA} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{6EF0948A-A30A-4A08-B967-627347A423AC} = {14DE1203-7E48-438A-A115-1C78687619AE}
+		{F4F0C396-BD03-4281-B49B-B38BD4290B2B} = {14DE1203-7E48-438A-A115-1C78687619AE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {32A6294E-81F0-41C4-AE71-39D2F1D2A746}
 	EndGlobalSection
 EndGlobal

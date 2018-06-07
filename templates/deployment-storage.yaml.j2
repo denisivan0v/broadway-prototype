@@ -15,6 +15,9 @@ spec:
       volumes:
       - name: postgres-data
         emptyDir: {}
+      - name: postgres-config
+        configMap:
+          name: {{ vendor }}-{{ id }}-postgres-config
       - name: zookeeper-data
         emptyDir: {}
       - name: kafka-data
@@ -24,17 +27,6 @@ spec:
         image: {{ postgres_path }}:{{ postgres_version }}
         ports:
         - containerPort: {{ postgres_port }}
-        lifecycle:
-          postStart:
-            exec:
-              command: 
-                - "/bin/sh"
-                - "-c"
-                - >
-                  pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }};
-                  apt-get update -y && apt-get install -y wget;
-#                  wget <URL to sql file>;
-#                  psql -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }} -f <sql file>;
         readinessProbe:
           exec:
             command: ["/bin/bash", "-c", "pg_isready -U {{ postgres_user }} -p {{ postgres_port }} -d {{ postgres_db }}"]
@@ -50,6 +42,9 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: postgres-data
+        - mountPath: /docker-entrypoint-initdb.d/01_restore_schema.sql
+          name: postgres-config
+          subPath: restore_schema
         env:
         - name: POSTGRES_DB
           value: '{{ postgres_db }}'

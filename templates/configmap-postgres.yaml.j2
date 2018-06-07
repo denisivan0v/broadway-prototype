@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ vendor }}-{{ id }}-postgres-config
+data:
+  restore_schema: |
+    {{ postgres_restore_schema }}

@@ -8,8 +8,8 @@ stages:
   - end
 
 before_script:
-  - export CI_TAG=`[[ -z ${CI_COMMIT_TAG} ]] && echo "branch-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA:0:8}" || echo "${CI_COMMIT_TAG}"`
-  - export ENVIRONMENT_KEYSPACE=`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`
+  - export BROADWAY_VERSION=`[[ -z ${CI_COMMIT_TAG} ]] && echo "branch-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA:0:8}" || echo "${CI_COMMIT_TAG}"`
+  - export ENVIRONMENT_KEYSPACE=`echo "branch_${CI_COMMIT_REF_SLUG}" | sed -e 's/-/_/g'`
 
 # ================= Build, Test & Orleans Storage Up =================
 
@@ -49,7 +49,7 @@ broadway-host-image:
   allow_failure: false
   script:
     - exit 0
-    - export IMAGE_TAG=$REGISTRY/roads/broadway-host:${CI_TAG}
+    - export IMAGE_TAG=$REGISTRY/roads/broadway-host:${BROADWAY_VERSION}
     - docker build --pull --rm --tag $IMAGE_TAG -f publish/broadway-host/Dockerfile publish/broadway-host
     - docker push $IMAGE_TAG
   tags: [ docker-engine, io ]
@@ -62,7 +62,7 @@ broadway-silo-image:
   allow_failure: false
   script:
     - exit 0
-    - export IMAGE_TAG=$REGISTRY/roads/broadway-silo:${CI_TAG}
+    - export IMAGE_TAG=$REGISTRY/roads/broadway-silo:${BROADWAY_VERSION}
     - docker build --pull --rm --tag $IMAGE_TAG -f publish/broadway-silo/Dockerfile publish/broadway-silo
     - docker push $IMAGE_TAG
   tags: [ docker-engine, io ]
@@ -78,7 +78,6 @@ broadway-silo-image:
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
-    BROADWAY_VERSION: "${CI_TAG}"
   tags: [ 2gis, docker ]
   except:
     - master
@@ -92,7 +91,6 @@ deploy-staging:
     - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
     - export ENVIRONMENT_KEYSPACE=${CI_COMMIT_REF_SLUG}
     - export ROADS_ENVIRONMENT=stage
-    - export BROADWAY_VERSION=${CI_TAG}
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   only:
     - master
@@ -109,7 +107,6 @@ deploy-testing:
     - echo ${ROADS_ENVIRONMENT}
     - echo ${BROADWAY_VERSION}
     - echo ${ENVIRONMENT_KEYSPACE}
-    - echo ${CI_TAG}
     - exit 0
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60

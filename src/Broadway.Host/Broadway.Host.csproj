@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Broadway.Interfaces\Broadway.Interfaces.csproj" />
+    <ProjectReference Include="..\Broadway\Broadway.csproj" />
     <ProjectReference Include="..\Orleans.Clustering.Cassandra\Orleans.Clustering.Cassandra.csproj" />
   </ItemGroup>
   <ItemGroup>

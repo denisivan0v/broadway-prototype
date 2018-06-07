@@ -67,3 +67,5 @@ spec:
           value: '{{ cassandra_keyspace }}'
         - name: ROADS_Cassandra__ContactPoints
           value: roads-cassandra-0.roads-cassandra.erm-roads.svc.web-staging.os-n3.hw
+        - name: ROADS_ConnectionStrings__BroadwayDataProjection
+          value: 'Host={{ vendor }}-{{ id }}-postgres.erm-roads;Port={{ postgres_port }};Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'

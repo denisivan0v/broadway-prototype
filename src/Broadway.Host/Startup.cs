@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json.Linq;
 
+using NuClear.Broadway.DataProjection;
 using NuClear.Broadway.Host.Options;
 using NuClear.Broadway.Interfaces.Grains;
 
@@ -74,6 +76,9 @@ namespace NuClear.Broadway.Host
                                 options.Audience = authenticationOptions.Audience;
                                 options.TokenValidationParameters = tokenValidationParameters;
                             });
+
+            var connectionString = _configuration.GetConnectionString("BroadwayDataProjection");
+            services.AddDbContextPool<DataProjectionContext>(builder => builder.UseNpgsql(connectionString));
 
             services.AddSwaggerGen(
                 options =>

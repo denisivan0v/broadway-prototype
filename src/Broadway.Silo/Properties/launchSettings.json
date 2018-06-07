@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Broadway.Silo": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ROADS_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

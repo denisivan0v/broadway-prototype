@@ -6,9 +6,8 @@ using Orleans;
 
 namespace NuClear.Broadway.Interfaces.Grains
 {
-    public interface ICardForERMGrain : IGrainWithIntegerKey
+    public interface ICardForERMGrain : IStateProjectorGrain
     {
-        Task<long> GetFirmCodeAsync();
         Task UpdateStateAsync(CardForERM cardForErm);
     }
 }

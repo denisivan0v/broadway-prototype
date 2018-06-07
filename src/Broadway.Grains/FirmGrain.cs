@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -12,37 +11,24 @@ using Orleans.EventSourcing;
 
 namespace NuClear.Broadway.Grains
 {
-    public class FirmGrain : JournaledGrain<Firm>, IFirmGrain, IStateProjectorGrain
+    public class FirmGrain : JournaledGrain<Firm>, IFirmGrain
     {
         private readonly ILogger<FirmGrain> _logger;
+        private readonly IDataProjector<Firm> _dataProjector;
 
-        public FirmGrain(ILogger<FirmGrain> logger)
+        public FirmGrain(ILogger<FirmGrain> logger, IDataProjector<Firm> dataProjector)
         {
             _logger = logger;
+            _dataProjector = dataProjector;
         }
 
         public Task<int> GetCurrentVersionAsync() => Task.FromResult(Version);
 
-        public Task ProjectStateAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task ProjectStateAsync() => _dataProjector.ProjectAsync(State);
 
         [StateModification]
         public async Task AddCardAsync(long cardCode)
         {
-            if (State.Cards != null)
-            {
-                if (State.Cards.Contains(cardCode))
-                {
-                    return;
-                }
-            }
-            else
-            {
-                State.Cards = new HashSet<long>();
-            }
-
             RaiseEvent(new CardAddedToFirmEvent(cardCode));
             await ConfirmEvents();
         }
@@ -50,11 +36,8 @@ namespace NuClear.Broadway.Grains
         [StateModification]
         public async Task RemoveCardAsync(long cardCode)
         {
-            if (State.Cards != null)
-            {
-                RaiseEvent(new CardRemovedFromFirmEvent(cardCode));
-                await ConfirmEvents();
-            }
+            RaiseEvent(new CardRemovedFromFirmEvent(cardCode));
+            await ConfirmEvents();
         }
 
         [StateModification]
@@ -82,10 +65,10 @@ namespace NuClear.Broadway.Grains
             switch (@event)
             {
                 case CardAddedToFirmEvent cardAddedToFirmEvent:
-                    state.Cards.Add(cardAddedToFirmEvent.CardCode);
+                    state.AddCard(cardAddedToFirmEvent.CardCode);
                     break;
                 case CardRemovedFromFirmEvent cardRemovedFromFirmEvent:
-                    state.Cards.Remove(cardRemovedFromFirmEvent.CardCode);
+                    state.RemoveCard(cardRemovedFromFirmEvent.CardCode);
                     break;
                 case FirmArchivedEvent firmArchievedEvent:
                     state.Code = firmArchievedEvent.FirmCode;

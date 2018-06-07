@@ -6,7 +6,7 @@ using Orleans;
 
 namespace NuClear.Broadway.Interfaces.Grains
 {
-    public interface IFirmGrain : IGrainWithIntegerKey
+    public interface IFirmGrain : IStateProjectorGrain
     {
         Task AddCardAsync(long cardCode);
         Task RemoveCardAsync(long cardCode);

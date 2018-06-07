@@ -12,5 +12,27 @@ namespace NuClear.Broadway.Interfaces.Models
         public bool ClosedForAscertainment { get; set; }
         public bool IsArchived { get; set; }
         public ISet<long> Cards { get; set; }
+
+        public void AddCard(long cardCode)
+        {
+            if (Cards != null)
+            {
+                if (Cards.Contains(cardCode))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                Cards = new HashSet<long>();
+            }
+
+            Cards.Add(cardCode);
+        }
+
+        public void RemoveCard(long cardCode)
+        {
+            Cards?.Remove(cardCode);
+        }
     }
 }

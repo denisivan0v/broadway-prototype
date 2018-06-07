@@ -32,7 +32,8 @@ namespace NuClear.Broadway.Grains.Workers
         protected override async Task ProcessMessage(Message<string, string> message)
         {
             var xml = XElement.Parse(message.Value);
-            switch (xml.Name.ToString())
+            var objectType = xml.Name.ToString();
+            switch (objectType)
             {
                 case nameof(Category):
                     await UpdateCategoryAsync(xml);
@@ -47,7 +48,7 @@ namespace NuClear.Broadway.Grains.Workers
 
                     break;
                 default:
-                    _logger.LogInformation("Unknown object type.");
+                    _logger.LogInformation($"{objectType}: Unknown object type.");
 
                     break;
             }

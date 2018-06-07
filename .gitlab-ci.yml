@@ -18,7 +18,6 @@ build-apps:
   when: always
   image: $REGISTRY/microsoft/dotnet:2.1.300-sdk-alpine3.7
   script:
-    - exit 0
     - dotnet restore --runtime debian-x64
     - dotnet publish src/Broadway.Host --configuration Release --runtime debian-x64 --output ../../publish/broadway-host
     - dotnet publish src/Broadway.Silo --configuration Release --runtime debian-x64 --output ../../publish/broadway-silo
@@ -48,7 +47,6 @@ broadway-host-image:
 #  when: manual
   allow_failure: false
   script:
-    - exit 0
     - export IMAGE_TAG=$REGISTRY/roads/broadway-host:${BROADWAY_VERSION}
     - docker build --pull --rm --tag $IMAGE_TAG -f publish/broadway-host/Dockerfile publish/broadway-host
     - docker push $IMAGE_TAG
@@ -61,7 +59,6 @@ broadway-silo-image:
 #  when: manual
   allow_failure: false
   script:
-    - exit 0
     - export IMAGE_TAG=$REGISTRY/roads/broadway-silo:${BROADWAY_VERSION}
     - docker build --pull --rm --tag $IMAGE_TAG -f publish/broadway-silo/Dockerfile publish/broadway-silo
     - docker push $IMAGE_TAG
@@ -103,11 +100,6 @@ deploy-staging:
 deploy-testing:
   <<: *deploy_testing_template
   script:
-    - echo ${DOMAIN_POSTFIX}
-    - echo ${ROADS_ENVIRONMENT}
-    - echo ${BROADWAY_VERSION}
-    - echo ${ENVIRONMENT_KEYSPACE}
-    - exit 0
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   dependencies: []

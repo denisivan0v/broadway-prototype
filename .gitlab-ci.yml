@@ -8,8 +8,8 @@ stages:
   - end
 
 before_script:
-  - echo "Global before_script"
   - export CI_TAG=`[[ -z ${CI_COMMIT_TAG} ]] && echo "branch-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA:0:8}" || echo "${CI_COMMIT_TAG}"`
+  - export ENVIRONMENT_KEYSPACE=`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`
 
 # ================= Build, Test & Orleans Storage Up =================
 
@@ -78,11 +78,7 @@ broadway-silo-image:
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
-    ENVIRONMENT_KEYSPACE: "`echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g'`"
-    ENVIRONMENT_KEYSPACE_TEST: "$(echo ${CI_COMMIT_REF_SLUG} | sed -e 's/-/_/g')"
-  before_script:
-    - echo ".deploy-testing:template before_script"
-    - export BROADWAY_VERSION="${CI_TAG}"
+    BROADWAY_VERSION: "${CI_TAG}"
   tags: [ 2gis, docker ]
   except:
     - master
@@ -109,10 +105,12 @@ deploy-staging:
 deploy-testing:
   <<: *deploy_testing_template
   script:
-    - echo "${CI_TAG}"
-    - echo "${BROADWAY_VERSION}"
-    - echo "${ENVIRONMENT_KEYSPACE}"
-    - echo "${ENVIRONMENT_KEYSPACE_TEST}"
+    - echo ${DOMAIN_POSTFIX}
+    - echo ${ROADS_ENVIRONMENT}
+    - echo ${BROADWAY_VERSION}
+    - echo ${ENVIRONMENT_KEYSPACE}
+    - echo ${CI_TAG}
+    - exit 0
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   dependencies: []

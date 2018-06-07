@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Npgsql;
+
 using NuClear.Broadway.DataProjection;
 using NuClear.Broadway.Grains;
 using NuClear.Broadway.Grains.Options;
@@ -97,9 +99,13 @@ namespace NuClear.Broadway.Silo
                                services.AddSingleton(kafkaOptions.MergeWith(mainClusterKafkaOptions));
 
                                var connectionString = configuration.GetConnectionString("BroadwayDataProjection");
-                               services.AddDbContextPool<DataProjectionContext>(builder => builder.UseNpgsql(connectionString));
+                               var connection = new NpgsqlConnection(connectionString);
+                               connection.Open();
 
-                               services.AddTransient<MessageSender>()
+                               services.AddDbContextPool<DataProjectionContext>(builder => builder.UseNpgsql(connection));
+
+                               services.AddSingleton(connection)
+                                       .AddTransient<MessageSender>()
                                        .AddTransient<IDataProjector<Category>, CategoryDataProjector>()
                                        .AddTransient<IDataProjector<SecondRubric>, SecondRubricDataProjector>()
                                        .AddTransient<IDataProjector<Rubric>, RubricDataProjector>()
@@ -117,6 +123,7 @@ namespace NuClear.Broadway.Silo
                    .AddCassandraGrainStorageAsDefault(config => config.GetSection("Cassandra"), ConcurrentGrainStateTypesProvider.Instance)
                    .AddLogStorageBasedLogConsistencyProvider("LogStorage")
                    .AddStateStorageBasedLogConsistencyProviderAsDefault()
+                   .UseInMemoryReminderService()
                    .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CampaignGrain).Assembly).WithReferences())
                    .ConfigureLogging(logging => logging.AddSerilog(logger, true))
                    .AddIncomingGrainCallFilter<StateModificationCallFilter>()

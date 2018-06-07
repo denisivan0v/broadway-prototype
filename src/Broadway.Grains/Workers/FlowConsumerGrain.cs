@@ -11,15 +11,18 @@ using NuClear.Broadway.Interfaces.Workers;
 using NuClear.Broadway.Kafka;
 
 using Orleans;
+using Orleans.Runtime;
 
 using Polly;
 using Polly.Retry;
 
 namespace NuClear.Broadway.Grains.Workers
 {
-    public abstract class FlowConsumerGrain : Grain, IWorkerGrain
+    public abstract class FlowConsumerGrain : Grain, IWorkerGrain, IRemindable
     {
         private const int BufferSize = 100;
+
+        private static readonly TimeSpan ReminderPeriod = TimeSpan.FromMinutes(1);
 
         private readonly ILogger _logger;
         private readonly KafkaOptions _kafkaOptions;
@@ -54,8 +57,6 @@ namespace NuClear.Broadway.Grains.Workers
 
         public override async Task OnActivateAsync()
         {
-            await base.OnActivateAsync();
-
             _messageReceiver = new SimpleMessageReceiver(
                 _logger,
                 _kafkaOptions,
@@ -64,7 +65,10 @@ namespace NuClear.Broadway.Grains.Workers
 
             _messageReceiver.OnMessage += OnMessage;
 
-            _logger.LogTrace("{grainType} has beed activated for topic {topic}.", GetType().Name, _topic);
+            var grainType = GetType().Name;
+            await RegisterOrUpdateReminder(grainType, ReminderPeriod, ReminderPeriod);
+
+            _logger.LogInformation("Consumer grain of type {grainType} has beed activated for topic {topic}.", grainType, _topic);
         }
 
         public override Task OnDeactivateAsync()
@@ -72,11 +76,9 @@ namespace NuClear.Broadway.Grains.Workers
             _messageReceiver.OnMessage -= OnMessage;
             _messageReceiver.Dispose();
 
-            var task = base.OnDeactivateAsync();
+            _logger.LogInformation("Consumer grain of type {grainType} has beed deactivated.", GetType().Name);
 
-            _logger.LogTrace("{grainType} has beed deactivated.", GetType().Name);
-
-            return task;
+            return Task.CompletedTask;
         }
 
         public Task StartExecutingAsync(GrainCancellationToken cancellation)
@@ -90,6 +92,12 @@ namespace NuClear.Broadway.Grains.Workers
         }
 
         protected abstract Task ProcessMessage(Message<string, string> message);
+
+        Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
+        {
+            _logger.LogInformation("Reminder {reminderName} received. This will prevent consumer grain deactivation.", reminderName);
+            return Task.CompletedTask;
+        }
 
         private void OnMessage(object sender, Message<string, string> message) => _messageProcessingQueue.Post(message);
 

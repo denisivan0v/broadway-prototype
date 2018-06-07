@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{D790569B
 		.gitlab-ci.yml = .gitlab-ci.yml
 		config-prototype.yaml = config-prototype.yaml
 		Directory.Build.props = Directory.Build.props
+		local-storage-up.bat = local-storage-up.bat
 		nuget.config = nuget.config
 		projections-db-schema.sql = projections-db-schema.sql
 		run-cql.py = run-cql.py

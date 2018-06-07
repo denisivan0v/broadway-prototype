@@ -2,7 +2,7 @@ variables:
   REGISTRY: "docker-hub.2gis.ru"
 
 stages:
-  - pre
+  - build
   - dockerize
   - deploy
   - end
@@ -11,10 +11,10 @@ before_script:
   - export BROADWAY_VERSION=`[[ -z ${CI_COMMIT_TAG} ]] && echo "branch-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA:0:8}" || echo "${CI_COMMIT_TAG}"`
   - export ENVIRONMENT_KEYSPACE=`echo "branch_${CI_COMMIT_REF_SLUG}" | sed -e 's/-/_/g'`
 
-# ================= Build, Test & Orleans Storage Up =================
+# ================= Build & Test =================
 
 build-apps:
-  stage: pre
+  stage: build
   when: always
   image: $REGISTRY/microsoft/dotnet:2.1.300-sdk-alpine3.7
   script:
@@ -28,17 +28,6 @@ build-apps:
     paths:
       - publish/broadway-host/
       - publish/broadway-silo/
-
-storage-up:
-  stage: pre
-  when: always
-  image: $REGISTRY/2gis-io/k8s-handle:latest
-  script:
-    - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
-    - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
-  tags: [ 2gis, docker ]
-  only:
-    - master
 
 # ================= Dockerize =================
 
@@ -76,6 +65,7 @@ broadway-silo-image:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
   tags: [ 2gis, docker ]
+  dependencies: []
   except:
     - master
     - tags
@@ -84,10 +74,11 @@ deploy-staging:
   stage: deploy
 #  when: manual
   image: $REGISTRY/2gis-io/k8s-handle:latest
+  variables:
+    DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
+    ROADS_ENVIRONMENT: stage
   script:
-    - export DOMAIN_POSTFIX=broadway-${CI_COMMIT_REF_SLUG}
     - export ENVIRONMENT_KEYSPACE=${CI_COMMIT_REF_SLUG}
-    - export ROADS_ENVIRONMENT=stage
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   only:
     - master
@@ -102,7 +93,6 @@ deploy-testing:
   script:
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
-  dependencies: []
   environment:
     name: ${CI_COMMIT_REF_NAME}
     url: http://broadway-${CI_COMMIT_REF_SLUG}.web-staging.2gis.ru/swagger
@@ -115,7 +105,6 @@ destroy-testing:
     - k8s-handle destroy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 60
     - pip install cassandra-driver
     - python run-cql.py ${CASSANDRA_STAGE_HOST} ${CASSANDRA_STAGE_PORT} "DROP KEYSPACE ${ENVIRONMENT_KEYSPACE}"
-  dependencies: []
   environment:
     name: ${CI_COMMIT_REF_NAME}
     action: stop

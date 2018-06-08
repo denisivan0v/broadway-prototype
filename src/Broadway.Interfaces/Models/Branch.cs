@@ -11,7 +11,7 @@ namespace NuClear.Broadway.Interfaces.Models
         public string DefaultLang { get; set; }
         public bool IsOnInfoRussia { get; set; }
         public bool IsDeleted { get; set; }
-        public List<BranchLocalization> Localizations { get; set; }
-        public List<string> EnabledLanguages { get; set; }
+        public ICollection<BranchLocalization> Localizations { get; set; }
+        public ICollection<string> EnabledLanguages { get; set; }
     }
 }

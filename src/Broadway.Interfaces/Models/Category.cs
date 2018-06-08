@@ -6,7 +6,7 @@ namespace NuClear.Broadway.Interfaces.Models
     {
         public long Code { get; set; }
         public bool IsDeleted { get; set; }
-        public List<RubricLocalization> Localizations { get; set; }
+        public ICollection<RubricLocalization> Localizations { get; set; }
         public ISet<long> SecondRubrics { get; private set; }
 
         public void AddSecondRubric(long secondRubricCode)

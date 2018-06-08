@@ -62,11 +62,10 @@ namespace NuClear.Broadway.Host
             var certificate = Base64UrlEncoder.DecodeBytes(authenticationOptions.Certificate);
             var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = false, // remove when AIM-212 will be done
-                    ValidateIssuerSigningKey = true,
-                    ValidateIssuer = true,
                     ValidIssuer = authenticationOptions.Issuer,
-                    IssuerSigningKey = new X509SecurityKey(new X509Certificate2(certificate))
+                    ValidateIssuer = true,
+                    IssuerSigningKey = new X509SecurityKey(new X509Certificate2(certificate)),
+                    ValidateIssuerSigningKey = true
                 };
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

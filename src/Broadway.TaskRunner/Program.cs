@@ -72,7 +72,7 @@ namespace NuClear.Broadway.TaskRunner
                             CommandLine.CommandTypes.FlowCardsForERM,
                             commandConfig =>
                                 {
-                                    commandConfig.Description = "Import objects from FlowCardsForERM flow.";
+                                    commandConfig.Description = "Import objects from flowCardsForERM.";
                                     commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
                                     commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
                                 });
@@ -81,7 +81,16 @@ namespace NuClear.Broadway.TaskRunner
                             CommandLine.CommandTypes.FlowKaleidoscope,
                             commandConfig =>
                                 {
-                                    commandConfig.Description = "Import objects from FlowKaleidoscope flow.";
+                                    commandConfig.Description = "Import objects from flowKaleidoscope.";
+                                    commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
+                                    commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
+                                });
+
+                        config.Command(
+                            CommandLine.CommandTypes.FlowGeoClassifier,
+                            commandConfig =>
+                                {
+                                    commandConfig.Description = "Import objects from flowGeoClassifier.";
                                     commandConfig.HelpOption(CommandLine.HelpOptionTemplate);
                                     commandConfig.OnExecute(() => Run(commandConfig, logger, clusterClient, cts));
                                 });

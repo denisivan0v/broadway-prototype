@@ -31,15 +31,29 @@ namespace NuClear.Broadway.Host.Controllers
         [HttpGet("firms")]
         public async Task<IActionResult> ListFirms()
         {
-            var cards = await _dbContext.Firms.AsNoTracking().Take(100).ToListAsync();
-            return Json(cards);
+            var firms = await _dbContext.Firms.AsNoTracking().Take(100).ToListAsync();
+            return Json(firms);
         }
 
         [HttpGet("rubrics")]
         public async Task<IActionResult> ListRubrics()
         {
-            var cards = await _dbContext.Rubrics.Where(x => !x.IsDeleted).Include(x => x.Localizations).AsNoTracking().Take(100).ToListAsync();
-            return Json(cards);
+            var rubrics = await _dbContext.Rubrics
+                                          .Where(x => !x.IsDeleted)
+                                          .Include(x => x.Localizations)
+                                          .Include(x => x.Branches)
+                                          .AsNoTracking()
+                                          .Take(100)
+                                          .ToListAsync();
+
+            return Json(rubrics);
+        }
+
+        [HttpGet("branches")]
+        public async Task<IActionResult> ListBranches()
+        {
+            var branches = await _dbContext.Branches.Where(x => !x.IsDeleted).Include(x => x.Localizations).AsNoTracking().Take(100).ToListAsync();
+            return Json(branches);
         }
     }
 }

@@ -1,4 +1,14 @@
 ﻿CREATE SEQUENCE "EntityFrameworkHiLoSequence" START WITH 1 INCREMENT BY 10 NO MINVALUE NO MAXVALUE NO CYCLE;
+CREATE TABLE "Branches" (
+    "Code" int4 NOT NULL,
+    "DefaultCityCode" int8 NULL,
+    "DefaultCountryCode" int4 NOT NULL,
+    "DefaultLang" text NOT NULL,
+    "IsDeleted" bool NOT NULL,
+    "IsOnInfoRussia" bool NOT NULL,
+    "NameLat" text NULL,
+    CONSTRAINT "PK_Branches" PRIMARY KEY ("Code")
+);
 CREATE TABLE "Cards" (
     "Code" int8 NOT NULL,
     "BranchCode" int4 NOT NULL,
@@ -42,15 +52,29 @@ CREATE TABLE "SecondRubrics" (
     "IsDeleted" bool NOT NULL,
     CONSTRAINT "PK_SecondRubrics" PRIMARY KEY ("Code")
 );
-CREATE TABLE "CardForERMRubrics" (
+CREATE TABLE "BranchLocalizations" (
+    "Id" int8 NOT NULL,
+    "BranchCode" int4 NULL,
+    "Lang" text NOT NULL,
+    "Name" text NOT NULL,
+    CONSTRAINT "PK_BranchLocalizations" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_BranchLocalizations_Branches_BranchCode" FOREIGN KEY ("BranchCode") REFERENCES "Branches" ("Code") ON DELETE RESTRICT
+);
+CREATE TABLE "CardsRubrics" (
     "RubricCode" int8 NOT NULL,
     "CardForERMCode" int8 NULL,
     "IsPrimary" bool NOT NULL,
     "SortingPosition" int4 NOT NULL,
-    CONSTRAINT "PK_CardForERMRubrics" PRIMARY KEY ("RubricCode"),
-    CONSTRAINT "FK_CardForERMRubrics_Cards_CardForERMCode" FOREIGN KEY ("CardForERMCode") REFERENCES "Cards" ("Code") ON DELETE RESTRICT
+    CONSTRAINT "PK_CardsRubrics" PRIMARY KEY ("RubricCode"),
+    CONSTRAINT "FK_CardsRubrics_Cards_CardForERMCode" FOREIGN KEY ("CardForERMCode") REFERENCES "Cards" ("Code") ON DELETE RESTRICT
 );
-CREATE TABLE "Localizations" (
+CREATE TABLE "RubricsBranches" (
+    "RubricCode" int8 NOT NULL,
+    "BranchCode" int4 NOT NULL,
+    CONSTRAINT "PK_RubricsBranches" PRIMARY KEY ("RubricCode", "BranchCode"),
+    CONSTRAINT "FK_RubricsBranches_Rubrics_RubricCode" FOREIGN KEY ("RubricCode") REFERENCES "Rubrics" ("Code") ON DELETE CASCADE
+);
+CREATE TABLE "RubricLocalizations" (
     "Id" int8 NOT NULL,
     "CategoryCode" int8 NULL,
     "Lang" text NOT NULL,
@@ -58,12 +82,13 @@ CREATE TABLE "Localizations" (
     "RubricCode" int8 NULL,
     "SecondRubricCode" int8 NULL,
     "ShortName" text NULL,
-    CONSTRAINT "PK_Localizations" PRIMARY KEY ("Id"),
-    CONSTRAINT "FK_Localizations_Categories_CategoryCode" FOREIGN KEY ("CategoryCode") REFERENCES "Categories" ("Code") ON DELETE RESTRICT,
-    CONSTRAINT "FK_Localizations_Rubrics_RubricCode" FOREIGN KEY ("RubricCode") REFERENCES "Rubrics" ("Code") ON DELETE RESTRICT,
-    CONSTRAINT "FK_Localizations_SecondRubrics_SecondRubricCode" FOREIGN KEY ("SecondRubricCode") REFERENCES "SecondRubrics" ("Code") ON DELETE RESTRICT
+    CONSTRAINT "PK_RubricLocalizations" PRIMARY KEY ("Id"),
+    CONSTRAINT "FK_RubricLocalizations_Categories_CategoryCode" FOREIGN KEY ("CategoryCode") REFERENCES "Categories" ("Code") ON DELETE RESTRICT,
+    CONSTRAINT "FK_RubricLocalizations_Rubrics_RubricCode" FOREIGN KEY ("RubricCode") REFERENCES "Rubrics" ("Code") ON DELETE RESTRICT,
+    CONSTRAINT "FK_RubricLocalizations_SecondRubrics_SecondRubricCode" FOREIGN KEY ("SecondRubricCode") REFERENCES "SecondRubrics" ("Code") ON DELETE RESTRICT
 );
-CREATE INDEX "IX_CardForERMRubrics_CardForERMCode" ON "CardForERMRubrics" ("CardForERMCode");
-CREATE INDEX "IX_Localizations_CategoryCode" ON "Localizations" ("CategoryCode");
-CREATE INDEX "IX_Localizations_RubricCode" ON "Localizations" ("RubricCode");
-CREATE INDEX "IX_Localizations_SecondRubricCode" ON "Localizations" ("SecondRubricCode");
+CREATE INDEX "IX_BranchLocalizations_BranchCode" ON "BranchLocalizations" ("BranchCode");
+CREATE INDEX "IX_CardsRubrics_CardForERMCode" ON "CardsRubrics" ("CardForERMCode");
+CREATE INDEX "IX_RubricLocalizations_CategoryCode" ON "RubricLocalizations" ("CategoryCode");
+CREATE INDEX "IX_RubricLocalizations_RubricCode" ON "RubricLocalizations" ("RubricCode");
+CREATE INDEX "IX_RubricLocalizations_SecondRubricCode" ON "RubricLocalizations" ("SecondRubricCode");

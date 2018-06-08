@@ -2,8 +2,6 @@
 
 using NuClear.Broadway.Interfaces.Models;
 
-using Orleans;
-
 namespace NuClear.Broadway.Interfaces.Grains
 {
     public interface ISecondRubricGrain : IStateProjectorGrain

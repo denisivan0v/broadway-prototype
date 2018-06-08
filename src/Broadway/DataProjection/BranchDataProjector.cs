@@ -7,25 +7,28 @@ using NuClear.Broadway.Interfaces.Models;
 
 namespace NuClear.Broadway.DataProjection
 {
-    public class RubricDataProjector : IDataProjector<Rubric>
+    public class BranchDataProjector : IDataProjector<Branch>
     {
         private readonly DataProjectionContext _dbContext;
 
-        public RubricDataProjector(DataProjectionContext dbContext)
+        public BranchDataProjector(DataProjectionContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task ProjectAsync(Rubric state)
+        public async Task ProjectAsync(Branch state)
         {
-            var rubric = await _dbContext.Rubrics.Include(x => x.Localizations).Include(x => x.Branches).SingleOrDefaultAsync(x => x.Code == state.Code);
-            if (rubric == null)
+            var branch = await _dbContext.Branches
+                                         .Include(x => x.Localizations)
+                                         .SingleOrDefaultAsync(x => x.Code == state.Code);
+
+            if (branch == null)
             {
                 await _dbContext.AddAsync(state);
             }
             else
             {
-                _dbContext.Entry(rubric).CurrentValues.SetValues(state);
+                _dbContext.Entry(branch).CurrentValues.SetValues(state);
             }
 
             await _dbContext.SaveChangesAsync();

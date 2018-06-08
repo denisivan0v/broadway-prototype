@@ -37,6 +37,7 @@ namespace NuClear.Broadway.Grains.Workers
                     { typeof(CategoryGrain).FullName, (factory, id) => factory.GetGrain<ICategoryGrain>(id) },
                     { typeof(SecondRubricGrain).FullName, (factory, id) => factory.GetGrain<ISecondRubricGrain>(id) },
                     { typeof(RubricGrain).FullName, (factory, id) => factory.GetGrain<IRubricGrain>(id) },
+                    { typeof(BranchGrain).FullName, (factory, id) => factory.GetGrain<IBranchGrain>(id) },
                     { typeof(FirmGrain).FullName, (factory, id) => factory.GetGrain<IFirmGrain>(id) },
                     { typeof(CardForERMGrain).FullName, (factory, id) => factory.GetGrain<ICardForERMGrain>(id) }
                 };

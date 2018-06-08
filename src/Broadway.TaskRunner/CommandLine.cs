@@ -15,6 +15,7 @@
         {
             public const string FlowCardsForERM = "flow-cardsforerm";
             public const string FlowKaleidoscope = "flow-kaleidoscope";
+            public const string FlowGeoClassifier = "flow-geoclassifier";
         }
 
         public struct Arguments

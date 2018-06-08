@@ -8,7 +8,7 @@ namespace NuClear.Broadway.Interfaces.Models
         public long SecondRubricCode { get; set; }
         public bool IsCommercial { get; set; }
         public bool IsDeleted { get; set; }
-        public List<Localization> Localizations { get; set; }
-        public ISet<int> Branches { get; set; }
+        public List<RubricLocalization> Localizations { get; set; }
+        public List<RubricBranch> Branches { get; set; }
     }
 }

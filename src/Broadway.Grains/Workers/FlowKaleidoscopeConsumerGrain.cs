@@ -17,14 +17,13 @@ namespace NuClear.Broadway.Grains.Workers
     public sealed class FlowKaleidoscopeConsumerGrain : FlowConsumerGrain, IFlowKaleidoscopeConsumerGrain
     {
         private const string ConsumerGroupToken = "roads-flow-kaleidoscope-consumer";
-        private const string Topic = "casino_staging_flowKaleidoscope_compacted";
 
         private readonly ILogger<FlowKaleidoscopeConsumerGrain> _logger;
 
         public FlowKaleidoscopeConsumerGrain(
             ILogger<FlowKaleidoscopeConsumerGrain> logger,
             ReferenceObjectsClusterKafkaOptions kafkaOptions)
-            : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
+            : base(logger, kafkaOptions, ConsumerGroupToken, kafkaOptions.FlowKaleidoscopeTopic)
         {
             _logger = logger;
         }

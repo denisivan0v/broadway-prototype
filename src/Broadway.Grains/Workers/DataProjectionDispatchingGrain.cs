@@ -29,7 +29,6 @@ namespace NuClear.Broadway.Grains.Workers
         private const string GrainVersionContextKey = nameof(GrainVersionContextKey);
 
         private const string ConsumerGroupToken = "roads-state-events-consumer";
-        private const string Topic = "roads_test_state_events";
 
         private static readonly Dictionary<string, Func<IGrainFactory, long, IGrain>> GrainProviders =
             new Dictionary<string, Func<IGrainFactory, long, IGrain>>
@@ -45,7 +44,7 @@ namespace NuClear.Broadway.Grains.Workers
         private readonly RetryPolicy<bool> _waitPolicy;
 
         public DataProjectionDispatchingGrain(ILogger<DataProjectionDispatchingGrain> logger, KafkaOptions kafkaOptions)
-            : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
+            : base(logger, kafkaOptions, ConsumerGroupToken, kafkaOptions.DataProjectionDispatchingTopic)
         {
             _waitPolicy =
                 Policy.HandleResult(true)

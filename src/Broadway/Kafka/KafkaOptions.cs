@@ -4,6 +4,7 @@
     {
         public string BrokerEndpoints { get; set; }
         public string ConsumerGroupPostfix { get; set; }
+        public string DataProjectionDispatchingTopic { get; set; }
         public ConsumerOptions Consumer { get; set; }
         public ProducerOptions Producer { get; set; }
 

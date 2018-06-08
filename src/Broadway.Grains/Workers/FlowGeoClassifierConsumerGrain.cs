@@ -19,14 +19,13 @@ namespace NuClear.Broadway.Grains.Workers
     public class FlowGeoClassifierConsumerGrain : FlowConsumerGrain, IFlowGeoClassifierConsumerGrain
     {
         private const string ConsumerGroupToken = "roads-flow-geoclassifier-consumer";
-        private const string Topic = "casino_staging_flowGeoClassifier_compacted";
 
         private readonly ILogger<FlowGeoClassifierConsumerGrain> _logger;
 
         public FlowGeoClassifierConsumerGrain(
             ILogger<FlowGeoClassifierConsumerGrain> logger,
             ReferenceObjectsClusterKafkaOptions kafkaOptions)
-            : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
+            : base(logger, kafkaOptions, ConsumerGroupToken, kafkaOptions.FlowGeoClassifierTopic)
         {
             _logger = logger;
         }

@@ -17,14 +17,13 @@ namespace NuClear.Broadway.Grains.Workers
     public sealed class FlowKaleidoscopeConsumerGrain : FlowConsumerGrain, IFlowKaleidoscopeConsumerGrain
     {
         private const string ConsumerGroupToken = "roads-flow-kaleidoscope-consumer";
-        private const string Topic = "casino_staging_flowKaleidoscope_compacted";
 
         private readonly ILogger<FlowKaleidoscopeConsumerGrain> _logger;
 
         public FlowKaleidoscopeConsumerGrain(
-            ILogger<FlowKaleidoscopeConsumerGrain> logger, 
+            ILogger<FlowKaleidoscopeConsumerGrain> logger,
             ReferenceObjectsClusterKafkaOptions kafkaOptions)
-            : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
+            : base(logger, kafkaOptions, ConsumerGroupToken, kafkaOptions.FlowKaleidoscopeTopic)
         {
             _logger = logger;
         }
@@ -68,10 +67,10 @@ namespace NuClear.Broadway.Grains.Workers
                 category.Localizations =
                     localizations?.Elements()
                                  .Select(
-                                     x => new Localization
+                                     x => new RubricLocalization
                                          {
-                                             Lang = (string)x.Attribute(nameof(Localization.Lang)),
-                                             Name = (string)x.Attribute(nameof(Localization.Name))
+                                             Lang = (string)x.Attribute(nameof(RubricLocalization.Lang)),
+                                             Name = (string)x.Attribute(nameof(RubricLocalization.Name))
                                          })
                                  .ToList();
 
@@ -101,10 +100,10 @@ namespace NuClear.Broadway.Grains.Workers
                 secondRubric.Localizations =
                     localizations?.Elements()
                                  .Select(
-                                     x => new Localization
+                                     x => new RubricLocalization
                                          {
-                                             Lang = (string)x.Attribute(nameof(Localization.Lang)),
-                                             Name = (string)x.Attribute(nameof(Localization.Name))
+                                             Lang = (string)x.Attribute(nameof(RubricLocalization.Lang)),
+                                             Name = (string)x.Attribute(nameof(RubricLocalization.Name))
                                          })
                                  .ToList();
                 await secondRubricGrain.UpdateStateAsync(secondRubric);
@@ -134,11 +133,11 @@ namespace NuClear.Broadway.Grains.Workers
                 rubric.Localizations =
                     localizations?.Elements()
                                  .Select(
-                                     x => new Localization
+                                     x => new RubricLocalization
                                          {
-                                             Lang = (string)x.Attribute(nameof(Localization.Lang)),
-                                             Name = (string)x.Attribute(nameof(Localization.Name)),
-                                             ShortName = (string)x.Attribute(nameof(Localization.ShortName))
+                                             Lang = (string)x.Attribute(nameof(RubricLocalization.Lang)),
+                                             Name = (string)x.Attribute(nameof(RubricLocalization.Name)),
+                                             ShortName = (string)x.Attribute(nameof(RubricLocalization.ShortName))
                                          })
                                  .ToList();
 
@@ -146,7 +145,7 @@ namespace NuClear.Broadway.Grains.Workers
                                      .Elements()
                                      .Elements(nameof(Rubric.Branches))
                                      .Elements()
-                                     .Select(x => (int)x.Attribute(nameof(Rubric.Code)))
+                                     .Select(x => new RubricBranch { RubricCode = code, BranchCode = (int)x.Attribute(nameof(Rubric.Code)) })
                                      .ToHashSet();
 
                 await rubricGrain.UpdateStateAsync(rubric);

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Broadway.TaskRunner": {
+      "commandName": "Project",
+      "commandLineArgs": "import flow-geoclassifier",
+      "environmentVariables": {
+        "ROADS_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

@@ -109,6 +109,7 @@ namespace NuClear.Broadway.Silo
                                        .AddTransient<IDataProjector<Category>, CategoryDataProjector>()
                                        .AddTransient<IDataProjector<SecondRubric>, SecondRubricDataProjector>()
                                        .AddTransient<IDataProjector<Rubric>, RubricDataProjector>()
+                                       .AddTransient<IDataProjector<Branch>, BranchDataProjector>()
                                        .AddTransient<IDataProjector<Firm>, FirmDataProjector>()
                                        .AddTransient<IDataProjector<CardForERM>, CardForERMDataProjector>();
                            })

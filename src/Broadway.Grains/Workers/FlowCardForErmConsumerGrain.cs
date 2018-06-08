@@ -17,12 +17,11 @@ namespace NuClear.Broadway.Grains.Workers
     public class FlowCardForErmConsumerGrain : FlowConsumerGrain, IFlowCardForErmConsumerGrain
     {
         private const string ConsumerGroupToken = "roads-flow-cardsforerm-consumer";
-        private const string Topic = "roads_test_flowCardsForERM";
 
         private readonly ILogger<FlowCardForErmConsumerGrain> _logger;
 
         public FlowCardForErmConsumerGrain(ILogger<FlowCardForErmConsumerGrain> logger, ReferenceObjectsClusterKafkaOptions kafkaOptions)
-            : base(logger, kafkaOptions, ConsumerGroupToken, Topic)
+            : base(logger, kafkaOptions, ConsumerGroupToken, kafkaOptions.FlowCardsForErmTopic)
         {
             _logger = logger;
         }

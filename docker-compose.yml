@@ -15,7 +15,7 @@ services:
     environment:
       POSTGRES_DB: BroadwayDataProjection
     volumes:
-      - ./projections-db-schema.sql:/docker-entrypoint-initdb.d/projections-db-schema.sql
+      - ./projections-db-schema.sql:/docker-entrypoint-initdb.d/projections-db-schema.sql:ro
   zookeeper:
     image: wurstmeister/zookeeper
     ports:

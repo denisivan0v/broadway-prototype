@@ -13,7 +13,8 @@ namespace NuClear.Broadway.TaskRunner
             new Dictionary<string, Type>
                 {
                     { "import-flow-cardsforerm", typeof(IFlowCardForErmConsumerGrain) },
-                    { "import-flow-kaleidoscope", typeof(IFlowKaleidoscopeConsumerGrain) }
+                    { "import-flow-kaleidoscope", typeof(IFlowKaleidoscopeConsumerGrain) },
+                    { "import-flow-geoclassifier", typeof(IFlowGeoClassifierConsumerGrain) }
                 };
 
         private static readonly MethodInfo GetGrainMethodInfo =

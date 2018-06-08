@@ -29,6 +29,9 @@ namespace NuClear.Broadway.Silo.StartupTasks
             var flowKaleidoscopeConsumerGrain = _grainFactory.GetGrain<IFlowKaleidoscopeConsumerGrain>(Guid.NewGuid().ToString());
             await flowKaleidoscopeConsumerGrain.StartExecutingAsync(tcs.Token);
 
+            var flowGeoClassifierConsumerGrain = _grainFactory.GetGrain<IFlowGeoClassifierConsumerGrain>(Guid.NewGuid().ToString());
+            await flowGeoClassifierConsumerGrain.StartExecutingAsync(tcs.Token);
+
             var flowCardForErmConsumerGrain = _grainFactory.GetGrain<IFlowCardForErmConsumerGrain>(Guid.NewGuid().ToString());
             await flowCardForErmConsumerGrain.StartExecutingAsync(tcs.Token);
         }

@@ -44,11 +44,11 @@ CREATE TABLE "SecondRubrics" (
 );
 CREATE TABLE "CardForERMRubrics" (
     "RubricCode" int8 NOT NULL,
-    "CardForERMCode" int8 NULL,
+    "CardCode" int8 NOT NULL,
     "IsPrimary" bool NOT NULL,
     "SortingPosition" int4 NOT NULL,
-    CONSTRAINT "PK_CardForERMRubrics" PRIMARY KEY ("RubricCode"),
-    CONSTRAINT "FK_CardForERMRubrics_Cards_CardForERMCode" FOREIGN KEY ("CardForERMCode") REFERENCES "Cards" ("Code") ON DELETE RESTRICT
+    CONSTRAINT "PK_CardForERMRubrics" PRIMARY KEY ("RubricCode", "CardCode"),
+    CONSTRAINT "FK_CardForERMRubrics_Cards_CardCode" FOREIGN KEY ("CardCode") REFERENCES "Cards" ("Code") ON DELETE CASCADE
 );
 CREATE TABLE "Localizations" (
     "Id" int8 NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE "Localizations" (
     CONSTRAINT "FK_Localizations_Rubrics_RubricCode" FOREIGN KEY ("RubricCode") REFERENCES "Rubrics" ("Code") ON DELETE RESTRICT,
     CONSTRAINT "FK_Localizations_SecondRubrics_SecondRubricCode" FOREIGN KEY ("SecondRubricCode") REFERENCES "SecondRubrics" ("Code") ON DELETE RESTRICT
 );
-CREATE INDEX "IX_CardForERMRubrics_CardForERMCode" ON "CardForERMRubrics" ("CardForERMCode");
+CREATE INDEX "IX_CardForERMRubrics_CardCode" ON "CardForERMRubrics" ("CardCode");
 CREATE INDEX "IX_Localizations_CategoryCode" ON "Localizations" ("CategoryCode");
 CREATE INDEX "IX_Localizations_RubricCode" ON "Localizations" ("RubricCode");
 CREATE INDEX "IX_Localizations_SecondRubricCode" ON "Localizations" ("SecondRubricCode");

@@ -18,6 +18,7 @@ namespace NuClear.Broadway.DataProjection
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            const string CardCode = nameof(CardCode);
             modelBuilder.Entity<Localization>(
                 builder =>
                     {
@@ -65,9 +66,9 @@ namespace NuClear.Broadway.DataProjection
             modelBuilder.Entity<CardForERM.Rubric>(
                 builder =>
                     {
-                        builder.HasKey(x => x.Code);
-                        builder.Property(x => x.Code).HasColumnName("RubricCode").ValueGeneratedNever();
-                        builder.Property(x => x.Code).IsRequired();
+                        builder.Property<long>(CardCode);
+                        builder.Property(x => x.Code).HasColumnName("RubricCode");
+                        builder.HasKey(nameof(CardForERM.Rubric.Code), CardCode);
                         builder.ToTable("CardForERMRubrics");
                     });
             modelBuilder.Entity<CardForERM>(
@@ -77,7 +78,7 @@ namespace NuClear.Broadway.DataProjection
                         builder.Property(x => x.Code).ValueGeneratedNever();
                         builder.Property(x => x.Code).IsRequired();
                         builder.OwnsOne(x => x.Address);
-                        builder.HasMany(x => x.Rubrics).WithOne();
+                        builder.HasMany(x => x.Rubrics).WithOne().HasForeignKey(CardCode).IsRequired();
                     });
         }
     }

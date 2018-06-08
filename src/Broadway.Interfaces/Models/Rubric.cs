@@ -9,6 +9,6 @@ namespace NuClear.Broadway.Interfaces.Models
         public bool IsCommercial { get; set; }
         public bool IsDeleted { get; set; }
         public List<RubricLocalization> Localizations { get; set; }
-        public List<RubricBranch> Branches { get; set; }
+        public ISet<RubricBranch> Branches { get; set; }
     }
 }

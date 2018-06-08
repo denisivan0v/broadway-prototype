@@ -147,7 +147,7 @@ namespace NuClear.Broadway.Grains.Workers
                                      .Elements(nameof(Rubric.Branches))
                                      .Elements()
                                      .Select(x => new RubricBranch { RubricCode = code, BranchCode = (int)x.Attribute(nameof(Rubric.Code)) })
-                                     .ToList();
+                                     .ToHashSet();
 
                 await rubricGrain.UpdateStateAsync(rubric);
             }

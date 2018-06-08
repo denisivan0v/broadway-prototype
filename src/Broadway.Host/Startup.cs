@@ -106,7 +106,7 @@ namespace NuClear.Broadway.Host
                                     { "Bearer", new string[] { } }
                                 });
 
-                        //options.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{nameof(Broadway)}.{nameof(Host)}.xml"));
+                        // options.IncludeXmlComments(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{nameof(Broadway)}.{nameof(Host)}.xml"));
                     });
 
             services.AddSingleton(CreateClusterClient);

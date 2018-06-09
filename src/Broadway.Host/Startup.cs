@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 
 using NuClear.Broadway.DataProjection;
+using NuClear.Broadway.Host.Middleware;
 using NuClear.Broadway.Host.Options;
 using NuClear.Broadway.Interfaces.Grains;
 
@@ -138,6 +139,7 @@ namespace NuClear.Broadway.Host
                                 }
                     });
 
+            app.UseMiddleware<HealthCheckMiddleware>();
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("Location"));
             app.UseAuthentication();
             app.UseMvc();

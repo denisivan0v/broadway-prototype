@@ -52,7 +52,7 @@ namespace NuClear.Broadway.Host.Controllers
         [HttpGet("branches")]
         public async Task<IActionResult> ListBranches()
         {
-            var branches = await _dbContext.Branches.Where(x => !x.IsDeleted).Include(x => x.Localizations).AsNoTracking().Take(100).ToListAsync();
+            var branches = await _dbContext.Branches.Where(x => !x.IsDeleted).Include(x => x.Localizations).AsNoTracking().ToListAsync();
             return Json(branches);
         }
     }

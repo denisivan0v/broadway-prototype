@@ -98,7 +98,7 @@ spec:
         - name: KAFKA_HEAP_OPTS
           value: '{{ kafka_heap_opts }}'
         - name: KAFKA_ADVERTISED_LISTENERS
-          value: 'PLAINTEXT://{{ kafka_brokers | join }},REPLICATION://127.0.0.1:9093'
+          value: 'PLAINTEXT://{{ kafka_storage_brokers }},REPLICATION://127.0.0.1:9093'
         - name: KAFKA_LISTENERS
           value: 'PLAINTEXT://0.0.0.0:{{ kafka_port }},REPLICATION://0.0.0.0:9093'
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP

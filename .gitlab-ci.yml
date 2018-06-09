@@ -64,8 +64,6 @@ before_script:
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
-    KAFKA_BROKERS: "roads-${DOMAIN_POSTFIX}-kafka.erm-roads:9092"
-    POSTGRES_HOST: "roads-${DOMAIN_POSTFIX}-postgres.erm-roads"
     POSTGRES_PORT: "5432"
     POSTGRES_DB: "BroadwayDataProjection"
     POSTGRES_USER: postgres
@@ -91,16 +89,9 @@ deploy-staging:
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_STAGE}
   script:
     - export ENVIRONMENT_KEYSPACE=stage
-    - echo $KAFKA_BROKERS
-    - echo $POSTGRES_HOST
-    - echo $POSTGRES_PORT
-    - echo $POSTGRES_DB
-    - echo $POSTGRES_USER
-    - echo $POSTGRES_PASSWORD
-    - exit 0
-    - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
-#  only:
-#    - master
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60 --strict
+  only:
+    - master
   dependencies: []
   tags: [ 2gis, docker ]
   environment:
@@ -110,8 +101,8 @@ deploy-staging:
 deploy-testing:
   <<: *deploy_testing_template
   script:
-    - echo $KAFKA_BROKERS
-    - echo $POSTGRES_HOST
+    - echo $CASSANDRA_CONTACT_POINTS
+    - echo $KAFKA_BROKERS_REF_OBJECTS
     - exit 0
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60

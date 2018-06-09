@@ -13,7 +13,7 @@ before_script:
 
 # ================= Build & Test =================
 
-.build-apps:
+build-apps:
   stage: pre
   when: always
   image: $REGISTRY/microsoft/dotnet:2.1.300-sdk-alpine3.7
@@ -31,7 +31,7 @@ before_script:
 
 # ================= Dockerize =================
 
-.broadway-host-image:
+broadway-host-image:
   stage: dockerize
 #  when: manual
   allow_failure: false
@@ -43,7 +43,7 @@ before_script:
   dependencies:
     - build-apps
 
-.broadway-silo-image:
+broadway-silo-image:
   stage: dockerize
 #  when: manual
   allow_failure: false
@@ -101,9 +101,6 @@ deploy-staging:
 deploy-testing:
   <<: *deploy_testing_template
   script:
-    - echo $CASSANDRA_CONTACT_POINTS
-    - echo $KAFKA_BROKERS_REF_OBJECTS
-    - exit 0
     - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
     - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
   environment:

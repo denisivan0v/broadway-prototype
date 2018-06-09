@@ -63,6 +63,8 @@ spec:
           value: '{{ roads_env }}'
         - name: ASPNETCORE_TEMP
           value: '{{ host_temp_dir }}'
+        - name: ROADS_Authentication__Authority
+          value: '{{ aim_authority }}'
         - name: ROADS_Cassandra__Keyspace
           value: '{{ cassandra_keyspace }}'
         - name: ROADS_Cassandra__ContactPoints

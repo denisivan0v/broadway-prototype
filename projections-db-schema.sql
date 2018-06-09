@@ -1,4 +1,4 @@
-﻿CREATE SEQUENCE "EntityFrameworkHiLoSequence" START WITH 1 INCREMENT BY 10 NO MINVALUE NO MAXVALUE NO CYCLE;
+CREATE SEQUENCE "EntityFrameworkHiLoSequence" START WITH 1 INCREMENT BY 10 NO MINVALUE NO MAXVALUE NO CYCLE;
 CREATE TABLE "Branches" (
     "Code" int4 NOT NULL,
     "DefaultCityCode" int8 NULL,
@@ -92,3 +92,4 @@ CREATE INDEX "IX_CardsRubrics_CardCode" ON "CardsRubrics" ("CardCode");
 CREATE INDEX "IX_RubricLocalizations_CategoryCode" ON "RubricLocalizations" ("CategoryCode");
 CREATE INDEX "IX_RubricLocalizations_RubricCode" ON "RubricLocalizations" ("RubricCode");
 CREATE INDEX "IX_RubricLocalizations_SecondRubricCode" ON "RubricLocalizations" ("SecondRubricCode");
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")

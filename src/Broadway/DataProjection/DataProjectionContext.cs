@@ -63,7 +63,7 @@ namespace NuClear.Broadway.DataProjection
                         builder.Property(x => x.Code).ValueGeneratedNever();
                         builder.Property(x => x.Code).IsRequired();
                         builder.HasMany(x => x.Localizations).WithOne();
-                        builder.Ignore(x => x.Branches);
+                        builder.HasMany(x => x.Branches).WithOne().HasForeignKey(x => x.RubricCode);
                     });
             modelBuilder.Entity<RubricBranch>(
                 builder =>
@@ -71,7 +71,6 @@ namespace NuClear.Broadway.DataProjection
                         builder.HasKey(x => new { x.RubricCode, x.BranchCode });
                         builder.Property(x => x.RubricCode).IsRequired();
                         builder.Property(x => x.BranchCode).IsRequired();
-                        builder.HasOne(x => x.Rubric).WithMany(x => x.Branches).HasForeignKey(x => x.RubricCode);
                         builder.ToTable("RubricsBranches");
                     });
             modelBuilder.Entity<Branch>(

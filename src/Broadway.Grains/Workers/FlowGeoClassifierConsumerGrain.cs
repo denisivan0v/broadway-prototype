@@ -40,7 +40,7 @@ namespace NuClear.Broadway.Grains.Workers
                     await UpdateBranchAsync(xml);
                     break;
                 default:
-                    _logger.LogError($"{objectType}: Unknown object type.");
+                    _logger.LogInformation($"{objectType}: Unknown object type.");
                     break;
             }
         }

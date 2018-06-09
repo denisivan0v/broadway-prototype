@@ -24,14 +24,14 @@ namespace NuClear.Broadway.Host.Controllers
         [HttpGet("cards")]
         public async Task<IActionResult> ListCards()
         {
-            var cards = await _dbContext.Cards.AsNoTracking().Take(100).ToListAsync();
+            var cards = await _dbContext.Cards.AsNoTracking().OrderBy(x => x.Code).Take(100).ToListAsync();
             return Json(cards);
         }
 
         [HttpGet("firms")]
         public async Task<IActionResult> ListFirms()
         {
-            var firms = await _dbContext.Firms.AsNoTracking().Take(100).ToListAsync();
+            var firms = await _dbContext.Firms.AsNoTracking().OrderBy(x => x.Code).Take(100).ToListAsync();
             return Json(firms);
         }
 
@@ -43,6 +43,7 @@ namespace NuClear.Broadway.Host.Controllers
                                           .Include(x => x.Localizations)
                                           .Include(x => x.Branches)
                                           .AsNoTracking()
+                                          .OrderBy(x => x.Code)
                                           .Take(100)
                                           .ToListAsync();
 
@@ -52,7 +53,12 @@ namespace NuClear.Broadway.Host.Controllers
         [HttpGet("branches")]
         public async Task<IActionResult> ListBranches()
         {
-            var branches = await _dbContext.Branches.Where(x => !x.IsDeleted).Include(x => x.Localizations).AsNoTracking().ToListAsync();
+            var branches = await _dbContext.Branches
+                                           .Where(x => !x.IsDeleted)
+                                           .Include(x => x.Localizations)
+                                           .AsNoTracking()
+                                           .ToListAsync();
+
             return Json(branches);
         }
     }

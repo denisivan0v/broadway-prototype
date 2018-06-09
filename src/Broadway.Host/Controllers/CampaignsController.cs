@@ -37,7 +37,7 @@ namespace NuClear.Broadway.Host.Controllers
         }
 
         [HttpPut("{id}/commands")]
-        public async Task SetName(long id, [FromBody]ChangeCompaignNameCommand command)
+        public async Task SetName(long id, [FromBody]ChangeCampaignNameCommand command)
         {
             var campaignGrain = _clusterClient.GetGrain<ICampaignGrain>(id);
             await campaignGrain.ChangeNameAsync(command.Name, command.IssuedBy);

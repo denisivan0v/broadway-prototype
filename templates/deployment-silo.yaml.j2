@@ -41,16 +41,24 @@ spec:
         - name: ROADS_Cassandra__Keyspace
           value: '{{ cassandra_keyspace }}'
         - name: ROADS_Cassandra__ContactPoints
-          value: roads-cassandra-0.roads-cassandra.erm-roads.svc.web-staging.os-n3.hw
+          value: '{{ cassandra_contact_points }}'
         - name: ROADS_Cassandra__ReplicationFactor
           value: '1'
         - name: ROADS_MainKafkaCluster__BrokerEndpoints
-          value: '{{ kafka_brokers }}'
+          value: '{{ kafka_stage_brokers | default(kafka_storage_brokers, true) }}'
         - name: ROADS_MainKafkaCluster__ConsumerGroupPostfix
           value: '{{ broadway_consumer_group_postfix }}'
+        - name: ROADS_MainKafkaCluster__DataProjectionDispatchingTopic
+          value: '{{ broadway_projection_dispatching_topic }}'
         - name: ROADS_ReferenceObjectsKafkaCluster__BrokerEndpoints
           value: '{{ broadway_ref_objects_cluster_kafka_brokers }}'
+        - name: ROADS_ReferenceObjectsKafkaCluster__FlowCardsForErmTopic
+          value: '{{ broadway_flow_cardsforerm_topic }}'
+        - name: ROADS_ReferenceObjectsKafkaCluster__FlowKaleidoscopeTopic
+          value: '{{ broadway_flow_kaleidoscope_topic }}'
+        - name: ROADS_ReferenceObjectsKafkaCluster__FlowGeoClassifierTopic
+          value: '{{ broadway_flow_geoclassifier_topic }}'
         - name: ROADS_ReferenceObjectsKafkaCluster__ConsumerGroupPostfix
           value: '{{ broadway_consumer_group_postfix }}'
         - name: ROADS_ConnectionStrings__BroadwayDataProjection
-          value: 'Host={{ vendor }}-{{ id }}-postgres.erm-roads;Port={{ postgres_port }};Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'
+          value: 'Host={{ postgres_stage_host | default(postgres_storage_host, true) }};Port={{ postgres_port }};Username={{ postgres_user }};Password={{ postgres_password }};Database={{ postgres_db }}'

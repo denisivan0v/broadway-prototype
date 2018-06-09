@@ -11,13 +11,13 @@ namespace NuClear.Broadway.Grains
 {
     public class StateModificationCallFilter : IIncomingGrainCallFilter
     {
-        private const string Topic = "roads_test_state_events";
-
         private readonly MessageSender _messageSender;
+        private readonly KafkaOptions _kafkaOptions;
 
-        public StateModificationCallFilter(MessageSender messageSender)
+        public StateModificationCallFilter(MessageSender messageSender, KafkaOptions kafkaOptions)
         {
             _messageSender = messageSender;
+            _kafkaOptions = kafkaOptions;
         }
 
         public async Task Invoke(IIncomingGrainCallContext context)
@@ -35,7 +35,7 @@ namespace NuClear.Broadway.Grains
                     var message = @event.Serialize();
 
                     var messageKey = $"{grainType}|{grainKey}";
-                    await _messageSender.SendAsync(Topic, messageKey, message);
+                    await _messageSender.SendAsync(_kafkaOptions.DataProjectionDispatchingTopic, messageKey, message);
                 }
             }
 

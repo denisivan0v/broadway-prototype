@@ -29,18 +29,6 @@ build-apps:
       - publish/broadway-host/
       - publish/broadway-silo/
 
-storage-up:
-  stage: pre
-  when: always
-  image: $REGISTRY/2gis-io/k8s-handle:latest
-  variables:
-    DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
-  script:
-    - k8s-handle deploy --config config-prototype.yaml --section deploy-storage --sync-mode true --tries 120
-  tags: [ 2gis, docker ]
-  only:
-    - master
-
 # ================= Dockerize =================
 
 broadway-host-image:
@@ -76,6 +64,10 @@ broadway-silo-image:
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: "BroadwayDataProjection"
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
   tags: [ 2gis, docker ]
   dependencies: []
   except:
@@ -87,18 +79,24 @@ deploy-staging:
 #  when: manual
   image: $REGISTRY/2gis-io/k8s-handle:latest
   variables:
-    DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
+    DOMAIN_POSTFIX: "broadway-stage"
     ROADS_ENVIRONMENT: stage
+    KAFKA_BROKERS: ${KAFKA_BROKERS_STAGE}
+    POSTGRES_HOST: ${POSTGRES_HOST_STAGE}
+    POSTGRES_PORT: ${POSTGRES_PORT_STAGE}
+    POSTGRES_DB: ${POSTGRES_DB_STAGE}
+    POSTGRES_USER: ${POSTGRES_USER_STAGE}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_STAGE}
   script:
-    - export ENVIRONMENT_KEYSPACE=${CI_COMMIT_REF_SLUG}
-    - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60
+    - export ENVIRONMENT_KEYSPACE=stage
+    - k8s-handle deploy --config config-prototype.yaml --section deploy-apps --sync-mode true --tries 60 --strict
   only:
     - master
   dependencies: []
   tags: [ 2gis, docker ]
   environment:
-    name: broadway-prototype
-    url: http://broadway-${CI_COMMIT_REF_SLUG}.web-staging.2gis.ru/swagger
+    name: stage
+    url: http://broadway-stage.web-staging.2gis.ru/swagger
 
 deploy-testing:
   <<: *deploy_testing_template

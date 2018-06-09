@@ -1,17 +1,21 @@
-common:
-  postgres_port: 5432
-  postgres_db: "BroadwayDataProjection"
-  postgres_user: "postgres"
-  postgres_password: "postgres"
-  kafka_brokers: "roads-{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
+﻿common:  
+  vendor: "roads"
+  id: "{{ env='DOMAIN_POSTFIX' }}"
+
+  postgres_stage_host: "{{ env='POSTGRES_HOST' }}"
+  postgres_storage_host: "roads-{{ env='DOMAIN_POSTFIX' }}-postgres.erm-roads"
+  postgres_port: "{{ env='POSTGRES_PORT' }}"
+  postgres_db: "{{ env='POSTGRES_DB' }}"
+  postgres_user: "{{ env='POSTGRES_USER' }}"
+  postgres_password: "{{ env='POSTGRES_PASSWORD' }}"
+
+  kafka_stage_brokers: "{{ env='KAFKA_BROKERS' }}"
+  kafka_storage_brokers: "roads-{{ env='DOMAIN_POSTFIX' }}-kafka.erm-roads:9092"
 
   k8s_ca_base64: "{{ env='K8S_CA_STAGE' }}"
   k8s_master_uri: "https://master.web-staging.os-n3.hw:6443"
   k8s_namespace: "erm-roads"
   k8s_token: "{{ env='K8S_TOKEN_STAGE' }}"
-  
-  vendor: "roads"
-  id: "{{ env='DOMAIN_POSTFIX' }}"
 
   max_surge: 1
   max_unavailable: 0 
@@ -21,7 +25,7 @@ common:
 deploy-storage:
   revision_history_limit: 3
 
-  postgres_path: "postgres"
+  postgres_path: "docker-hub.2gis.ru/postgres"
   postgres_version: "9.6.8-alpine"
   postgres_limits_cpu: "700m"
   postgres_limits_memory: "400Mi"
@@ -71,7 +75,7 @@ deploy-apps:
   silo_metrics_port: 3000
   
   host_domain: "{{ env='DOMAIN_POSTFIX' }}"
-  host_healthcheck: "/swagger"
+  host_healthcheck: "/healthcheck"
   host_healthcheck_delay: 1
   host_healthcheck_timeout: 60
   host_path: "docker-hub.2gis.ru/roads/broadway-host"
@@ -86,10 +90,15 @@ deploy-apps:
   prometheus_scrape_metrics: "false"
   
   cassandra_keyspace: "{{ env='ENVIRONMENT_KEYSPACE' }}"
+  cassandra_contact_points: "{{ env='CASSANDRA_CONTACT_POINTS' }}"
 
   broadway_version: "{{ env='BROADWAY_VERSION' }}"
   broadway_consumer_group_postfix: "{{ env='DOMAIN_POSTFIX' }}"
-  broadway_ref_objects_cluster_kafka_brokers: "kafka1.test.c.os-n3.hw,kafka2.test.c.os-n3.hw,kafka3.test.c.os-n3.hw"
+  broadway_ref_objects_cluster_kafka_brokers: "{{ env='KAFKA_BROKERS_REF_OBJECTS' }}"
+  broadway_projection_dispatching_topic: "roads_test_state_events"
+  broadway_flow_cardsforerm_topic: "roads_test_flowCardsForERM"
+  broadway_flow_kaleidoscope_topic: "casino_staging_flowKaleidoscope_compacted"
+  broadway_flow_geoclassifier_topic: "casino_staging_flowGeoClassifier_compacted"
 
   kubectl:
   - template: deployment-silo.yaml.j2

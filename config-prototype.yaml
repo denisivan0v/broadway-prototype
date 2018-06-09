@@ -89,6 +89,8 @@ deploy-apps:
   prometheus_blackbox_probe: "false"
   prometheus_scrape_metrics: "false"
   
+  aim_authority: "{{ env='AIM_AUTHORITY' }}"
+  
   cassandra_keyspace: "{{ env='ENVIRONMENT_KEYSPACE' }}"
   cassandra_contact_points: "{{ env='CASSANDRA_CONTACT_POINTS' }}"
 

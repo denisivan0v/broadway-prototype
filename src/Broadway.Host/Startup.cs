@@ -60,19 +60,20 @@ namespace NuClear.Broadway.Host
             services.AddApiVersioning(options => options.ReportApiVersions = true);
 
             var authenticationOptions = _configuration.GetSection("Authentication").Get<JwtAuthenticationOptions>();
-            var certificate = Base64UrlEncoder.DecodeBytes(authenticationOptions.Certificate);
             var tokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidIssuer = authenticationOptions.Issuer,
                     ValidateIssuer = true,
-                    IssuerSigningKey = new X509SecurityKey(new X509Certificate2(certificate)),
-                    ValidateIssuerSigningKey = true
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true
                 };
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(
                         options =>
                             {
+                                options.Authority = authenticationOptions.Authority;
+                                options.RequireHttpsMetadata = true;
                                 options.Audience = authenticationOptions.Audience;
                                 options.TokenValidationParameters = tokenValidationParameters;
                             });

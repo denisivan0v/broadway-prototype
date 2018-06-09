@@ -64,6 +64,7 @@ broadway-silo-image:
   variables:
     DOMAIN_POSTFIX: "broadway-${CI_COMMIT_REF_SLUG}"
     ROADS_ENVIRONMENT: stage
+    AIM_AUTHORITY: ${AIM_AUTHORITY_STAGE}
     POSTGRES_PORT: "5432"
     POSTGRES_DB: "BroadwayDataProjection"
     POSTGRES_USER: postgres
@@ -81,6 +82,7 @@ deploy-staging:
   variables:
     DOMAIN_POSTFIX: "broadway-stage"
     ROADS_ENVIRONMENT: stage
+    AIM_AUTHORITY: ${AIM_AUTHORITY_STAGE}
     KAFKA_BROKERS: ${KAFKA_BROKERS_STAGE}
     POSTGRES_HOST: ${POSTGRES_HOST_STAGE}
     POSTGRES_PORT: ${POSTGRES_PORT_STAGE}
